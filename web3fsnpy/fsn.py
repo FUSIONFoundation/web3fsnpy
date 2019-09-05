@@ -105,6 +105,43 @@ class Fsn(Module):
     def chainId(self):
         return self.web3fsnpy.manager.request_blocking("eth_chainId", [])
 
+
+    def allTickets(self, block_identifier):
+        method = "fsn_allTickets"
+        result = self.web3fsnpy.manager.request_blocking(
+            method,
+            [block_identifier],
+        )
+        if result is None:
+            raise BlockNotFound(f"Block with id: {block_identifier} not found.")
+        return result
+
+    def ticketsByAddress(self, account, block_identifier=None):
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        return self.web3fsnpy.manager.request_blocking(
+            "fsn_allTicketsByAddress",
+            [account, block_identifier],
+        )
+
+    def totalNumberOfTickets(self, block_identifier=None):
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        return self.web3fsnpy.manager.request_blocking(
+            "fsn_totalNumberOfTickets",
+            [block_identifier],
+        )
+
+    def totalNumberOfTicketsByAddress(self, account, block_identifier=None):
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        return self.web3fsnpy.manager.request_blocking(
+            "fsn_totalNumberOfTicketsByAddress",
+            [account, block_identifier],
+        )
+
+
+
     def getBalance(self, account, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
