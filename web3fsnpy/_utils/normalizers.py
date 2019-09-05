@@ -27,23 +27,23 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3._utils.encoding import (
+from web3fsnpy._utils.encoding import (
     hexstr_if_str,
     text_if_str,
     to_bytes,
     to_hex,
     to_text,
 )
-from web3._utils.ens import (
+from web3fsnpy._utils.ens import (
     StaticENS,
     is_ens_name,
     validate_name_has_address,
 )
-from web3._utils.validation import (
+from web3fsnpy._utils.validation import (
     validate_abi,
     validate_address,
 )
-from web3.exceptions import (
+from web3fsnpy.exceptions import (
     InvalidAddress,
 )
 
@@ -164,7 +164,7 @@ def abi_ens_resolver(w3, type_str, val):
     if type_str == 'address' and is_ens_name(val):
         if w3 is None:
             raise InvalidAddress(
-                "Could not look up name %r because no web3"
+                "Could not look up name %r because no web3fsnpy"
                 " connection available" % (val)
             )
         elif w3.ens is None:
@@ -174,7 +174,7 @@ def abi_ens_resolver(w3, type_str, val):
             )
         elif int(w3.net.version) is not 1 and not isinstance(w3.ens, StaticENS):
             raise InvalidAddress(
-                "Could not look up name %r because web3 is"
+                "Could not look up name %r because web3fsnpy is"
                 " not connected to mainnet" % (val)
             )
         else:

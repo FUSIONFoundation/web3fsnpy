@@ -18,13 +18,13 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3._utils.formatters import (
+from web3fsnpy._utils.formatters import (
     apply_formatter_if,
 )
-from web3._utils.threads import (
+from web3fsnpy._utils.threads import (
     TimerClass,
 )
-from web3._utils.validation import (
+from web3fsnpy._utils.validation import (
     validate_address,
 )
 
@@ -95,8 +95,8 @@ class Filter:
     poll_interval = None
     filter_id = None
 
-    def __init__(self, web3, filter_id):
-        self.web3 = web3
+    def __init__(self, web3fsnpy, filter_id):
+        self.web3fsnpy = web3fsnpy
         self.filter_id = filter_id
         self.callbacks = []
         super().__init__()
@@ -121,11 +121,11 @@ class Filter:
         return filter(self.is_valid_entry, entries)
 
     def get_new_entries(self):
-        log_entries = self._filter_valid_entries(self.web3.eth.getFilterChanges(self.filter_id))
+        log_entries = self._filter_valid_entries(self.web3fsnpy.fsn.getFilterChanges(self.filter_id))
         return self._format_log_entries(log_entries)
 
     def get_all_entries(self):
-        log_entries = self._filter_valid_entries(self.web3.eth.getFilterLogs(self.filter_id))
+        log_entries = self._filter_valid_entries(self.web3fsnpy.fsn.getFilterLogs(self.filter_id))
         return self._format_log_entries(log_entries)
 
     def _format_log_entries(self, log_entries=None):
@@ -239,7 +239,7 @@ class ShhFilter(Filter):
         super().__init__(*args, **kwargs)
 
     def get_new_entries(self):
-        all_messages = self.web3.manager.request_blocking(
+        all_messages = self.web3fsnpy.manager.request_blocking(
             "shh_getFilterMessages",
             [self.filter_id]
         )

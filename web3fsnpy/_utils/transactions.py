@@ -6,10 +6,10 @@ from eth_utils.toolz import (
     merge,
 )
 
-from web3._utils.threads import (
+from web3fsnpy._utils.threads import (
     Timeout,
 )
-from web3.exceptions import (
+from web3fsnpy.exceptions import (
     TransactionNotFound,
 )
 
@@ -27,19 +27,19 @@ VALID_TRANSACTION_PARAMS = [
 TRANSACTION_DEFAULTS = {
     'value': 0,
     'data': b'',
-    'gas': lambda web3, tx: web3.eth.estimateGas(tx),
-    'gasPrice': lambda web3, tx: web3.eth.generateGasPrice(tx) or web3.eth.gasPrice,
-    'chainId': lambda web3, tx: web3.eth.chainId,
+    'gas': lambda web3fsnpy, tx: web3fsnpy.fsn.estimateGas(tx),
+    'gasPrice': lambda web3fsnpy, tx: web3fsnpy.fsn.generateGasPrice(tx) or web3fsnpy.fsn.gasPrice,
+    'chainId': lambda web3fsnpy, tx: web3fsnpy.fsn.chainId,
 }
 
 
 @curry
-def fill_nonce(web3, transaction):
+def fill_nonce(web3fsnpy, transaction):
     if 'from' in transaction and 'nonce' not in transaction:
         return assoc(
             transaction,
             'nonce',
-            web3.eth.getTransactionCount(
+            web3fsnpy.fsn.getTransactionCount(
                 transaction['from'],
                 block_identifier='pending'))
     else:
@@ -47,16 +47,16 @@ def fill_nonce(web3, transaction):
 
 
 @curry
-def fill_transaction_defaults(web3, transaction):
+def fill_transaction_defaults(web3fsnpy, transaction):
     """
-    if web3 is None, fill as much as possible while offline
+    if web3fsnpy is None, fill as much as possible while offline
     """
     defaults = {}
     for key, default_getter in TRANSACTION_DEFAULTS.items():
         if key not in transaction:
             if callable(default_getter):
-                if web3 is not None:
-                    default_val = default_getter(web3, transaction)
+                if web3fsnpy is not None:
+                    default_val = default_getter(web3fsnpy, transaction)
                 else:
                     raise ValueError("You must specify %s in the transaction" % key)
             else:
@@ -65,11 +65,11 @@ def fill_transaction_defaults(web3, transaction):
     return merge(defaults, transaction)
 
 
-def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_latency=0.1):
+def wait_for_transaction_receipt(web3fsnpy, txn_hash, timeout=120, poll_latency=0.1):
     with Timeout(timeout) as _timeout:
         while True:
             try:
-                txn_receipt = web3.eth.getTransactionReceipt(txn_hash)
+                txn_receipt = web3fsnpy.fsn.getTransactionReceipt(txn_hash)
             except TransactionNotFound:
                 txn_receipt = None
             # FIXME: The check for a null `blockHash` is due to parity's
@@ -82,19 +82,19 @@ def wait_for_transaction_receipt(web3, txn_hash, timeout=120, poll_latency=0.1):
     return txn_receipt
 
 
-def get_block_gas_limit(web3, block_identifier=None):
+def get_block_gas_limit(web3fsnpy, block_identifier=None):
     if block_identifier is None:
-        block_identifier = web3.eth.blockNumber
-    block = web3.eth.getBlock(block_identifier)
+        block_identifier = web3fsnpy.fsn.blockNumber
+    block = web3fsnpy.fsn.getBlock(block_identifier)
     return block['gasLimit']
 
 
-def get_buffered_gas_estimate(web3, transaction, gas_buffer=100000):
+def get_buffered_gas_estimate(web3fsnpy, transaction, gas_buffer=100000):
     gas_estimate_transaction = dict(**transaction)
 
-    gas_estimate = web3.eth.estimateGas(gas_estimate_transaction)
+    gas_estimate = web3fsnpy.fsn.estimateGas(gas_estimate_transaction)
 
-    gas_limit = get_block_gas_limit(web3)
+    gas_limit = get_block_gas_limit(web3fsnpy)
 
     if gas_estimate > gas_limit:
         raise ValueError(
@@ -106,8 +106,8 @@ def get_buffered_gas_estimate(web3, transaction, gas_buffer=100000):
     return min(gas_limit, gas_estimate + gas_buffer)
 
 
-def get_required_transaction(web3, transaction_hash):
-    current_transaction = web3.eth.getTransaction(transaction_hash)
+def get_required_transaction(web3fsnpy, transaction_hash):
+    current_transaction = web3fsnpy.fsn.getTransaction(transaction_hash)
     if not current_transaction:
         raise ValueError('Supplied transaction with hash {} does not exist'
                          .format(transaction_hash))
@@ -144,7 +144,7 @@ def assert_valid_transaction_params(transaction_params):
             raise ValueError('{} is not a valid transaction parameter'.format(param))
 
 
-def prepare_replacement_transaction(web3, current_transaction, new_transaction):
+def prepare_replacement_transaction(web3fsnpy, current_transaction, new_transaction):
     if current_transaction['blockHash'] is not None:
         raise ValueError('Supplied transaction with hash {} has already been mined'
                          .format(current_transaction['hash']))
@@ -158,7 +158,7 @@ def prepare_replacement_transaction(web3, current_transaction, new_transaction):
         if new_transaction['gasPrice'] <= current_transaction['gasPrice']:
             raise ValueError('Supplied gas price must exceed existing transaction gas price')
     else:
-        generated_gas_price = web3.eth.generateGasPrice(new_transaction)
+        generated_gas_price = web3fsnpy.fsn.generateGasPrice(new_transaction)
         minimum_gas_price = int(math.ceil(current_transaction['gasPrice'] * 1.1))
         if generated_gas_price and generated_gas_price > minimum_gas_price:
             new_transaction = assoc(new_transaction, 'gasPrice', generated_gas_price)
@@ -168,8 +168,8 @@ def prepare_replacement_transaction(web3, current_transaction, new_transaction):
     return new_transaction
 
 
-def replace_transaction(web3, current_transaction, new_transaction):
+def replace_transaction(web3fsnpy, current_transaction, new_transaction):
     new_transaction = prepare_replacement_transaction(
-        web3, current_transaction, new_transaction
+        web3fsnpy, current_transaction, new_transaction
     )
-    return web3.eth.sendTransaction(new_transaction)
+    return web3fsnpy.fsn.sendTransaction(new_transaction)

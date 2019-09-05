@@ -26,7 +26,7 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3._utils.abi import (
+from web3fsnpy._utils.abi import (
     is_address_type,
     is_array_type,
     is_bool_type,
@@ -37,12 +37,12 @@ from web3._utils.abi import (
     size_of_type,
     sub_type_of_array_type,
 )
-from web3._utils.validation import (
+from web3fsnpy._utils.validation import (
     assert_one_val,
     validate_abi_type,
     validate_abi_value,
 )
-from web3.datastructures import (
+from web3fsnpy.datastructures import (
     AttributeDict,
 )
 
@@ -296,7 +296,7 @@ class DynamicArrayPackedEncoder(BaseArrayEncoder):
         return encoded_value
 
 
-#  TODO: Replace with eth-abi packed encoder once web3 requires eth-abi>=2
+#  TODO: Replace with eth-abi packed encoder once web3fsnpy requires eth-abi>=2
 def encode_single_packed(_type, value):
     import codecs
     from eth_abi import (

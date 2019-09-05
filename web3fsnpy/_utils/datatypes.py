@@ -2,7 +2,7 @@ from eth_utils.toolz import (
     concat,
 )
 
-import web3._utils.formatters
+import web3fsnpy._utils.formatters
 
 
 def verify_attr(class_name, key, namespace):
@@ -28,7 +28,7 @@ class PropertyCheckingFactory(type):
             verify_attr(name, key, all_keys)
 
         if normalizers:
-            processed_namespace = web3._utils.formatters.apply_formatters_to_dict(
+            processed_namespace = web3fsnpy._utils.formatters.apply_formatters_to_dict(
                 normalizers,
                 namespace,
             )

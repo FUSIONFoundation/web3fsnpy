@@ -1,4 +1,4 @@
-from web3.method import (
+from web3fsnpy.method import (
     Method,
     default_root_munger,
 )
