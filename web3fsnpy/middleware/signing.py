@@ -6,6 +6,17 @@ import operator
 from eth_account import (
     Account,
 )
+
+from eth_account._utils.signing import (
+    hash_of_signed_transaction,
+    sign_message_hash,
+    sign_transaction_dict,
+    to_standard_signature_bytes,
+    to_standard_v,
+)
+
+
+
 from eth_account.signers.local import (
     LocalAccount,
 )
@@ -14,9 +25,14 @@ from eth_keys.datatypes import (
 )
 from eth_utils import (
     to_dict,
+    to_hex,
 )
 from eth_utils.toolz import (
     compose,
+)
+
+from hexbytes import (
+    HexBytes,
 )
 
 from web3fsnpy._utils.formatters import (
@@ -29,6 +45,9 @@ from web3fsnpy._utils.rpc_abi import (
 from web3fsnpy._utils.transactions import (
     fill_nonce,
     fill_transaction_defaults,
+)
+from web3fsnpy._utils.events import (
+    keccak,
 )
 
 from .abi import (
@@ -134,3 +153,5 @@ def construct_sign_and_send_raw_middleware(private_key_or_account):
         return middleware
 
     return sign_and_send_raw_middleware
+
+

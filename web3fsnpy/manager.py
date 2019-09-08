@@ -92,7 +92,7 @@ class RequestManager:
         Make a synchronous request using the provider
         """
         response = self._make_request(method, params)
-
+        
         if "error" in response:
             raise ValueError(response["error"])
 
