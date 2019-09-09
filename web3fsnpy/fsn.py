@@ -2,6 +2,7 @@ from eth_account import (
     Account,
 )
 from eth_utils import (
+    add_0x_prefix,
     apply_to_return_value,
     is_checksum_address,
     is_string,
@@ -38,6 +39,7 @@ from web3fsnpy._utils.transactions import (
     get_required_transaction,
     replace_transaction,
     wait_for_transaction_receipt,
+    fill_transaction_defaults,
 )
 from web3fsnpy.contract import (
     Contract,
@@ -62,6 +64,36 @@ class Fsn(Module):
     defaultContractFactory = Contract
     iban = Iban
     gasPriceStrategy = None
+    __defaultChainId = 32659
+    
+    
+    consts = {
+        "TimeForever":       0xffffffffffffffff, # javascript will convert this to 0x10000000000
+        "TimeForeverStr":   "0xffffffffffffffff",
+
+        "FSNToken":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+
+        "OwnerUSANAssetID": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
+ 
+        "TicketLogAddress": "0xfffffffffffffffffffffffffffffffffffffffe",
+        "TicketLogAddress_Topic_To_Function": {
+            "0": "ticketSelected",
+            "1": "ticketReturn",
+            "2": "ticketExpired"
+        },
+
+        "TicketLogAddress_Topic_ticketSelected": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "TicketLogAddress_Topic_ticketReturn":   "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "TicketLogAddress_Topic_ticketExpired":  "0x0000000000000000000000000000000000000000000000000000000000000002",
+
+        "FSNCallAddress":                        "0xffffffffffffffffffffffffffffffffffffffff",
+        
+        "EMPTY_HASH":                            "0x0000000000000000000000000000000000000000000000000000000000000000",
+    }
+
+    
+    
+    
 
     def namereg(self):
         raise NotImplementedError()
@@ -91,8 +123,8 @@ class Fsn(Module):
 
     @property
     def gasPrice(self):
-        return self.web3fsnpy.manager.request_blocking("eth_gasPrice", [])
-
+        #return self.web3fsnpy.manager.request_blocking("eth_gasPrice", [])
+        return web3fsn.toWei(21,'gwei')
     @property
     def accounts(self):
         return self.web3fsnpy.manager.request_blocking("eth_accounts", [])
@@ -103,7 +135,21 @@ class Fsn(Module):
 
     @property
     def chainId(self):
-        return self.web3fsnpy.manager.request_blocking("eth_chainId", [])
+#        return self.web3fsnpy.manager.request_blocking("eth_chainId", [])
+        return self.__defaultChainId
+
+    def fill_tx_defaults(self, transaction):
+        return fill_transaction_defaults(self, transaction)
+
+
+    def buyTicket(self, account):
+        block_identifier = self.defaultBlock
+        TxHash = self.web3fsnpy.manager.request_blocking(
+            "fsntx_buyTicket",
+            [account],
+        )
+        return TxHash
+            
 
 
     def allTickets(self, block_identifier):
@@ -140,6 +186,22 @@ class Fsn(Module):
             [account, block_identifier],
         )
 
+    def createRawAsset(self, rawTransaction):
+        
+        TxHash =  self.web3fsnpy.manager.request_blocking(
+            "fsntx_genAsset",
+            [rawTransaction],
+        )
+        return TxHash
+
+
+    def sendRawAsset(self, rawTransaction):
+        
+        TxHash =  self.web3fsnpy.manager.request_blocking(
+            "fsntx_sendAsset",
+            [rawTransaction],
+        )
+        return TxHash
 
 
     def getBalance(self, account, block_identifier=None):
@@ -334,13 +396,15 @@ class Fsn(Module):
         # TODO: move to middleware
         if 'from' not in transaction and is_checksum_address(self.defaultAccount):
             transaction = assoc(transaction, 'from', self.defaultAccount)
-
+            
         # TODO: move gas estimation in middleware
         if 'gas' not in transaction:
             transaction = assoc(
                 transaction,
                 'gas',
-                get_buffered_gas_estimate(self.web3fsnpy, transaction),
+                gasPrice()
+                #get_buffered_gas_estimate(self.web3fsnpy, transaction),
+                
             )
 
         return self.web3fsnpy.manager.request_blocking(
@@ -385,19 +449,22 @@ class Fsn(Module):
         )
 
     def estimateGas(self, transaction, block_identifier=None):
+        
+        return web3fsn.toWei(21,'gwei')    # value from MyFusionWallet JS code
+        
         # TODO: move to middleware
-        if 'from' not in transaction and is_checksum_address(self.defaultAccount):
-            transaction = assoc(transaction, 'from', self.defaultAccount)
+        #if 'from' not in transaction and is_checksum_address(self.defaultAccount):
+            #transaction = assoc(transaction, 'from', self.defaultAccount)
 
-        if block_identifier is None:
-            params = [transaction]
-        else:
-            params = [transaction, block_identifier]
+        #if block_identifier is None:
+            #params = [transaction]
+        #else:
+            #params = [transaction, block_identifier]
 
-        return self.web3fsnpy.manager.request_blocking(
-            "eth_estimateGas",
-            params,
-        )
+        #return self.web3fsnpy.manager.request_blocking(
+            #"eth_estimateGas",
+            #params,
+        #)
 
     def filter(self, filter_params=None, filter_id=None):
         if filter_id and filter_params:

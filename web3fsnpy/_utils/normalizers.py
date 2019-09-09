@@ -23,17 +23,26 @@ from eth_utils.address import (
 from eth_utils.toolz import (
     curry,
 )
+from eth_utils.curried import (
+       hexstr_if_str,
+       text_if_str,
+       to_bytes,
+       to_hex,
+       to_text,
+)
+
 from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy._utils.encoding import (
-    hexstr_if_str,
-    text_if_str,
-    to_bytes,
-    to_hex,
-    to_text,
-)
+#from web3fsnpy._utils.encoding import (
+    #hexstr_if_str,
+    #text_if_str,
+    #to_bytes,
+    #to_hex,
+    #to_text,
+#)
+
 from web3fsnpy._utils.ens import (
     StaticENS,
     is_ens_name,
@@ -97,7 +106,6 @@ def parse_basic_type_str(old_normalizer):
 
         if not isinstance(abi_type, BasicType):
             return type_str, data
-
         return old_normalizer(abi_type, type_str, data)
 
     return new_normalizer
@@ -117,7 +125,7 @@ def abi_bytes_to_hex(abi_type, type_str, data):
     if len(bytes_data) > num_bytes:
         raise ValueError(
             "This value was expected to be at most %d bytes, but instead was %d: %r" % (
-                (num_bytes, len(bytes_data), data)
+                #(num_bytes, len(bytes_data), data)
             )
         )
 

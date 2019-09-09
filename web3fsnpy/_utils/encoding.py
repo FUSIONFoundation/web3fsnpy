@@ -164,6 +164,7 @@ def to_bytes(primitive=None, hexstr=None, text=None):
         return decode_hex(hexstr)
     elif text is not None:
         return text.encode('utf-8')
+    
     raise TypeError("expected an int in first arg, or keyword of hexstr or text")
 
 

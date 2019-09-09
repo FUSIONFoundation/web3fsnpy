@@ -6,6 +6,11 @@ from eth_utils.toolz import (
     merge,
 )
 
+from eth_utils import (
+    to_hex,
+)
+
+
 from web3fsnpy._utils.threads import (
     Timeout,
 )
@@ -22,14 +27,22 @@ VALID_TRANSACTION_PARAMS = [
     'data',
     'nonce',
     'chainId',
+    'symbol',
+    'decimal',
+    'total',
+    'canChange',
+    'asset',
 ]
 
 TRANSACTION_DEFAULTS = {
     'value': 0,
     'data': b'',
-    'gas': lambda web3fsnpy, tx: web3fsnpy.fsn.estimateGas(tx),
-    'gasPrice': lambda web3fsnpy, tx: web3fsnpy.fsn.generateGasPrice(tx) or web3fsnpy.fsn.gasPrice,
-    'chainId': lambda web3fsnpy, tx: web3fsnpy.fsn.chainId,
+#    'gas': lambda web3fsnpy, tx: web3fsnpy.fsn.estimateGas(tx),
+#    'gasPrice': lambda web3fsnpy, tx: web3fsnpy.fsn.generateGasPrice(tx) or web3fsnpy.fsn.gasPrice,
+#    'nonce':     None,
+    'chainId':   None,
+    'gas':       300000,
+    'gasPrice':  2000000000,
 }
 
 

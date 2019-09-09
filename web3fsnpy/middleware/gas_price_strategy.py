@@ -7,6 +7,7 @@ def gas_price_strategy_middleware(make_request, web3fsnpy):
     """
     Includes a gas price using the gas price strategy
     """
+    
     def middleware(method, params):
         if method == 'eth_sendTransaction':
             transaction = params[0]
