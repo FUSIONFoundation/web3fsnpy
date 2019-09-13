@@ -27,7 +27,7 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy._utils.abi import (
+from web3._utils.abi import (
     abi_to_signature,
     check_if_arguments_can_be_encoded,
     fallback_func_abi_exists,
@@ -40,55 +40,55 @@ from web3fsnpy._utils.abi import (
     map_abi_data,
     merge_args_and_kwargs,
 )
-from web3fsnpy._utils.blocks import (
+from web3._utils.blocks import (
     is_hex_encoded_block_hash,
 )
-from web3fsnpy._utils.contracts import (
+from web3._utils.contracts import (
     encode_abi,
     find_matching_event_abi,
     find_matching_fn_abi,
     get_function_info,
     prepare_transaction,
 )
-from web3fsnpy._utils.datatypes import (
+from web3._utils.datatypes import (
     PropertyCheckingFactory,
 )
-from web3fsnpy._utils.decorators import (
+from web3._utils.decorators import (
     combomethod,
     deprecated_for,
 )
-from web3fsnpy._utils.empty import (
+from web3._utils.empty import (
     empty,
 )
-from web3fsnpy._utils.encoding import (
+from web3._utils.encoding import (
     to_4byte_hex,
     to_hex,
 )
-from web3fsnpy._utils.events import (
+from web3._utils.events import (
     EventFilterBuilder,
     get_event_data,
     is_dynamic_sized_type,
 )
-from web3fsnpy._utils.filters import (
+from web3._utils.filters import (
     construct_event_filter_params,
 )
-from web3fsnpy._utils.function_identifiers import (
+from web3._utils.function_identifiers import (
     FallbackFn,
 )
-from web3fsnpy._utils.normalizers import (
+from web3._utils.normalizers import (
     BASE_RETURN_NORMALIZERS,
     normalize_abi,
     normalize_address,
     normalize_bytecode,
 )
-from web3fsnpy._utils.transactions import (
+from web3._utils.transactions import (
     fill_transaction_defaults,
 )
-from web3fsnpy.datastructures import (
+from web3.datastructures import (
     AttributeDict,
     MutableAttributeDict,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     BadFunctionCallOutput,
     BlockNumberOutofRange,
     FallbackNotFound,
@@ -100,7 +100,7 @@ from web3fsnpy.exceptions import (
     NoABIFunctionsFound,
     ValidationError,
 )
-from web3fsnpy.logs import (
+from web3.logs import (
     DISCARD,
     IGNORE,
     STRICT,
@@ -115,9 +115,9 @@ class ContractFunctions:
     """Class containing contract function objects
     """
 
-    def __init__(self, abi, web3fsnpy, address=None):
+    def __init__(self, abi, web3, address=None):
         self.abi = abi
-        self.web3fsnpy = web3fsnpy
+        self.web3 = web3
         self.address = address
 
         if self.abi:
@@ -128,7 +128,7 @@ class ContractFunctions:
                     func['name'],
                     ContractFunction.factory(
                         func['name'],
-                        web3fsnpy=self.web3fsnpy,
+                        web3=self.web3,
                         contract_abi=self.abi,
                         address=self.address,
                         function_identifier=func['name']))
@@ -170,7 +170,7 @@ class ContractEvents:
     .. code-block:: python
 
         >>> mycontract.events
-        <web3fsnpy.contract.ContractEvents object at 0x108afde10>
+        <web3.contract.ContractEvents object at 0x108afde10>
 
     To get list of all supported events in the contract ABI.
     This allows you to iterate over :class:`ContractEvent` proxy classes.
@@ -178,12 +178,12 @@ class ContractEvents:
     .. code-block:: python
 
         >>> for e in mycontract.events: print(e)
-        <class 'web3fsnpy._utils.datatypes.LogAnonymous'>
+        <class 'web3._utils.datatypes.LogAnonymous'>
         ...
 
     """
 
-    def __init__(self, abi, web3fsnpy, address=None):
+    def __init__(self, abi, web3, address=None):
         if abi:
             self.abi = abi
             self._events = filter_by_type('event', self.abi)
@@ -193,7 +193,7 @@ class ContractEvents:
                     event['name'],
                     ContractEvent.factory(
                         event['name'],
-                        web3fsnpy=web3fsnpy,
+                        web3=web3,
                         contract_abi=self.abi,
                         address=address,
                         event_name=event['name']))
@@ -228,7 +228,7 @@ class Contract:
     """Base class for Contract proxy classes.
 
     First you need to create your Contract classes using
-    :meth:`web3fsnpy.eth.Eth.contract` that takes compiled Solidity contract
+    :meth:`web3.eth.Eth.contract` that takes compiled Solidity contract
     ABI definitions as input.  The created class object will be a subclass of
     this base class.
 
@@ -242,7 +242,7 @@ class Contract:
     """
 
     # set during class construction
-    web3fsnpy = None
+    web3 = None
 
     # instance level properties
     address = None
@@ -276,31 +276,31 @@ class Contract:
 
         :param address: Contract address as 0x hex string
         """
-        if self.web3fsnpy is None:
+        if self.web3 is None:
             raise AttributeError(
                 'The `Contract` class has not been initialized.  Please use the '
-                '`web3fsnpy.contract` interface to create your contract class.'
+                '`web3.contract` interface to create your contract class.'
             )
 
         if address:
-            self.address = normalize_address(self.web3fsnpy.ens, address)
+            self.address = normalize_address(self.web3.ens, address)
 
         if not self.address:
             raise TypeError("The address argument is required to instantiate a contract.")
 
-        self.functions = ContractFunctions(self.abi, self.web3fsnpy, self.address)
-        self.caller = ContractCaller(self.abi, self.web3fsnpy, self.address)
-        self.events = ContractEvents(self.abi, self.web3fsnpy, self.address)
-        self.fallback = Contract.get_fallback_function(self.abi, self.web3fsnpy, self.address)
+        self.functions = ContractFunctions(self.abi, self.web3, self.address)
+        self.caller = ContractCaller(self.abi, self.web3, self.address)
+        self.events = ContractEvents(self.abi, self.web3, self.address)
+        self.fallback = Contract.get_fallback_function(self.abi, self.web3, self.address)
 
     @classmethod
-    def factory(cls, web3fsnpy, class_name=None, **kwargs):
+    def factory(cls, web3, class_name=None, **kwargs):
 
-        kwargs['web3fsnpy'] = web3fsnpy
+        kwargs['web3'] = web3
 
         normalizers = {
             'abi': normalize_abi,
-            'address': partial(normalize_address, kwargs['web3fsnpy'].ens),
+            'address': partial(normalize_address, kwargs['web3'].ens),
             'bytecode': normalize_bytecode,
             'bytecode_runtime': normalize_bytecode,
         }
@@ -311,10 +311,10 @@ class Contract:
             kwargs,
             normalizers=normalizers,
         )
-        contract.functions = ContractFunctions(contract.abi, contract.web3fsnpy)
-        contract.caller = ContractCaller(contract.abi, contract.web3fsnpy, contract.address)
-        contract.events = ContractEvents(contract.abi, contract.web3fsnpy)
-        contract.fallback = Contract.get_fallback_function(contract.abi, contract.web3fsnpy)
+        contract.functions = ContractFunctions(contract.abi, contract.web3)
+        contract.caller = ContractCaller(contract.abi, contract.web3, contract.address)
+        contract.events = ContractEvents(contract.abi, contract.web3)
+        contract.fallback = Contract.get_fallback_function(contract.abi, contract.web3)
 
         return contract
 
@@ -334,7 +334,7 @@ class Contract:
                 "with it"
             )
 
-        return ContractConstructor(cls.web3fsnpy,
+        return ContractConstructor(cls.web3,
                                    cls.abi,
                                    cls.bytecode,
                                    *args,
@@ -357,12 +357,12 @@ class Contract:
         if data is None:
             data = fn_selector
 
-        return encode_abi(cls.web3fsnpy, fn_abi, fn_arguments, data)
+        return encode_abi(cls.web3, fn_abi, fn_arguments, data)
 
     @combomethod
     def all_functions(self):
         return find_functions_by_identifier(
-            self.abi, self.web3fsnpy, self.address, lambda _: True
+            self.abi, self.web3, self.address, lambda _: True
         )
 
     @combomethod
@@ -376,7 +376,7 @@ class Contract:
         def callable_check(fn_abi):
             return abi_to_signature(fn_abi) == signature
 
-        fns = find_functions_by_identifier(self.abi, self.web3fsnpy, self.address, callable_check)
+        fns = find_functions_by_identifier(self.abi, self.web3, self.address, callable_check)
         return get_function_by_identifier(fns, 'signature')
 
     @combomethod
@@ -385,7 +385,7 @@ class Contract:
             return fn_abi['name'] == fn_name
 
         return find_functions_by_identifier(
-            self.abi, self.web3fsnpy, self.address, callable_check
+            self.abi, self.web3, self.address, callable_check
         )
 
     @combomethod
@@ -398,7 +398,7 @@ class Contract:
         def callable_check(fn_abi):
             return encode_hex(function_abi_to_4byte_selector(fn_abi)) == to_4byte_hex(selector)
 
-        fns = find_functions_by_identifier(self.abi, self.web3fsnpy, self.address, callable_check)
+        fns = find_functions_by_identifier(self.abi, self.web3, self.address, callable_check)
         return get_function_by_identifier(fns, 'selector')
 
     @combomethod
@@ -421,7 +421,7 @@ class Contract:
             return check_if_arguments_can_be_encoded(fn_abi, args=args, kwargs={})
 
         return find_functions_by_identifier(
-            self.abi, self.web3fsnpy, self.address, callable_check
+            self.abi, self.web3, self.address, callable_check
         )
 
     @combomethod
@@ -443,7 +443,7 @@ class Contract:
 
         return prepare_transaction(
             cls.address,
-            cls.web3fsnpy,
+            cls.web3,
             fn_identifier=fn_name,
             contract_abi=cls.abi,
             transaction=transaction,
@@ -466,11 +466,11 @@ class Contract:
             argument_names=argument_names)
 
     @staticmethod
-    def get_fallback_function(abi, web3fsnpy, address=None):
+    def get_fallback_function(abi, web3, address=None):
         if abi and fallback_func_abi_exists(abi):
             return ContractFunction.factory(
                 'fallback',
-                web3fsnpy=web3fsnpy,
+                web3=web3,
                 contract_abi=abi,
                 address=address,
                 function_identifier=FallbackFn)()
@@ -490,7 +490,7 @@ class Contract:
             arguments = merge_args_and_kwargs(constructor_abi, args, kwargs)
 
             deploy_data = add_0x_prefix(
-                encode_abi(cls.web3fsnpy, constructor_abi, arguments, data=cls.bytecode)
+                encode_abi(cls.web3, constructor_abi, arguments, data=cls.bytecode)
             )
         else:
             if args is not None or kwargs is not None:
@@ -514,8 +514,8 @@ class ContractConstructor:
     """
     Class for contract constructor API.
     """
-    def __init__(self, web3fsnpy, abi, bytecode, *args, **kwargs):
-        self.web3fsnpy = web3fsnpy
+    def __init__(self, web3, abi, bytecode, *args, **kwargs):
+        self.web3 = web3
         self.abi = abi
         self.bytecode = bytecode
         self.data_in_transaction = self._encode_data_in_transaction(*args, **kwargs)
@@ -532,7 +532,7 @@ class ContractConstructor:
 
             arguments = merge_args_and_kwargs(constructor_abi, args, kwargs)
             data = add_0x_prefix(
-                encode_abi(self.web3fsnpy, constructor_abi, arguments, data=self.bytecode)
+                encode_abi(self.web3, constructor_abi, arguments, data=self.bytecode)
             )
         else:
             data = to_hex(self.bytecode)
@@ -548,12 +548,12 @@ class ContractConstructor:
             self.check_forbidden_keys_in_transaction(estimate_gas_transaction,
                                                      ["data", "to"])
 
-        if self.web3fsnpy.eth.defaultAccount is not empty:
-            estimate_gas_transaction.setdefault('from', self.web3fsnpy.eth.defaultAccount)
+        if self.web3.eth.defaultAccount is not empty:
+            estimate_gas_transaction.setdefault('from', self.web3.eth.defaultAccount)
 
         estimate_gas_transaction['data'] = self.data_in_transaction
 
-        return self.web3fsnpy.eth.estimateGas(estimate_gas_transaction)
+        return self.web3.eth.estimateGas(estimate_gas_transaction)
 
     @combomethod
     def transact(self, transaction=None):
@@ -564,13 +564,13 @@ class ContractConstructor:
             self.check_forbidden_keys_in_transaction(transact_transaction,
                                                      ["data", "to"])
 
-        if self.web3fsnpy.eth.defaultAccount is not empty:
-            transact_transaction.setdefault('from', self.web3fsnpy.eth.defaultAccount)
+        if self.web3.eth.defaultAccount is not empty:
+            transact_transaction.setdefault('from', self.web3.eth.defaultAccount)
 
         transact_transaction['data'] = self.data_in_transaction
 
         # TODO: handle asynchronous contract creation
-        return self.web3fsnpy.eth.sendTransaction(transact_transaction)
+        return self.web3.eth.sendTransaction(transact_transaction)
 
     @combomethod
     def buildTransaction(self, transaction=None):
@@ -585,12 +585,12 @@ class ContractConstructor:
             self.check_forbidden_keys_in_transaction(built_transaction,
                                                      ["data", "to"])
 
-        if self.web3fsnpy.eth.defaultAccount is not empty:
-            built_transaction.setdefault('from', self.web3fsnpy.eth.defaultAccount)
+        if self.web3.eth.defaultAccount is not empty:
+            built_transaction.setdefault('from', self.web3.eth.defaultAccount)
 
         built_transaction['data'] = self.data_in_transaction
         built_transaction['to'] = b''
-        return fill_transaction_defaults(self.web3fsnpy, built_transaction)
+        return fill_transaction_defaults(self.web3, built_transaction)
 
     @staticmethod
     def check_forbidden_keys_in_transaction(transaction, forbidden_keys=None):
@@ -736,7 +736,7 @@ class ContractFunction:
     """
     address = None
     function_identifier = None
-    web3fsnpy = None
+    web3 = None
     contract_abi = None
     abi = None
     transaction = None
@@ -798,7 +798,7 @@ class ContractFunction:
             # Read "owner" public variable
             addr = contract.functions.owner().call()
 
-        :param transaction: Dictionary of transaction info for web3fsnpy interface
+        :param transaction: Dictionary of transaction info for web3 interface
         :return: ``Caller`` object that has contract public functions
             and variables exposed as Python methods
         """
@@ -812,8 +812,8 @@ class ContractFunction:
 
         if self.address:
             call_transaction.setdefault('to', self.address)
-        if self.web3fsnpy.eth.defaultAccount is not empty:
-            call_transaction.setdefault('from', self.web3fsnpy.eth.defaultAccount)
+        if self.web3.eth.defaultAccount is not empty:
+            call_transaction.setdefault('from', self.web3.eth.defaultAccount)
 
         if 'to' not in call_transaction:
             if isinstance(self, type):
@@ -827,10 +827,10 @@ class ContractFunction:
                     "Please ensure that this contract instance has an address."
                 )
 
-        block_id = parse_block_identifier(self.web3fsnpy, block_identifier)
+        block_id = parse_block_identifier(self.web3, block_identifier)
 
         return call_contract_function(
-            self.web3fsnpy,
+            self.web3,
             self.address,
             self._return_data_normalizers,
             self.function_identifier,
@@ -853,8 +853,8 @@ class ContractFunction:
 
         if self.address is not None:
             transact_transaction.setdefault('to', self.address)
-        if self.web3fsnpy.eth.defaultAccount is not empty:
-            transact_transaction.setdefault('from', self.web3fsnpy.eth.defaultAccount)
+        if self.web3.eth.defaultAccount is not empty:
+            transact_transaction.setdefault('from', self.web3.eth.defaultAccount)
 
         if 'to' not in transact_transaction:
             if isinstance(self, type):
@@ -869,7 +869,7 @@ class ContractFunction:
 
         return transact_with_contract_function(
             self.address,
-            self.web3fsnpy,
+            self.web3,
             self.function_identifier,
             transact_transaction,
             self.contract_abi,
@@ -891,8 +891,8 @@ class ContractFunction:
 
         if self.address:
             estimate_gas_transaction.setdefault('to', self.address)
-        if self.web3fsnpy.eth.defaultAccount is not empty:
-            estimate_gas_transaction.setdefault('from', self.web3fsnpy.eth.defaultAccount)
+        if self.web3.eth.defaultAccount is not empty:
+            estimate_gas_transaction.setdefault('from', self.web3.eth.defaultAccount)
 
         if 'to' not in estimate_gas_transaction:
             if isinstance(self, type):
@@ -907,7 +907,7 @@ class ContractFunction:
 
         return estimate_gas_for_function(
             self.address,
-            self.web3fsnpy,
+            self.web3,
             self.function_identifier,
             estimate_gas_transaction,
             self.contract_abi,
@@ -946,7 +946,7 @@ class ContractFunction:
 
         return build_transaction_for_function(
             self.address,
-            self.web3fsnpy,
+            self.web3,
             self.function_identifier,
             built_transaction,
             self.contract_abi,
@@ -957,7 +957,7 @@ class ContractFunction:
 
     @combomethod
     def _encode_transaction_data(cls):
-        return add_0x_prefix(encode_abi(cls.web3fsnpy, cls.abi, cls.arguments, cls.selector))
+        return add_0x_prefix(encode_abi(cls.web3, cls.abi, cls.arguments, cls.selector))
 
     _return_data_normalizers = tuple()
 
@@ -982,7 +982,7 @@ class ContractEvent:
     """
     address = None
     event_name = None
-    web3fsnpy = None
+    web3 = None
     contract_abi = None
     abi = None
 
@@ -1089,7 +1089,7 @@ class ContractEvent:
         for arg, value in match_single_vals.items():
             filter_builder.args[arg].match_single(value)
 
-        log_filter = filter_builder.deploy(self.web3fsnpy)
+        log_filter = filter_builder.deploy(self.web3)
         log_filter.log_entry_formatter = get_event_data(self._get_event_abi())
         log_filter.builder = filter_builder
 
@@ -1125,8 +1125,8 @@ class ContractEvent:
 
         .. code-block:: python
 
-            from = max(mycontract.web3fsnpy.eth.blockNumber - 10, 1)
-            to = mycontract.web3fsnpy.eth.blockNumber
+            from = max(mycontract.web3.eth.blockNumber - 10, 1)
+            to = mycontract.web3.eth.blockNumber
 
             events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
 
@@ -1154,7 +1154,7 @@ class ContractEvent:
                 ...
             )
 
-        See also: :func:`web3fsnpy.middleware.filter.local_filter_middleware`.
+        See also: :func:`web3.middleware.filter.local_filter_middleware`.
 
         :param argument_filters:
         :param fromBlock: block number or "latest", defaults to "latest"
@@ -1197,7 +1197,7 @@ class ContractEvent:
             event_filter_params['blockHash'] = blockHash
 
         # Call JSON-RPC API
-        logs = self.web3fsnpy.eth.getLogs(event_filter_params)
+        logs = self.web3.eth.getLogs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
         return tuple(get_event_data(abi, entry) for entry in logs)
@@ -1231,11 +1231,11 @@ class ContractCaller:
     """
     def __init__(self,
                  abi,
-                 web3fsnpy,
+                 web3,
                  address,
                  transaction=None,
                  block_identifier='latest'):
-        self.web3fsnpy = web3fsnpy
+        self.web3 = web3
         self.address = address
         self.abi = abi
         self._functions = None
@@ -1248,12 +1248,12 @@ class ContractCaller:
             for func in self._functions:
                 fn = ContractFunction.factory(
                     func['name'],
-                    web3fsnpy=self.web3fsnpy,
+                    web3=self.web3,
                     contract_abi=self.abi,
                     address=self.address,
                     function_identifier=func['name'])
 
-                block_id = parse_block_identifier(self.web3fsnpy, block_identifier)
+                block_id = parse_block_identifier(self.web3, block_identifier)
                 caller_method = partial(self.call_function,
                                         fn,
                                         transaction=transaction,
@@ -1286,7 +1286,7 @@ class ContractCaller:
         if transaction is None:
             transaction = {}
         return type(self)(self.abi,
-                          self.web3fsnpy,
+                          self.web3,
                           self.address,
                           transaction=transaction,
                           block_identifier=block_identifier)
@@ -1315,7 +1315,7 @@ def check_for_forbidden_api_filter_arguments(event_abi, _filters):
 
 
 def call_contract_function(
-        web3fsnpy,
+        web3,
         address,
         normalizers,
         function_identifier,
@@ -1331,7 +1331,7 @@ def call_contract_function(
     """
     call_transaction = prepare_transaction(
         address,
-        web3fsnpy,
+        web3,
         fn_identifier=function_identifier,
         contract_abi=contract_abi,
         fn_abi=fn_abi,
@@ -1341,9 +1341,9 @@ def call_contract_function(
     )
 
     if block_id is None:
-        return_data = web3fsnpy.eth.call(call_transaction)
+        return_data = web3.eth.call(call_transaction)
     else:
-        return_data = web3fsnpy.eth.call(call_transaction, block_identifier=block_id)
+        return_data = web3.eth.call(call_transaction, block_identifier=block_id)
 
     if fn_abi is None:
         fn_abi = find_matching_fn_abi(contract_abi, function_identifier, args, kwargs)
@@ -1357,7 +1357,7 @@ def call_contract_function(
         # eth-abi-utils
         is_missing_code_error = (
             return_data in ACCEPTABLE_EMPTY_STRINGS and
-            web3fsnpy.eth.getCode(address) in ACCEPTABLE_EMPTY_STRINGS
+            web3.eth.getCode(address) in ACCEPTABLE_EMPTY_STRINGS
         )
         if is_missing_code_error:
             msg = (
@@ -1387,22 +1387,22 @@ def call_contract_function(
         return normalized_data
 
 
-def parse_block_identifier(web3fsnpy, block_identifier):
+def parse_block_identifier(web3, block_identifier):
     if isinstance(block_identifier, int):
-        return parse_block_identifier_int(web3fsnpy, block_identifier)
+        return parse_block_identifier_int(web3, block_identifier)
     elif block_identifier in ['latest', 'earliest', 'pending']:
         return block_identifier
     elif isinstance(block_identifier, bytes) or is_hex_encoded_block_hash(block_identifier):
-        return web3fsnpy.eth.getBlock(block_identifier)['number']
+        return web3.eth.getBlock(block_identifier)['number']
     else:
         raise BlockNumberOutofRange
 
 
-def parse_block_identifier_int(web3fsnpy, block_identifier_int):
+def parse_block_identifier_int(web3, block_identifier_int):
     if block_identifier_int >= 0:
         block_num = block_identifier_int
     else:
-        last_block = web3fsnpy.eth.getBlock('latest')['number']
+        last_block = web3.eth.getBlock('latest')['number']
         block_num = last_block + block_identifier_int + 1
         if block_num < 0:
             raise BlockNumberOutofRange
@@ -1411,7 +1411,7 @@ def parse_block_identifier_int(web3fsnpy, block_identifier_int):
 
 def transact_with_contract_function(
         address,
-        web3fsnpy,
+        web3,
         function_name=None,
         transaction=None,
         contract_abi=None,
@@ -1424,7 +1424,7 @@ def transact_with_contract_function(
     """
     transact_transaction = prepare_transaction(
         address,
-        web3fsnpy,
+        web3,
         fn_identifier=function_name,
         contract_abi=contract_abi,
         transaction=transaction,
@@ -1433,13 +1433,13 @@ def transact_with_contract_function(
         fn_kwargs=kwargs,
     )
 
-    txn_hash = web3fsnpy.eth.sendTransaction(transact_transaction)
+    txn_hash = web3.eth.sendTransaction(transact_transaction)
     return txn_hash
 
 
 def estimate_gas_for_function(
         address,
-        web3fsnpy,
+        web3,
         fn_identifier=None,
         transaction=None,
         contract_abi=None,
@@ -1453,7 +1453,7 @@ def estimate_gas_for_function(
     """
     estimate_transaction = prepare_transaction(
         address,
-        web3fsnpy,
+        web3,
         fn_identifier=fn_identifier,
         contract_abi=contract_abi,
         fn_abi=fn_abi,
@@ -1462,13 +1462,13 @@ def estimate_gas_for_function(
         fn_kwargs=kwargs,
     )
 
-    gas_estimate = web3fsnpy.eth.estimateGas(estimate_transaction)
+    gas_estimate = web3.eth.estimateGas(estimate_transaction)
     return gas_estimate
 
 
 def build_transaction_for_function(
         address,
-        web3fsnpy,
+        web3,
         function_name=None,
         transaction=None,
         contract_abi=None,
@@ -1482,7 +1482,7 @@ def build_transaction_for_function(
     """
     prepared_transaction = prepare_transaction(
         address,
-        web3fsnpy,
+        web3,
         fn_identifier=function_name,
         contract_abi=contract_abi,
         fn_abi=fn_abi,
@@ -1491,17 +1491,17 @@ def build_transaction_for_function(
         fn_kwargs=kwargs,
     )
 
-    prepared_transaction = fill_transaction_defaults(web3fsnpy, prepared_transaction)
+    prepared_transaction = fill_transaction_defaults(web3, prepared_transaction)
 
     return prepared_transaction
 
 
-def find_functions_by_identifier(contract_abi, web3fsnpy, address, callable_check):
+def find_functions_by_identifier(contract_abi, web3, address, callable_check):
     fns_abi = filter_by_type('function', contract_abi)
     return [
         ContractFunction.factory(
             fn_abi['name'],
-            web3fsnpy=web3fsnpy,
+            web3=web3,
             contract_abi=contract_abi,
             address=address,
             function_identifier=fn_abi['name'],

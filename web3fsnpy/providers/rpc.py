@@ -5,16 +5,16 @@ from eth_utils import (
     to_dict,
 )
 
-from web3fsnpy._utils.http import (
+from web3._utils.http import (
     construct_user_agent,
 )
-from web3fsnpy._utils.request import (
+from web3._utils.request import (
     make_post_request,
 )
-from web3fsnpy.datastructures import (
+from web3.datastructures import (
     NamedElementOnion,
 )
-from web3fsnpy.middleware import (
+from web3.middleware import (
     http_retry_request_middleware,
 )
 
@@ -28,7 +28,7 @@ def get_default_endpoint():
 
 
 class HTTPProvider(JSONBaseProvider):
-    logger = logging.getLogger("web3fsnpy.providers.HTTPProvider")
+    logger = logging.getLogger("web3.providers.HTTPProvider")
     endpoint_uri = None
     _request_args = None
     _request_kwargs = None

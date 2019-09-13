@@ -2,7 +2,6 @@ from eth_account import (
     Account,
 )
 from eth_utils import (
-    add_0x_prefix,
     apply_to_return_value,
     is_checksum_address,
     is_string,
@@ -15,85 +14,54 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy._utils.blocks import (
+from web3._utils.blocks import (
     select_method_for_block_identifier,
 )
-from web3fsnpy._utils.empty import (
+from web3._utils.empty import (
     empty,
 )
-from web3fsnpy._utils.encoding import (
+from web3._utils.encoding import (
     to_hex,
 )
-from web3fsnpy._utils.filters import (
+from web3._utils.filters import (
     BlockFilter,
     LogFilter,
     TransactionFilter,
 )
-from web3fsnpy._utils.threads import (
+from web3._utils.threads import (
     Timeout,
 )
-from web3fsnpy._utils.transactions import (
+from web3._utils.transactions import (
     assert_valid_transaction_params,
     extract_valid_transaction_params,
     get_buffered_gas_estimate,
     get_required_transaction,
     replace_transaction,
     wait_for_transaction_receipt,
-    fill_transaction_defaults,
 )
-from web3fsnpy.contract import (
+from web3.contract import (
     Contract,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     BlockNotFound,
     TimeExhausted,
     TransactionNotFound,
 )
-from web3fsnpy.iban import (
+from web3.iban import (
     Iban,
 )
-from web3fsnpy.module import (
+from web3.module import (
     Module,
 )
 
 
-class Fsn(Module):
+class Eth(Module):
     account = Account()
     defaultAccount = empty
     defaultBlock = "latest"
     defaultContractFactory = Contract
     iban = Iban
     gasPriceStrategy = None
-    __defaultChainId = 32659
-    
-    
-    consts = {
-        "TimeForever":       0xffffffffffffffff, # javascript will convert this to 0x10000000000
-        "TimeForeverStr":   "0xffffffffffffffff",
-
-        "FSNToken":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-
-        "OwnerUSANAssetID": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
- 
-        "TicketLogAddress": "0xfffffffffffffffffffffffffffffffffffffffe",
-        "TicketLogAddress_Topic_To_Function": {
-            "0": "ticketSelected",
-            "1": "ticketReturn",
-            "2": "ticketExpired"
-        },
-
-        "TicketLogAddress_Topic_ticketSelected": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "TicketLogAddress_Topic_ticketReturn":   "0x0000000000000000000000000000000000000000000000000000000000000001",
-        "TicketLogAddress_Topic_ticketExpired":  "0x0000000000000000000000000000000000000000000000000000000000000002",
-
-        "FSNCallAddress":                        "0xffffffffffffffffffffffffffffffffffffffff",
-        
-        "EMPTY_HASH":                            "0x0000000000000000000000000000000000000000000000000000000000000000",
-    }
-
-    
-    
-    
 
     def namereg(self):
         raise NotImplementedError()
@@ -103,111 +71,44 @@ class Fsn(Module):
 
     @property
     def protocolVersion(self):
-        return self.web3fsnpy.manager.request_blocking("eth_protocolVersion", [])
+        return self.web3.manager.request_blocking("eth_protocolVersion", [])
 
     @property
     def syncing(self):
-        return self.web3fsnpy.manager.request_blocking("eth_syncing", [])
+        return self.web3.manager.request_blocking("eth_syncing", [])
 
     @property
     def coinbase(self):
-        return self.web3fsnpy.manager.request_blocking("eth_coinbase", [])
+        return self.web3.manager.request_blocking("eth_coinbase", [])
 
     @property
     def mining(self):
-        return self.web3fsnpy.manager.request_blocking("eth_mining", [])
+        return self.web3.manager.request_blocking("eth_mining", [])
 
     @property
     def hashrate(self):
-        return self.web3fsnpy.manager.request_blocking("eth_hashrate", [])
+        return self.web3.manager.request_blocking("eth_hashrate", [])
 
     @property
     def gasPrice(self):
-        #return self.web3fsnpy.manager.request_blocking("eth_gasPrice", [])
-        return web3fsn.toWei(21,'gwei')
+        return self.web3.manager.request_blocking("eth_gasPrice", [])
+
     @property
     def accounts(self):
-        return self.web3fsnpy.manager.request_blocking("eth_accounts", [])
+        return self.web3.manager.request_blocking("eth_accounts", [])
 
     @property
     def blockNumber(self):
-        return self.web3fsnpy.manager.request_blocking("eth_blockNumber", [])
+        return self.web3.manager.request_blocking("eth_blockNumber", [])
 
     @property
     def chainId(self):
-#        return self.web3fsnpy.manager.request_blocking("eth_chainId", [])
-        return self.__defaultChainId
-
-    def fill_tx_defaults(self, transaction):
-        return fill_transaction_defaults(self, transaction)
-
-
-    def buyTicket(self, account):
-        block_identifier = self.defaultBlock
-        TxHash = self.web3fsnpy.manager.request_blocking(
-            "fsntx_buyTicket",
-            [account],
-        )
-        return TxHash
-            
-
-
-    def allTickets(self, block_identifier):
-        method = "fsn_allTickets"
-        result = self.web3fsnpy.manager.request_blocking(
-            method,
-            [block_identifier],
-        )
-        if result is None:
-            raise BlockNotFound(f"Block with id: {block_identifier} not found.")
-        return result
-
-    def ticketsByAddress(self, account, block_identifier=None):
-        if block_identifier is None:
-            block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
-            "fsn_allTicketsByAddress",
-            [account, block_identifier],
-        )
-
-    def totalNumberOfTickets(self, block_identifier=None):
-        if block_identifier is None:
-            block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
-            "fsn_totalNumberOfTickets",
-            [block_identifier],
-        )
-
-    def totalNumberOfTicketsByAddress(self, account, block_identifier=None):
-        if block_identifier is None:
-            block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
-            "fsn_totalNumberOfTicketsByAddress",
-            [account, block_identifier],
-        )
-
-    def createRawAsset(self, rawTransaction):
-        
-        TxHash =  self.web3fsnpy.manager.request_blocking(
-            "fsntx_genAsset",
-            [rawTransaction],
-        )
-        return TxHash
-
-
-    def sendRawAsset(self, rawTransaction):
-        
-        TxHash =  self.web3fsnpy.manager.request_blocking(
-            "fsntx_sendAsset",
-            [rawTransaction],
-        )
-        return TxHash
-
+        return self.web3.manager.request_blocking("eth_chainId", [])
 
     def getBalance(self, account, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getBalance",
             [account, block_identifier],
         )
@@ -215,7 +116,7 @@ class Fsn(Module):
     def getStorageAt(self, account, position, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getStorageAt",
             [account, position, block_identifier]
         )
@@ -223,7 +124,7 @@ class Fsn(Module):
     def getProof(self, account, positions, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getProof",
             [account, positions, block_identifier]
         )
@@ -231,7 +132,7 @@ class Fsn(Module):
     def getCode(self, account, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getCode",
             [account, block_identifier],
         )
@@ -248,7 +149,7 @@ class Fsn(Module):
             if_number='eth_getBlockByNumber',
         )
 
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             method,
             [block_identifier, full_transactions],
         )
@@ -267,7 +168,7 @@ class Fsn(Module):
             if_hash='eth_getBlockTransactionCountByHash',
             if_number='eth_getBlockTransactionCountByNumber',
         )
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             method,
             [block_identifier],
         )
@@ -286,7 +187,7 @@ class Fsn(Module):
             if_hash='eth_getUncleCountByBlockHash',
             if_number='eth_getUncleCountByBlockNumber',
         )
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             method,
             [block_identifier],
         )
@@ -305,7 +206,7 @@ class Fsn(Module):
             if_hash='eth_getUncleByBlockHashAndIndex',
             if_number='eth_getUncleByBlockNumberAndIndex',
         )
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             method,
             [block_identifier, uncle_index],
         )
@@ -316,7 +217,7 @@ class Fsn(Module):
         return result
 
     def getTransaction(self, transaction_hash):
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             "eth_getTransactionByHash",
             [transaction_hash],
         )
@@ -342,7 +243,7 @@ class Fsn(Module):
             if_hash='eth_getTransactionByBlockHashAndIndex',
             if_number='eth_getTransactionByBlockNumberAndIndex',
         )
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             method,
             [block_identifier, transaction_index],
         )
@@ -355,7 +256,7 @@ class Fsn(Module):
 
     def waitForTransactionReceipt(self, transaction_hash, timeout=120):
         try:
-            return wait_for_transaction_receipt(self.web3fsnpy, transaction_hash, timeout)
+            return wait_for_transaction_receipt(self.web3, transaction_hash, timeout)
         except Timeout:
             raise TimeExhausted(
                 "Transaction {} is not in the chain, after {} seconds".format(
@@ -365,7 +266,7 @@ class Fsn(Module):
             )
 
     def getTransactionReceipt(self, transaction_hash):
-        result = self.web3fsnpy.manager.request_blocking(
+        result = self.web3.manager.request_blocking(
             "eth_getTransactionReceipt",
             [transaction_hash],
         )
@@ -376,61 +277,59 @@ class Fsn(Module):
     def getTransactionCount(self, account, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getTransactionCount",
             [account, block_identifier],
         )
 
     def replaceTransaction(self, transaction_hash, new_transaction):
-        current_transaction = get_required_transaction(self.web3fsnpy, transaction_hash)
-        return replace_transaction(self.web3fsnpy, current_transaction, new_transaction)
+        current_transaction = get_required_transaction(self.web3, transaction_hash)
+        return replace_transaction(self.web3, current_transaction, new_transaction)
 
     def modifyTransaction(self, transaction_hash, **transaction_params):
         assert_valid_transaction_params(transaction_params)
-        current_transaction = get_required_transaction(self.web3fsnpy, transaction_hash)
+        current_transaction = get_required_transaction(self.web3, transaction_hash)
         current_transaction_params = extract_valid_transaction_params(current_transaction)
         new_transaction = merge(current_transaction_params, transaction_params)
-        return replace_transaction(self.web3fsnpy, current_transaction, new_transaction)
+        return replace_transaction(self.web3, current_transaction, new_transaction)
 
     def sendTransaction(self, transaction):
         # TODO: move to middleware
         if 'from' not in transaction and is_checksum_address(self.defaultAccount):
             transaction = assoc(transaction, 'from', self.defaultAccount)
-            
+
         # TODO: move gas estimation in middleware
         if 'gas' not in transaction:
             transaction = assoc(
                 transaction,
                 'gas',
-                gasPrice()
-                #get_buffered_gas_estimate(self.web3fsnpy, transaction),
-                
+                get_buffered_gas_estimate(self.web3, transaction),
             )
 
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_sendTransaction",
             [transaction],
         )
 
     def sendRawTransaction(self, raw_transaction):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_sendRawTransaction",
             [raw_transaction],
         )
 
     def sign(self, account, data=None, hexstr=None, text=None):
         message_hex = to_hex(data, hexstr=hexstr, text=text)
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_sign", [account, message_hex],
         )
 
     def signTransaction(self, transaction):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_signTransaction", [transaction],
         )
 
     def signTypedData(self, account, jsonMessage):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_signTypedData", [account, jsonMessage],
         )
 
@@ -443,28 +342,25 @@ class Fsn(Module):
         # TODO: move to middleware
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_call",
             [transaction, block_identifier],
         )
 
     def estimateGas(self, transaction, block_identifier=None):
-        
-        return web3fsn.toWei(21,'gwei')    # value from MyFusionWallet JS code
-        
         # TODO: move to middleware
-        #if 'from' not in transaction and is_checksum_address(self.defaultAccount):
-            #transaction = assoc(transaction, 'from', self.defaultAccount)
+        if 'from' not in transaction and is_checksum_address(self.defaultAccount):
+            transaction = assoc(transaction, 'from', self.defaultAccount)
 
-        #if block_identifier is None:
-            #params = [transaction]
-        #else:
-            #params = [transaction, block_identifier]
+        if block_identifier is None:
+            params = [transaction]
+        else:
+            params = [transaction, block_identifier]
 
-        #return self.web3fsnpy.manager.request_blocking(
-            #"eth_estimateGas",
-            #params,
-        #)
+        return self.web3.manager.request_blocking(
+            "eth_estimateGas",
+            params,
+        )
 
     def filter(self, filter_params=None, filter_id=None):
         if filter_id and filter_params:
@@ -474,60 +370,60 @@ class Fsn(Module):
             )
         if is_string(filter_params):
             if filter_params == "latest":
-                filter_id = self.web3fsnpy.manager.request_blocking(
+                filter_id = self.web3.manager.request_blocking(
                     "eth_newBlockFilter", [],
                 )
-                return BlockFilter(self.web3fsnpy, filter_id)
+                return BlockFilter(self.web3, filter_id)
             elif filter_params == "pending":
-                filter_id = self.web3fsnpy.manager.request_blocking(
+                filter_id = self.web3.manager.request_blocking(
                     "eth_newPendingTransactionFilter", [],
                 )
-                return TransactionFilter(self.web3fsnpy, filter_id)
+                return TransactionFilter(self.web3, filter_id)
             else:
                 raise ValueError(
                     "The filter API only accepts the values of `pending` or "
                     "`latest` for string based filters"
                 )
         elif isinstance(filter_params, dict):
-            _filter_id = self.web3fsnpy.manager.request_blocking(
+            _filter_id = self.web3.manager.request_blocking(
                 "eth_newFilter",
                 [filter_params],
             )
-            return LogFilter(self.web3fsnpy, _filter_id)
+            return LogFilter(self.web3, _filter_id)
         elif filter_id and not filter_params:
-            return LogFilter(self.web3fsnpy, filter_id)
+            return LogFilter(self.web3, filter_id)
         else:
             raise TypeError("Must provide either filter_params as a string or "
                             "a valid filter object, or a filter_id as a string "
                             "or hex.")
 
     def getFilterChanges(self, filter_id):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getFilterChanges", [filter_id],
         )
 
     def getFilterLogs(self, filter_id):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getFilterLogs", [filter_id],
         )
 
     def getLogs(self, filter_params):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_getLogs", [filter_params],
         )
 
     def submitHashrate(self, hashrate, node_id):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_submitHashrate", [hashrate, node_id],
         )
 
     def submitWork(self, nonce, pow_hash, mix_digest):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_submitWork", [nonce, pow_hash, mix_digest],
         )
 
     def uninstallFilter(self, filter_id):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "eth_uninstallFilter", [filter_id],
         )
 
@@ -536,7 +432,7 @@ class Fsn(Module):
                  **kwargs):
         ContractFactoryClass = kwargs.pop('ContractFactoryClass', self.defaultContractFactory)
 
-        ContractFactory = ContractFactoryClass.factory(self.web3fsnpy, **kwargs)
+        ContractFactory = ContractFactoryClass.factory(self.web3, **kwargs)
 
         if address:
             return ContractFactory(address)
@@ -550,11 +446,11 @@ class Fsn(Module):
         raise DeprecationWarning("This method has been deprecated as of EIP 1474.")
 
     def getWork(self):
-        return self.web3fsnpy.manager.request_blocking("eth_getWork", [])
+        return self.web3.manager.request_blocking("eth_getWork", [])
 
     def generateGasPrice(self, transaction_params=None):
         if self.gasPriceStrategy:
-            return self.gasPriceStrategy(self.web3fsnpy, transaction_params)
+            return self.gasPriceStrategy(self.web3, transaction_params)
 
     def setGasPriceStrategy(self, gas_price_strategy):
         self.gasPriceStrategy = gas_price_strategy

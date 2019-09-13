@@ -17,7 +17,7 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy._utils.abi import (
+from web3._utils.abi import (
     abi_to_signature,
     check_if_arguments_can_be_encoded,
     filter_by_argument_count,
@@ -31,19 +31,19 @@ from web3fsnpy._utils.abi import (
     map_abi_data,
     merge_args_and_kwargs,
 )
-from web3fsnpy._utils.encoding import (
+from web3._utils.encoding import (
     to_hex,
 )
-from web3fsnpy._utils.function_identifiers import (
+from web3._utils.function_identifiers import (
     FallbackFn,
 )
-from web3fsnpy._utils.normalizers import (
+from web3._utils.normalizers import (
     abi_address_to_hex,
     abi_bytes_to_bytes,
     abi_ens_resolver,
     abi_string_to_text,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     ValidationError,
 )
 
@@ -126,7 +126,7 @@ def find_matching_fn_abi(abi, fn_identifier=None, args=None, kwargs=None):
         raise ValidationError(message)
 
 
-def encode_abi(web3fsnpy, abi, arguments, data=None):
+def encode_abi(web3, abi, arguments, data=None):
     argument_types = get_abi_input_types(abi)
 
     if not check_if_arguments_can_be_encoded(abi, arguments, {}):
@@ -138,7 +138,7 @@ def encode_abi(web3fsnpy, abi, arguments, data=None):
         )
 
     normalizers = [
-        abi_ens_resolver(web3fsnpy),
+        abi_ens_resolver(web3),
         abi_address_to_hex,
         abi_bytes_to_bytes,
         abi_string_to_text,
@@ -161,7 +161,7 @@ def encode_abi(web3fsnpy, abi, arguments, data=None):
 
 def prepare_transaction(
         address,
-        web3fsnpy,
+        web3,
         fn_identifier,
         contract_abi=None,
         fn_abi=None,
@@ -191,7 +191,7 @@ def prepare_transaction(
         prepared_transaction.setdefault('to', address)
 
     prepared_transaction['data'] = encode_transaction_data(
-        web3fsnpy,
+        web3,
         fn_identifier,
         contract_abi,
         fn_abi,
@@ -202,7 +202,7 @@ def prepare_transaction(
 
 
 def encode_transaction_data(
-        web3fsnpy,
+        web3,
         fn_identifier,
         contract_abi=None,
         fn_abi=None,
@@ -217,7 +217,7 @@ def encode_transaction_data(
     else:
         raise TypeError("Unsupported function identifier")
 
-    return add_0x_prefix(encode_abi(web3fsnpy, fn_abi, fn_arguments, fn_selector))
+    return add_0x_prefix(encode_abi(web3, fn_abi, fn_arguments, fn_selector))
 
 
 def get_fallback_function_info(contract_abi=None, fn_abi=None):

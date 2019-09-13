@@ -23,36 +23,27 @@ from eth_utils.address import (
 from eth_utils.toolz import (
     curry,
 )
-from eth_utils.curried import (
-       hexstr_if_str,
-       text_if_str,
-       to_bytes,
-       to_hex,
-       to_text,
-)
-
 from hexbytes import (
     HexBytes,
 )
 
-#from web3fsnpy._utils.encoding import (
-    #hexstr_if_str,
-    #text_if_str,
-    #to_bytes,
-    #to_hex,
-    #to_text,
-#)
-
-from web3fsnpy._utils.ens import (
+from web3._utils.encoding import (
+    hexstr_if_str,
+    text_if_str,
+    to_bytes,
+    to_hex,
+    to_text,
+)
+from web3._utils.ens import (
     StaticENS,
     is_ens_name,
     validate_name_has_address,
 )
-from web3fsnpy._utils.validation import (
+from web3._utils.validation import (
     validate_abi,
     validate_address,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     InvalidAddress,
 )
 
@@ -106,6 +97,7 @@ def parse_basic_type_str(old_normalizer):
 
         if not isinstance(abi_type, BasicType):
             return type_str, data
+
         return old_normalizer(abi_type, type_str, data)
 
     return new_normalizer
@@ -125,7 +117,7 @@ def abi_bytes_to_hex(abi_type, type_str, data):
     if len(bytes_data) > num_bytes:
         raise ValueError(
             "This value was expected to be at most %d bytes, but instead was %d: %r" % (
-                #(num_bytes, len(bytes_data), data)
+                (num_bytes, len(bytes_data), data)
             )
         )
 
@@ -172,7 +164,7 @@ def abi_ens_resolver(w3, type_str, val):
     if type_str == 'address' and is_ens_name(val):
         if w3 is None:
             raise InvalidAddress(
-                "Could not look up name %r because no web3fsnpy"
+                "Could not look up name %r because no web3"
                 " connection available" % (val)
             )
         elif w3.ens is None:
@@ -182,7 +174,7 @@ def abi_ens_resolver(w3, type_str, val):
             )
         elif int(w3.net.version) is not 1 and not isinstance(w3.ens, StaticENS):
             raise InvalidAddress(
-                "Could not look up name %r because web3fsnpy is"
+                "Could not look up name %r because web3 is"
                 " not connected to mainnet" % (val)
             )
         else:

@@ -1,16 +1,16 @@
 import logging
 import uuid
 
-from web3fsnpy._utils.decorators import (
+from web3._utils.decorators import (
     deprecated_for,
 )
-from web3fsnpy._utils.threads import (
+from web3._utils.threads import (
     spawn,
 )
-from web3fsnpy.datastructures import (
+from web3.datastructures import (
     NamedElementOnion,
 )
-from web3fsnpy.middleware import (
+from web3.middleware import (
     abi_middleware,
     attrdict_middleware,
     gas_price_strategy_middleware,
@@ -20,20 +20,20 @@ from web3fsnpy.middleware import (
     request_parameter_normalizer,
     validation_middleware,
 )
-from web3fsnpy.providers import (
+from web3.providers import (
     AutoProvider,
 )
 
 
 class RequestManager:
-    logger = logging.getLogger("web3fsnpy.RequestManager")
+    logger = logging.getLogger("web3.RequestManager")
 
-    def __init__(self, web3fsnpy, provider=None, middlewares=None):
-        self.web3fsnpy = web3fsnpy
+    def __init__(self, web3, provider=None, middlewares=None):
+        self.web3 = web3
         self.pending_requests = {}
 
         if middlewares is None:
-            middlewares = self.default_middlewares(web3fsnpy)
+            middlewares = self.default_middlewares(web3)
 
         self.middleware_onion = NamedElementOnion(middlewares)
 
@@ -42,7 +42,7 @@ class RequestManager:
         else:
             self.provider = provider
 
-    web3fsnpy = None
+    web3 = None
     _provider = None
 
     @property
@@ -54,7 +54,7 @@ class RequestManager:
         self._provider = provider
 
     @staticmethod
-    def default_middlewares(web3fsnpy):
+    def default_middlewares(web3):
         """
         List the default middlewares for the request manager.
         Leaving ens unspecified will prevent the middleware from resolving names.
@@ -62,7 +62,7 @@ class RequestManager:
         return [
             (request_parameter_normalizer, 'request_param_normalizer'),
             (gas_price_strategy_middleware, 'gas_price_strategy'),
-            (name_to_address_middleware(web3fsnpy), 'name_to_address'),
+            (name_to_address_middleware(web3), 'name_to_address'),
             (attrdict_middleware, 'attrdict'),
             (pythonic_middleware, 'pythonic'),
             (normalize_errors_middleware, 'normalize_errors'),
@@ -75,14 +75,14 @@ class RequestManager:
     #
     def _make_request(self, method, params):
         request_func = self.provider.request_func(
-            self.web3fsnpy,
+            self.web3,
             tuple(self.middleware_onion))
         self.logger.debug("Making request. Method: %s", method)
         return request_func(method, params)
 
     async def _coro_make_request(self, method, params):
         request_func = self.provider.request_func(
-            self.web3fsnpy,
+            self.web3,
             tuple(self.middleware_onion))
         self.logger.debug("Making request. Method: %s", method)
         return await request_func(method, params)
@@ -92,7 +92,7 @@ class RequestManager:
         Make a synchronous request using the provider
         """
         response = self._make_request(method, params)
-        
+
         if "error" in response:
             raise ValueError(response["error"])
 

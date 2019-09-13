@@ -1,6 +1,6 @@
 import time
 
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     StaleBlockchain,
 )
 
@@ -29,7 +29,7 @@ def make_stalecheck_middleware(
     if allowable_delay <= 0:
         raise ValueError("You must set a positive allowable_delay in seconds for this middleware")
 
-    def stalecheck_middleware(make_request, web3fsnpy):
+    def stalecheck_middleware(make_request, web3):
         cache = {'latest': None}
 
         def middleware(method, params):
@@ -37,7 +37,7 @@ def make_stalecheck_middleware(
                 if _isfresh(cache['latest'], allowable_delay):
                     pass
                 else:
-                    latest = web3fsnpy.fsn.getBlock('latest')
+                    latest = web3.eth.getBlock('latest')
                     if _isfresh(latest, allowable_delay):
                         cache['latest'] = latest
                     else:

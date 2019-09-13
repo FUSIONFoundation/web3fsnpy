@@ -5,10 +5,10 @@ from eth_utils.toolz import (
     assoc,
 )
 
-from web3fsnpy._utils import (
+from web3._utils import (
     shh,
 )
-from web3fsnpy._utils.personal import (
+from web3._utils.personal import (
     ecRecover,
     importRawKey,
     listAccounts,
@@ -18,7 +18,7 @@ from web3fsnpy._utils.personal import (
     signTypedData,
     unlockAccount,
 )
-from web3fsnpy.module import (
+from web3.module import (
     Module,
     ModuleV2,
 )
@@ -66,7 +66,7 @@ class Parity(Module):
     defaultBlock = "latest"
 
     def enode(self):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "parity_enode",
             [],
         )
@@ -74,49 +74,49 @@ class Parity(Module):
     def listStorageKeys(self, address, quantity, hash_, block_identifier=None):
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "parity_listStorageKeys",
             [address, quantity, hash_, block_identifier],
         )
 
     def netPeers(self):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "parity_netPeers",
             [],
         )
 
     def addReservedPeer(self, url):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "parity_addReservedPeer",
             [url],
         )
 
     def traceReplayTransaction(self, transaction_hash, mode=['trace']):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_replayTransaction",
             [transaction_hash, mode],
         )
 
     def traceReplayBlockTransactions(self, block_identifier, mode=['trace']):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_replayBlockTransactions",
             [block_identifier, mode]
         )
 
     def traceBlock(self, block_identifier):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_block",
             [block_identifier]
         )
 
     def traceFilter(self, params):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_filter",
             [params]
         )
 
     def traceTransaction(self, transaction_hash):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_transaction",
             [transaction_hash]
         )
@@ -129,25 +129,25 @@ class Parity(Module):
         # TODO: move to middleware
         if block_identifier is None:
             block_identifier = self.defaultBlock
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_call",
             [transaction, mode, block_identifier],
         )
 
     def traceRawTransaction(self, raw_transaction, mode=['trace']):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "trace_rawTransaction",
             [raw_transaction, mode],
         )
 
     def setMode(self, mode):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "parity_setMode",
             [mode]
         )
 
     def mode(self):
-        return self.web3fsnpy.manager.request_blocking(
+        return self.web3.manager.request_blocking(
             "parity_mode",
             []
         )

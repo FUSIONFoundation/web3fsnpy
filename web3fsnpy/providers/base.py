@@ -5,10 +5,10 @@ from eth_utils import (
     to_text,
 )
 
-from web3fsnpy._utils.encoding import (
+from web3._utils.encoding import (
     FriendlyJsonSerde,
 )
-from web3fsnpy.middleware import (
+from web3.middleware import (
     combine_middlewares,
 )
 
@@ -25,7 +25,7 @@ class BaseProvider:
     def middlewares(self, values):
         self._middlewares = tuple(values)
 
-    def request_func(self, web3fsnpy, outer_middlewares):
+    def request_func(self, web3, outer_middlewares):
         """
         @param outer_middlewares is an iterable of middlewares, ordered by first to execute
         @returns a function that calls all the middleware and eventually self.make_request()
@@ -36,14 +36,14 @@ class BaseProvider:
         if cache_key is None or cache_key != all_middlewares:
             self._request_func_cache = (
                 all_middlewares,
-                self._generate_request_func(web3fsnpy, all_middlewares)
+                self._generate_request_func(web3, all_middlewares)
             )
         return self._request_func_cache[-1]
 
-    def _generate_request_func(self, web3fsnpy, middlewares):
+    def _generate_request_func(self, web3, middlewares):
         return combine_middlewares(
             middlewares=middlewares,
-            web3fsnpy=web3fsnpy,
+            web3=web3,
             provider_request_fn=self.make_request,
         )
 
@@ -74,7 +74,7 @@ class JSONBaseProvider(BaseProvider):
 
     def isConnected(self):
         try:
-            response = self.make_request('web3fsnpy_clientVersion', [])
+            response = self.make_request('web3_clientVersion', [])
         except IOError:
             return False
 

@@ -5,10 +5,10 @@ from eth_utils.toolz import (
     curry,
 )
 
-from web3fsnpy._utils.abi import (
+from web3._utils.abi import (
     map_abi_data,
 )
-from web3fsnpy._utils.formatters import (
+from web3._utils.formatters import (
     apply_formatter_at_index,
 )
 

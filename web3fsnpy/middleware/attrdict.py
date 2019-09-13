@@ -5,12 +5,12 @@ from eth_utils.toolz import (
     assoc,
 )
 
-from web3fsnpy.datastructures import (
+from web3.datastructures import (
     AttributeDict,
 )
 
 
-def attrdict_middleware(make_request, web3fsnpy):
+def attrdict_middleware(make_request, web3):
     """
     Converts any result which is a dictionary into an a
     """

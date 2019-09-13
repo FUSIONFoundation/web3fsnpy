@@ -1,4 +1,4 @@
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     ValidationError,
 )
 

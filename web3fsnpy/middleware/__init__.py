@@ -64,13 +64,13 @@ from .signing import (  # noqa: F401
 )
 
 
-def combine_middlewares(middlewares, web3fsnpy, provider_request_fn):
+def combine_middlewares(middlewares, web3, provider_request_fn):
     """
     Returns a callable function which will call the provider.provider_request
     function wrapped with all of the middlewares.
     """
     return functools.reduce(
-        lambda request_fn, middleware: middleware(request_fn, web3fsnpy),
+        lambda request_fn, middleware: middleware(request_fn, web3),
         reversed(middlewares),
         provider_request_fn,
     )

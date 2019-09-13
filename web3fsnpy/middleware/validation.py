@@ -14,10 +14,10 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     ValidationError,
 )
-from web3fsnpy.middleware.formatting import (
+from web3.middleware.formatting import (
     construct_web3_formatting_middleware,
 )
 
@@ -28,15 +28,15 @@ is_not_null = complement(is_null)
 
 
 @curry
-def validate_chain_id(web3fsnpy, chain_id):
-    if int(chain_id) == web3fsnpy.eth.chainId:
+def validate_chain_id(web3, chain_id):
+    if int(chain_id) == web3.eth.chainId:
         return chain_id
     else:
         raise ValidationError(
             "The transaction declared chain ID %r, "
             "but the connected node is on %r" % (
                 chain_id,
-                web3fsnpy.fsn.chainId,
+                web3.eth.chainId,
             )
         )
 
@@ -62,12 +62,12 @@ def transaction_normalizer(transaction):
     return dissoc(transaction, 'chainId')
 
 
-def transaction_param_validator(web3fsnpy):
+def transaction_param_validator(web3):
     transactions_params_validators = {
         'chainId': apply_formatter_if(
             # Bypass `validate_chain_id` if chainId can't be determined
-            lambda _: is_not_null(web3fsnpy.fsn.chainId),
-            validate_chain_id(web3fsnpy)
+            lambda _: is_not_null(web3.eth.chainId),
+            validate_chain_id(web3)
         ),
     }
     return apply_formatter_at_index(
@@ -88,10 +88,10 @@ block_validator = apply_formatter_if(
 
 
 @curry
-def chain_id_validator(web3fsnpy):
+def chain_id_validator(web3):
     return compose(
         apply_formatter_at_index(transaction_normalizer, 0),
-        transaction_param_validator(web3fsnpy)
+        transaction_param_validator(web3)
     )
 
 
