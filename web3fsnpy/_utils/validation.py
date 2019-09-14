@@ -23,7 +23,7 @@ from eth_utils.toolz import (
     valmap,
 )
 
-from web3fsnpy._utils.abi import (
+from web3._utils.abi import (
     abi_to_signature,
     filter_by_type,
     is_address_type,
@@ -37,10 +37,10 @@ from web3fsnpy._utils.abi import (
     length_of_array_type,
     sub_type_of_array_type,
 )
-from web3fsnpy._utils.formatters import (
+from web3._utils.formatters import (
     apply_formatter_to_array,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     InvalidAddress,
 )
 

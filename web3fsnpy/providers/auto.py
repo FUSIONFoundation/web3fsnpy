@@ -3,10 +3,10 @@ from urllib.parse import (
     urlparse,
 )
 
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     CannotHandleRequest,
 )
-from web3fsnpy.providers import (
+from web3.providers import (
     BaseProvider,
     HTTPProvider,
     IPCProvider,

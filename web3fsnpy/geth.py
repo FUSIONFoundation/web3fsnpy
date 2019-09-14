@@ -1,7 +1,7 @@
-from web3fsnpy._utils import (
+from web3._utils import (
     shh,
 )
-from web3fsnpy._utils.admin import (
+from web3._utils.admin import (
     add_peer,
     addPeer,
     datadir,
@@ -17,7 +17,7 @@ from web3fsnpy._utils.admin import (
     stopRPC,
     stopWS,
 )
-from web3fsnpy._utils.miner import (
+from web3._utils.miner import (
     makeDag,
     setEtherbase,
     setExtra,
@@ -27,7 +27,7 @@ from web3fsnpy._utils.miner import (
     stop,
     stopAutoDag,
 )
-from web3fsnpy._utils.personal import (
+from web3._utils.personal import (
     ecRecover,
     importRawKey,
     listAccounts,
@@ -38,12 +38,12 @@ from web3fsnpy._utils.personal import (
     signTypedData,
     unlockAccount,
 )
-from web3fsnpy._utils.txpool import (
+from web3._utils.txpool import (
     content,
     inspect,
     status,
 )
-from web3fsnpy.module import (
+from web3.module import (
     Module,
     ModuleV2,
 )

@@ -1,7 +1,7 @@
-from web3fsnpy.method import (
+from web3.method import (
     Method,
 )
-from web3fsnpy.module import (
+from web3.module import (
     Module,
     ModuleV2,
 )
@@ -15,7 +15,7 @@ class BaseVersion(ModuleV2):
 
     @property
     def api(self):
-        from web3fsnpy import __version__
+        from web3 import __version__
         return __version__
 
 
@@ -45,17 +45,17 @@ class Version(Module):
     @property
     def api(self):
         raise DeprecationWarning(
-            "This method has been deprecated ... Please use web3fsnpy.api instead."
+            "This method has been deprecated ... Please use web3.api instead."
         )
 
     @property
     def node(self):
         raise DeprecationWarning(
-            "This method has been deprecated ... Please use web3fsnpy.clientVersion instead."
+            "This method has been deprecated ... Please use web3.clientVersion instead."
         )
 
     @property
     def ethereum(self):
         raise DeprecationWarning(
-            "This method has been deprecated ... Please use web3fsnpy.eth.protocolVersion instead."
+            "This method has been deprecated ... Please use web3.eth.protocolVersion instead."
         )

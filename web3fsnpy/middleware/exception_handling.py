@@ -7,7 +7,7 @@ def construct_exception_handler_middleware(method_handlers=None):
     if method_handlers is None:
         method_handlers = {}
 
-    def exception_handler_middleware(make_request, web3fsnpy):
+    def exception_handler_middleware(make_request, web3):
         def middleware(method, params):
             if method in method_handlers:
                 exc_type, handler = method_handlers[method]

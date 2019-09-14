@@ -1,4 +1,4 @@
-from web3fsnpy.module import (
+from web3.module import (
     Module,
 )
 
@@ -6,11 +6,11 @@ from web3fsnpy.module import (
 class Net(Module):
     @property
     def listening(self):
-        return self.web3fsnpy.manager.request_blocking("net_listening", [])
+        return self.web3.manager.request_blocking("net_listening", [])
 
     @property
     def peerCount(self):
-        return self.web3fsnpy.manager.request_blocking("net_peerCount", [])
+        return self.web3.manager.request_blocking("net_peerCount", [])
 
     @property
     def chainId(self):
@@ -18,4 +18,4 @@ class Net(Module):
 
     @property
     def version(self):
-        return self.web3fsnpy.manager.request_blocking("net_version", [])
+        return self.web3.manager.request_blocking("net_version", [])

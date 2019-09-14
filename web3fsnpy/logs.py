@@ -1,4 +1,4 @@
-from web3fsnpy._utils.events import (
+from web3._utils.events import (
     EventLogErrorFlags,
 )
 

@@ -8,10 +8,10 @@ from threading import (
 
 import websockets
 
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     ValidationError,
 )
-from web3fsnpy.providers.base import (
+from web3.providers.base import (
     JSONBaseProvider,
 )
 
@@ -61,7 +61,7 @@ class PersistentWebSocket:
 
 
 class WebsocketProvider(JSONBaseProvider):
-    logger = logging.getLogger("web3fsnpy.providers.WebsocketProvider")
+    logger = logging.getLogger("web3.providers.WebsocketProvider")
     _loop = None
 
     def __init__(

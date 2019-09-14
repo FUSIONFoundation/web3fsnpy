@@ -14,17 +14,17 @@ from hexbytes import (
 )
 
 from ens import ENS
-from web3fsnpy._utils.abi import (
+from web3._utils.abi import (
     map_abi_data,
 )
-from web3fsnpy._utils.decorators import (
+from web3._utils.decorators import (
     combomethod,
     deprecated_for,
 )
-from web3fsnpy._utils.empty import (
+from web3._utils.empty import (
     empty,
 )
-from web3fsnpy._utils.encoding import (
+from web3._utils.encoding import (
     hex_encode_abi_type,
     to_bytes,
     to_hex,
@@ -32,16 +32,16 @@ from web3fsnpy._utils.encoding import (
     to_text,
     to_json,
 )
-from web3fsnpy._utils.module import (
+from web3._utils.module import (
     attach_modules,
 )
-from web3fsnpy._utils.normalizers import (
+from web3._utils.normalizers import (
     abi_ens_resolver,
 )
-from web3fsnpy.fsn import (
-    Fsn,
+from web3.eth import (
+    Eth,
 )
-from web3fsnpy.geth import (
+from web3.geth import (
     Geth,
     GethAdmin,
     GethMiner,
@@ -49,43 +49,43 @@ from web3fsnpy.geth import (
     GethShh,
     GethTxPool,
 )
-from web3fsnpy.iban import (
+from web3.iban import (
     Iban,
 )
-from web3fsnpy.manager import (
+from web3.manager import (
     RequestManager as DefaultRequestManager,
 )
-from web3fsnpy.net import (
+from web3.net import (
     Net,
 )
-from web3fsnpy.parity import (
+from web3.parity import (
     Parity,
     ParityPersonal,
     ParityShh,
 )
-from web3fsnpy.providers.eth_tester import (
+from web3.providers.eth_tester import (
     EthereumTesterProvider,
 )
-from web3fsnpy.providers.ipc import (
+from web3.providers.ipc import (
     IPCProvider,
 )
-from web3fsnpy.providers.rpc import (
+from web3.providers.rpc import (
     HTTPProvider,
 )
-from web3fsnpy.providers.websocket import (
+from web3.providers.websocket import (
     WebsocketProvider,
 )
-from web3fsnpy.testing import (
+from web3.testing import (
     Testing,
 )
-from web3fsnpy.version import (
+from web3.version import (
     Version,
 )
 
 
 def get_default_modules():
     return {
-        "fsn": (Fsn,),
+        "eth": (Eth,),
         "net": (Net,),
         "version": (Version,),
         "parity": (Parity, {
@@ -103,7 +103,7 @@ def get_default_modules():
     }
 
 
-class Web3Fsn:
+class Web3:
     # Providers
     HTTPProvider = HTTPProvider
     IPCProvider = IPCProvider
@@ -156,18 +156,18 @@ class Web3Fsn:
 
     @property
     def clientVersion(self):
-        return self.manager.request_blocking("web3fsnpy_clientVersion", [])
+        return self.manager.request_blocking("web3_clientVersion", [])
 
     @property
     def api(self):
-        from web3fsnpy import __version__
+        from web3 import __version__
         return __version__
 
     @staticmethod
     @deprecated_for("keccak")
     @apply_to_return_value(HexBytes)
     def sha3(primitive=None, text=None, hexstr=None):
-        return Web3Fsn.keccak(primitive, text, hexstr)
+        return Web3.keccak(primitive, text, hexstr)
 
     @staticmethod
     @apply_to_return_value(HexBytes)
@@ -242,6 +242,6 @@ class Web3Fsn:
             )
 
     def enable_unstable_package_management_api(self):
-        from web3fsnpy.pm import PM
+        from web3.pm import PM
         if not hasattr(self, '_pm'):
             PM.attach(self, '_pm')

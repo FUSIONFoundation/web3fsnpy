@@ -7,7 +7,7 @@ import socket
 import sys
 import threading
 
-from web3fsnpy._utils.threads import (
+from web3._utils.threads import (
     Timeout,
 )
 
@@ -24,7 +24,7 @@ except ImportError:
 def get_ipc_socket(ipc_path, timeout=0.1):
     if sys.platform == 'win32':
         # On Windows named pipe is used. Simulate socket with it.
-        from web3fsnpy._utils.windows import NamedPipe
+        from web3._utils.windows import NamedPipe
 
         return NamedPipe(ipc_path)
     else:
@@ -187,7 +187,7 @@ def get_dev_ipc_path():
 
 
 class IPCProvider(JSONBaseProvider):
-    logger = logging.getLogger("web3fsnpy.providers.IPCProvider")
+    logger = logging.getLogger("web3.providers.IPCProvider")
     _socket = None
 
     def __init__(self, ipc_path=None, timeout=10, *args, **kwargs):

@@ -49,13 +49,13 @@ from eth_utils.toolz import (
     pipe,
 )
 
-from web3fsnpy._utils.ens import (
+from web3._utils.ens import (
     is_ens_name,
 )
-from web3fsnpy._utils.formatters import (
+from web3._utils.formatters import (
     recursive_map,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     FallbackNotFound,
 )
 

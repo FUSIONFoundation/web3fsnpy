@@ -16,7 +16,7 @@ from eth_utils.toolz import (
     dissoc,
 )
 
-from web3fsnpy._utils.decorators import (
+from web3._utils.decorators import (
     reject_recursive_repeats,
 )
 

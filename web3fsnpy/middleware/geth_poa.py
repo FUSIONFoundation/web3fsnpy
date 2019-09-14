@@ -9,7 +9,7 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy.middleware.formatting import (
+from web3.middleware.formatting import (
     construct_formatting_middleware,
 )
 

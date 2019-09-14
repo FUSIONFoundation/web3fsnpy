@@ -6,7 +6,7 @@ counter = itertools.count()
 INVOCATIONS_BEFORE_RESULT = 5
 
 
-def unmined_receipt_simulator_middleware(make_request, web3fsnpy):
+def unmined_receipt_simulator_middleware(make_request, web3):
     receipt_counters = collections.defaultdict(itertools.count)
 
     def middleware(method, params):

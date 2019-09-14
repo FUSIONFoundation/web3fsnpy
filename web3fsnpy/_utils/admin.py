@@ -1,11 +1,11 @@
-from web3fsnpy.method import (
+from web3.method import (
     DeprecatedMethod,
     Method,
     default_root_munger,
 )
 
 
-def admin_start_params_munger(module, host='localhost', port='8546', cors='', apis='eth,net,web3fsnpy'):
+def admin_start_params_munger(module, host='localhost', port='8546', cors='', apis='eth,net,web3'):
     return (host, port, cors, apis)
 
 

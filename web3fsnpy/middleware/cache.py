@@ -4,13 +4,13 @@ import time
 
 import lru
 
-from web3fsnpy._utils.caching import (
+from web3._utils.caching import (
     generate_cache_key,
 )
 
 SIMPLE_CACHE_RPC_WHITELIST = {
-    'web3fsnpy_clientVersion',
-    'web3fsnpy_sha3',
+    'web3_clientVersion',
+    'web3_sha3',
     'net_version',
     # 'net_peerCount',
     # 'net_listening',
@@ -85,7 +85,7 @@ def construct_simple_cache_middleware(
         ``response`` and returns a boolean as to whether the response should be
         cached.
     """
-    def simple_cache_middleware(make_request, web3fsnpy):
+    def simple_cache_middleware(make_request, web3):
         cache = cache_class()
         lock = threading.Lock()
 
@@ -116,8 +116,8 @@ _simple_cache_middleware = construct_simple_cache_middleware(
 
 
 TIME_BASED_CACHE_RPC_WHITELIST = {
-    # 'web3fsnpy_clientVersion',
-    # 'web3fsnpy_sha3',
+    # 'web3_clientVersion',
+    # 'web3_sha3',
     # 'net_version',
     # 'net_peerCount',
     # 'net_listening',
@@ -184,7 +184,7 @@ def construct_time_based_cache_middleware(
         ``response`` and returns a boolean as to whether the response should be
         cached.
     """
-    def time_based_cache_middleware(make_request, web3fsnpy):
+    def time_based_cache_middleware(make_request, web3):
         cache = cache_class()
         lock = threading.Lock()
 
@@ -226,8 +226,8 @@ _time_based_cache_middleware = construct_time_based_cache_middleware(
 
 
 BLOCK_NUMBER_RPC_WHITELIST = {
-    # 'web3fsnpy_clientVersion',
-    # 'web3fsnpy_sha3',
+    # 'web3_clientVersion',
+    # 'web3_sha3',
     # 'net_version',
     # 'net_peerCount',
     # 'net_listening',
@@ -314,7 +314,7 @@ def construct_latest_block_based_cache_middleware(
         a new block when the last seen latest block is older than the average
         block time.
     """
-    def latest_block_based_cache_middleware(make_request, web3fsnpy):
+    def latest_block_based_cache_middleware(make_request, web3):
         cache = cache_class()
         block_info = {}
 
@@ -336,12 +336,12 @@ def construct_latest_block_based_cache_middleware(
                 # measured by blocks is greater than or equal to the number of
                 # blocks sampled then we need to recompute the average block
                 # time.
-                latest_block = web3fsnpy.eth.getBlock('latest')
+                latest_block = web3.eth.getBlock('latest')
                 ancestor_block_number = max(
                     0,
                     latest_block['number'] - average_block_time_sample_size,
                 )
-                ancestor_block = web3fsnpy.eth.getBlock(ancestor_block_number)
+                ancestor_block = web3.eth.getBlock(ancestor_block_number)
                 sample_size = latest_block['number'] - ancestor_block_number
 
                 block_info[AVG_BLOCK_SAMPLE_SIZE_KEY] = sample_size
@@ -359,10 +359,10 @@ def construct_latest_block_based_cache_middleware(
 
                 # latest block is too old so update cache
                 if time_since_latest_block > avg_block_time:
-                    block_info['latest_block'] = web3fsnpy.eth.getBlock('latest')
+                    block_info['latest_block'] = web3.eth.getBlock('latest')
             else:
                 # latest block has not been fetched so we fetch it.
-                block_info['latest_block'] = web3fsnpy.eth.getBlock('latest')
+                block_info['latest_block'] = web3.eth.getBlock('latest')
 
         lock = threading.Lock()
 

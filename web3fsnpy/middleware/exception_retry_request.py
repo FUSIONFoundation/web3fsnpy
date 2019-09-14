@@ -71,7 +71,7 @@ def check_if_retry_on_failure(method):
         return False
 
 
-def exception_retry_middleware(make_request, web3fsnpy, errors, retries=5):
+def exception_retry_middleware(make_request, web3, errors, retries=5):
     """
     Creates middleware that retries failed HTTP requests. Is a default
     middleware for HTTPProvider.
@@ -91,9 +91,9 @@ def exception_retry_middleware(make_request, web3fsnpy, errors, retries=5):
     return middleware
 
 
-def http_retry_request_middleware(make_request, web3fsnpy):
+def http_retry_request_middleware(make_request, web3):
     return exception_retry_middleware(
         make_request,
-        web3fsnpy,
+        web3,
         (ConnectionError, HTTPError, Timeout, TooManyRedirects)
     )

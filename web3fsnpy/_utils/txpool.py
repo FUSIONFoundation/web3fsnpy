@@ -1,4 +1,4 @@
-from web3fsnpy.method import (
+from web3.method import (
     Method,
 )
 

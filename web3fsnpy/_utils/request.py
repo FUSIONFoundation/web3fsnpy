@@ -1,7 +1,7 @@
 import lru
 import requests
 
-from web3fsnpy._utils.caching import (
+from web3._utils.caching import (
     generate_cache_key,
 )
 

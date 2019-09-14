@@ -31,22 +31,22 @@ from eth_utils.toolz import (
     valfilter,
 )
 
-import web3fsnpy
-from web3fsnpy._utils.encoding import (
+import web3
+from web3._utils.encoding import (
     encode_single_packed,
     hexstr_if_str,
     to_bytes,
 )
-from web3fsnpy._utils.formatters import (
+from web3._utils.formatters import (
     apply_formatter_if,
 )
-from web3fsnpy._utils.normalizers import (
+from web3._utils.normalizers import (
     BASE_RETURN_NORMALIZERS,
 )
-from web3fsnpy.datastructures import (
+from web3.datastructures import (
     AttributeDict,
 )
-from web3fsnpy.exceptions import (
+from web3.exceptions import (
     InvalidEventABI,
     LogTopicError,
     MismatchedABI,
@@ -354,8 +354,8 @@ class EventFilterBuilder:
         return valfilter(lambda x: x is not None, params)
 
     def deploy(self, w3):
-        if not isinstance(w3, web3fsnpy.Web3Fsn):
-            raise ValueError("Invalid web3fsnpy argument: got: {0}".format(repr(w3)))
+        if not isinstance(w3, web3.Web3):
+            raise ValueError("Invalid web3 argument: got: {0}".format(repr(w3)))
 
         for arg in self.args.values():
             arg._immutable = True

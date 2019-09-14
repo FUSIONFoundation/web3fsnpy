@@ -23,14 +23,14 @@ from hexbytes import (
     HexBytes,
 )
 
-from web3fsnpy._utils.abi import (
+from web3._utils.abi import (
     is_length,
 )
-from web3fsnpy._utils.encoding import (
+from web3._utils.encoding import (
     hexstr_if_str,
     to_hex,
 )
-from web3fsnpy._utils.formatters import (
+from web3._utils.formatters import (
     apply_formatter_at_index,
     apply_formatter_if,
     apply_formatter_to_array,
