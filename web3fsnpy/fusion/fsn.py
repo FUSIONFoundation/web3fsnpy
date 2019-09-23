@@ -1,10 +1,19 @@
 from eth_account import (
     Account,
+) 
+
+#from eth_account.account import (
+    #signTransaction,
+#)
+
+from web3.middleware import (
+    construct_sign_and_send_raw_middleware,
 )
+
 from eth_utils import (
     add_0x_prefix,
     apply_to_return_value,
-    from_wei,
+    from_wei,    
     is_address,
     is_checksum_address,
     keccak as eth_utils_keccak,
@@ -26,8 +35,42 @@ from eth_utils.toolz import (
     assoc,
     merge,
 )
+
+from eth_keys import (
+    KeyAPI,
+    keys,
+)
+
 from hexbytes import (
     HexBytes,
+)
+
+from web3.datastructures import (
+    AttributeDict,
+)
+
+from web3.manager import (
+    RequestManager as DefaultRequestManager,
+)
+
+from web3._utils.module import (
+    attach_modules,
+)
+from web3.net import (
+    Net,
+)
+from web3.parity import (
+    Parity,
+    ParityPersonal,
+    ParityShh,
+)
+from web3.geth import (
+    Geth,
+    GethAdmin,
+    GethMiner,
+    GethPersonal,
+    GethShh,
+    GethTxPool,
 )
 
 from web3._utils.formatters import (
@@ -51,16 +94,27 @@ from web3._utils.encoding import (
 from web3._utils.threads import (
     Timeout,
 )
-from web3.fusion.fsn_transactions import (
-    fill_transaction_defaults,
-)
+
 from web3.fusion.exceptions import (
     NotRawTransaction,
+    _notConnected,
+    BadSendingAddress,
+    PrivateKeyNotSet,
 )
-from web3.fusion import (
-    fsn_assets,
+
+from web3.fusion.fsn_transactions import (
+    fill_transaction_defaults,
+    SignTx,
+)
+
+from web3.fusion.fsn_assets import (
+    buildGenAssetTx,
+    buildSendAssetTx,
+    buildIncAssetTx,
+    buildDecAssetTx,
 )
 from web3.fusion.fsn_utils import (
+    get_default_modules,
     is_named_block,
     is_hexstr,
     block_number_formatter,
@@ -72,6 +126,8 @@ import web3.eth
 
 class Fsn(web3.eth.Eth):
     
+   
+    RequestManager = DefaultRequestManager
 
     # Encoding and Decoding
     toBytes = staticmethod(to_bytes)
@@ -88,9 +144,14 @@ class Fsn(web3.eth.Eth):
     isAddress = staticmethod(is_address)
     isChecksumAddress = staticmethod(is_checksum_address)
     toChecksumAddress = staticmethod(to_checksum_address)
+    
+    acct = None            # This is the Fusion account.
 
 
     def __init__(self, linkToChain):
+        
+        
+        gotprivatekey = False
 
         for key, val in linkToChain.items():
             if key == 'network':
@@ -100,22 +161,64 @@ class Fsn(web3.eth.Eth):
                 if val not in ['WebSocket', 'HTTP', 'IPC']:
                     raise TypeError('Error in linkToChain dictionary: Found ',val, 'but provider must be one of WebSocket, HTTP, or IPC')
             elif key == 'gateway':
-                pass
+                pass          # Can be 'default'
+            elif key == 'private_key':
+                if is_string(val) and len(val) > 0:
+                    private_key = val
+                    if private_key[0:1] == '0x':
+                        private_key = remove_0x_prefix(private_key)
+                    gotprivatekey = True
+                    self.acct = Account.from_key(private_key)
             else:
                 raise TypeError('Error in linkToChain dictionary: Illegal key ',key )
+            
         
-        if linkToChain['provider'] == 'WebSocket':
-            self.web3 = Web3(Web3.WebsocketProvider(linkToChain['gateway']))
-        elif linkToChain['provider'] == 'HTTP':
-            self.web3 = Web3(Web3.HTTPProvider(linkToChain['gateway']))
-        else:
-            self.web3 = Web3(Web3.IPCProvider(linkToChain['gateway']))
         
+            
         if linkToChain['network'] == 'testnet':
             self.__defaultChainId = 46688
         elif linkToChain['network'] == 'mainnet':
             self.__defaultChainId = 32659
+            
+            
+        if linkToChain['gateway'] == 'default':
+            if linkToChain['network'] == 'testnet':
+                if linkToChain['provider'] == 'WebSocket':
+                    linkToChain['gateway'] = 'wss://testnetpublicgateway1.fusionnetwork.io:10001'
+                elif linkToChain['provider'] == 'HTTP':
+                    linkToChain['gateway'] = 'https://testnetpublicgateway1.fusionnetwork.io:10000/'
+                elif linkToChain['provider'] == 'IPC':
+                    raise TypeError('Error: Cannot specify a default gateway for IPC')
+            elif linkToChain['network'] == 'mainnet':
+                if linkToChain['provider'] == 'WebSocket':
+                    linkToChain['gateway'] = 'wss://mainnetpublicgateway1.fusionnetwork.io:10001'
+                elif linkToChain['provider'] == 'HTTP':
+                    linkToChain['gateway'] = 'https://mainnetpublicgateway1.fusionnetwork.io:10000/'
+                elif linkToChain['provider'] == 'IPC':
+                    raise TypeError('Error: Cannot specify a default gateway for IPC')
         
+
+        print('Connecting to : ',linkToChain['network'],linkToChain['gateway'], ' with the ',linkToChain['provider'], ' method')
+        
+        if linkToChain['provider'] == 'WebSocket':
+            self.manager = self.RequestManager(Web3.WebsocketProvider(linkToChain['gateway']))
+            self.web3 = Web3(Web3.WebsocketProvider(linkToChain['gateway']))
+        elif linkToChain['provider'] == 'HTTP':
+            self.manager = self.RequestManager(Web3.HTTPProvider(linkToChain['gateway']))
+            self.web3 = Web3(Web3.HTTPProvider(linkToChain['gateway']))
+        else:
+            self.manager = self.RequestManager(Web3.IPCProvider(linkToChain['gateway']))
+            self.web3 = Web3(Web3.IPCProvider(linkToChain['gateway']))
+            
+        modules = get_default_modules()
+        attach_modules(self, modules)
+        
+        defaultAccount = None      
+        
+        if gotprivatekey:
+            #print('Adding account to list')
+            self.addAccount()
+            
         
         
         self.consts = {
@@ -139,7 +242,7 @@ class Fsn(web3.eth.Eth):
             
             "EMPTY_HASH":                            "0x0000000000000000000000000000000000000000000000000000000000000000",
             
-            "BN":                                    18446744073709551615,
+            "BN":                                    18446744073709551615,   # Used in time locks to signify infinity
         }
             
         self.tokens = {
@@ -147,23 +250,34 @@ class Fsn(web3.eth.Eth):
             "FSN":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         }
 
-        
-
+        self.__defaultGenAssetGasPrice  = 0.0000001            # Default gasPrice in FSN for genAsset
+        self.__defaultSendAssetGasPrice = 0.000000002          # Default gasPrice in FSN for sendAsset
+        self.__defaultIncDecAssetGasPrice  = 0.000000003          # Default gasPrice in FSN for incAsset, or decAsset
         
         
 
 
     @property
     def chainId(self):
-    #    return self.web3fsnpy.manager.request_blocking("eth_chainId", [])
+    #    return self.web3.manager.request_blocking("eth_chainId", [])
         return self.__defaultChainId
         
     def BN(self):
         return self.consts['BN']
 
     def fill_tx_defaults(self, transaction):
-        return fill_transaction_defaults(self, transaction,self.__defaultChainId)
-
+        return fill_transaction_defaults(transaction,self.__defaultChainId)
+    
+    def isConnected(self):
+        try:
+            self.blockNumber
+            return True
+        except(_notConnected):
+            return False
+     
+    def addAccount(self):
+        self.web3.middleware_onion.add(construct_sign_and_send_raw_middleware(self.acct))
+        self.defaultAccount = self.acct.address
 
     def getBalance(self, account, assetId, block_identifier=None):
         if is_integer(account):
@@ -171,7 +285,7 @@ class Fsn(web3.eth.Eth):
         if not is_address(account):
             raise TypeError(
                 'The account does not have a valid address format'
-        )
+            )
         if not is_hexstr(assetId):
             raise TypeError(
                 'assetId must be a hex string'
@@ -185,6 +299,22 @@ class Fsn(web3.eth.Eth):
             "fsn_getBalance",
             [assetId, account, block_identifier],
         )
+    
+    
+    def signAndTransmit(self, Tx_dict):
+        
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        
+        Tx_signed = SignTx(Tx_dict, self.acct)    
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_sendRawTransaction",
+            [Tx_signed],
+        )
+        return TxHash
 
 
     def buyTicket(self, account):
@@ -230,62 +360,272 @@ class Fsn(web3.eth.Eth):
             "fsn_totalNumberOfTicketsByAddress",
             [account, block_identifier],
         )
-
-    def createRawAsset(self, raw_transaction):
-        if isinstance(raw_transaction,dict):
-            raise NotRawTransaction(
-                'This looks like a dict and not like a signed raw transaction'
+    
+    def sendTransaction(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
             )
-        TxHash =  self.web3.manager.request_blocking(
-            "fsntx_genRawAsset",
-            [raw_transaction],
-        )
-        return TxHash
-        
-    def createAsset(self, transaction):
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
         if not isinstance(transaction,dict):
             raise TypeError(
                 'This does not look like a dict of a transaction'
             )
-                
-        Tx =  fsn_assets.fsn_asset_create(transaction)
-            
-        print('Is the endpoint alive? : ',self.web3fsnpy.manager.provider.isConnected())
-        #TxHash = self.web3fsnpy.manager._make_request("fsntx_genAsset", [Tx])
-        #TxHash = self.web3fsnpy.manager.request_blocking("fsntx_genAsset", [Tx])
-        #print('Return from request = ', TxHash)
-        json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
-            
-        print(json_rpc)
-        #return TxHash
-
-
-    def sendRawAsset(self, raw_transaction):
-        if isinstance(raw_transaction,dict):
-            raise NotRawTransaction(
-                'This looks like a dict and not like a signed raw transaction'
-            )
-        TxHash =  self.web3.manager.request_blocking(
-            "fsntx_sendRawAsset", 
-            [raw_transaction])
-        return TxHash
-
-
-    def sendAsset(self, account, transaction):
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This transaction is not a dict'
-            )
-        TxHash =  self.web3.manager.request_blocking(
-            "fsntx_sendAsset",
+        
+        return self.web3.manager.request_blocking(
+            "eth_sendTransaction",
             [transaction],
         )
+
+    def createRawAsset(self, transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the createRawAsset method'
+            )
+            
+        Tx =  buildGenAssetTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildGenAssetTx",
+            [Tx],
+        )
+        Tx_dict = dict(Tx)
+        
+        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultGenAssetGasPrice, 'ether'))    #  Fusion gas price for GenAsset
+        Tx_dict['chainId'] = self.__defaultChainId
+        
+     
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+     
+ 
+ 
+    def createAsset(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the createAsset method'
+            )
+        
+        
+        Tx =  buildGenAssetTx(transaction, self.__defaultChainId)
+      
+        print('\n',Tx,'\n')
+
+        TxHash = self.web3.manager.request_blocking(
+            "fsntx_genAsset", 
+            [Tx]
+        )
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
+        #print(json_rpc)
         return TxHash
+
+
+
+    def incRawAsset(self, transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the incRawAsset method'
+            )
+            
+        Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildIncAssetTx",
+            [Tx],
+        )
+        Tx_dict = dict(Tx)
+        
+        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for GenAsset
+        Tx_dict['chainId'] = self.__defaultChainId
+        
+        
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+ 
+    def incAsset(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the incAsset method'
+            )
+        
+        
+        Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
+      
+        print('\n',Tx,'\n')
+
+        TxHash = self.web3.manager.request_blocking(
+            "fsntx_incAsset", 
+            [Tx]
+        )
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
+        #print(json_rpc)
+        return TxHash
+ 
+ 
+    def decRawAsset(self, transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the decRawAsset method'
+            )
+            
+        Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildDecAssetTx",
+            [Tx],
+        )
+        Tx_dict = dict(Tx)
+        
+        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for decAsset
+        Tx_dict['chainId'] = self.__defaultChainId
+        
+     
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+ 
+  
+    def decAsset(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the decAsset method'
+            )
+        
+        
+        Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
+      
+        print('\n',Tx,'\n')
+
+        TxHash = self.web3.manager.request_blocking(
+            "fsntx_decAsset", 
+            [Tx]
+        )
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
+        #print(json_rpc)
+        return TxHash
+
+
+    def sendRawAsset(self, transaction, prepareOnly=False):
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the sendAsset method'
+            )
+        
+        
+        Tx = buildSendAssetTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildSendAssetTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultSendAssetGasPrice, 'ether'))    #  Fusion gas price for SendAsset
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+    def sendAsset(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the sendAsset method'
+            )
+        
+        
+        Tx =  buildSendAssetTx(transaction, self.__defaultChainId)
+        
+        print('\n',Tx,'\n')
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendAsset",Tx)
+        #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_sendAsset",
+            [Tx],
+        )
+        return TxHash
+
         
     def getAssetId(self,asset_name):
         if not is_string(asset_name):
             raise TypeError(
-            'asset_name must be the name of an asset as a string'   
+            'In getAssetId, the variable asset_name must be the name of an asset as a string'   
             )
         for key, tokenId in self.tokens.items():
             if key == asset_name:

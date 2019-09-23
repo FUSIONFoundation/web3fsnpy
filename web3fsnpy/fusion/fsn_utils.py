@@ -42,6 +42,29 @@ from eth_utils import (
     keccak,
 )
 
+from web3.parity import (
+    Parity,
+    ParityPersonal,
+    ParityShh,
+)
+from web3.net import (
+    Net,
+)
+from web3.testing import (
+    Testing,
+)
+from web3.version import (
+    Version,
+)
+from web3.geth import (
+    Geth,
+    GethAdmin,
+    GethMiner,
+    GethPersonal,
+    GethShh,
+    GethTxPool,
+)
+
 from web3._utils.validation import (
     assert_one_val,
 )
@@ -95,6 +118,24 @@ from web3.datastructures import (
     AttributeDict,
 )
 
+def get_default_modules():
+    return {
+        "net": (Net,),
+        "version": (Version,),
+        "parity": (Parity, {
+            "personal": (ParityPersonal,),
+            "shh": (ParityShh,),
+        }),
+        "geth": (Geth, {
+            "admin": (GethAdmin,),
+            "miner": (GethMiner,),
+            "personal": (GethPersonal,),
+            "shh": (GethShh,),
+            "txpool": (GethTxPool,),
+        }),
+        "testing": (Testing,),
+    }
+
 
 def bytes_to_ascii(value):
     return codecs.decode(value, 'ascii')
@@ -129,6 +170,19 @@ def to_hexbytes(self, num_bytes, val, variable_length=False):
                 result, len(result), num_bytes
             )
         )
+
+
+@curry
+def to_hex_if_integer_or_ascii(val):
+    if isinstance(val, int):
+        result = hex(val)
+    elif is_hex(val):
+        result = val
+    elif isinstance(val, str):
+        result = hex(int(val))
+    else:
+        raise TypeError("Cannot convert %r to hex" % val)
+    return result
 
 
 def is_named_block(value):

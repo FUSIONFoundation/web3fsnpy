@@ -5,9 +5,8 @@ from  web3.fusion import Fsn
 
 linkToChain = {
     'network'     : 'mainnet',     # One of 'testnet', or 'mainnet'
-    'provider'    : 'WebSocket',   # One of 'WebSocket', 'HTTP', or 'IPC'
-    'gateway'     : 'wss://mainnetpublicgateway1.fusionnetwork.io:10001',
-    #'gateway'     : 'wss://testnetpublicgateway1.fusionnetwork.io:10001',
+    'provider'    : 'HTTP',   # One of 'WebSocket', 'HTTP', or 'IPC'
+    'gateway'     : 'default',
 }
 
 web3fsn = Fsn(linkToChain)
@@ -18,9 +17,9 @@ asset_name = 'FSN'
 blockNo = 'latest'
 #
 #
-asset_Id = web3fsn.getAssetId(asset_name)
+asset_Id = web3fsn.getAssetId(asset_name)   # Or you can put the asset ID as a hex number here if it is not a 'standard' asset.
 #
-pub_key = '0x432baf0AB7261819fCf587De7e6D68f902E43195'
+pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'
 #
 bal = web3fsn.getBalance(pub_key, asset_Id, blockNo)
 #

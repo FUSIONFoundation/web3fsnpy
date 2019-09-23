@@ -4,10 +4,9 @@
 from  web3.fusion import Fsn
 
 linkToChain = {
-    'network'     : 'mainnet',     # One of 'testnet', or 'mainnet'
+    'network'     : 'testnet',     # One of 'testnet', or 'mainnet'
     'provider'    : 'WebSocket',   # One of 'WebSocket', 'HTTP', or 'IPC'
-    'gateway'     : 'wss://mainnetpublicgateway1.fusionnetwork.io:10001',
-    #'gateway'     : 'wss://testnetpublicgateway1.fusionnetwork.io:10001',
+    'gateway'     : 'default',
 }
 
 web3fsn = Fsn(linkToChain)
