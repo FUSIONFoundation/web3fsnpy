@@ -1,43 +1,33 @@
 #!/usr/bin/env python3
-"""
- Demonstrate sending FSN tokens from one account to another
-"""
+#
+# Demonstrate sending FSN tokens from one account to another
 #
 #
 import os
 import sys
-#import pdb ; pdb.set_trace()
-
+from getpass import getpass
 
 
 #web3fusion
 from  web3.fusion import Fsn
 
-#   Remember to set your environment variables to run this test
-#    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
-
-
-
 linkToChain = {
-    'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'HTTP',                             # One of 'WebSocket', 'HTTP', or 'IPC'
-    'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
-    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read, or signed raw transactions
+    'network'     : 'testnet',     # One of 'testnet', or 'mainnet'
+    'provider'    : 'HTTP',   # One of 'WebSocket', 'HTTP', or 'IPC'
+    'gateway'     : 'default',
 }
-
-#
 
 web3fsn = Fsn(linkToChain)
 
-#pdb.set_trace()
-
-if not web3fsn.isConnected():
-    raise (
-        'Did not connect to gateway ',
-        linkToChain['gateway']
-    )
-
 #
+#
+# Don't leave a private key hardcoded, so you could use an environmental variable to store it
+#
+try:  
+   private_key_sender = os.environ["FSN_PRIVATE_KEY"]
+except KeyError: 
+   print('Set environment variable FSN_PRIVATE_KEY to be private key of sending wallet (without 0x prefix)')
+   sys.exit(1)
 
 
 pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
@@ -64,9 +54,14 @@ transaction = {
 tx = web3fsn.fill_tx_defaults(transaction)
 
 #print(tx)
+
+# Sign the transaction if you want to send a raw transaction, so that it can be signed offline for security.
+
+signed_tx = web3fsn.account.sign_transaction(tx,private_key_sender)
+
+# Send the raw transaction (i.e. signed). The signed_tx can be copied from the offline signing and now sent securely
+TxHash = web3fsn.sendRawTransaction(signed_tx.rawTransaction)
 #
-# Send an unsigned transaction 
-TxHash = web3fsn.sendTransaction(tx)
 #
 print('TxHash = ',web3fsn.toHex(TxHash))
 #

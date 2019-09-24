@@ -3,7 +3,7 @@
 # Demonstrate getting asset information
 #
 #
-from web3fsnpy import Web3Fsn
+from  web3.fusion import Fsn
 import os
 import sys
 from eth_utils import (
@@ -12,21 +12,24 @@ from eth_utils import (
 from datetime import datetime, timedelta
 #import pdb ; pdb.set_trace()
 
-testnet = "wss://testnetpublicgateway1.fusionnetwork.io:10001"
-mainnet = "wss://mainnetpublicgateway1.fusionnetwork.io:10001"
-httptestnet = "http://testnetpublicgateway1.fusionnetwork.io:10000"
-#
-web3fsn = Web3Fsn(Web3Fsn.WebsocketProvider(testnet))
-#web3fsn = Web3Fsn(Web3Fsn.HTTPProvider(httptestnet))
+linkToChain = {
+    'network'     : 'mainnet',     # One of 'testnet', or 'mainnet'
+    'provider'    : 'WebSocket',   # One of 'WebSocket', 'HTTP', or 'IPC'
+    'gateway'     : 'default',
+}
+
+web3fsn = Fsn(linkToChain)
+
+
 #
 pub_key = '0x432baf0AB7261819fCf587De7e6D68f902E43195'
 asset_name = 'FSN'
 blockNo = 'latest'
 #
 #
-asset_Id = web3fsn.fsn.getAssetId(asset_name)
+asset_Id = web3fsn.getAssetId(asset_name)
 #
-asset_timelocks = web3fsn.fsn.getTimeLockBalance(asset_Id, pub_key, blockNo)
+asset_timelocks = web3fsn.getTimeLockBalance(asset_Id, pub_key, blockNo)
 #
 print(asset_timelocks,'\n')
 #
@@ -41,7 +44,7 @@ for i in range(n_items):
     tm = asset_timelocks.Items[i].StartTime
     print('Start Time :   ',datetime.fromtimestamp(tm).strftime('%c'))
     tm = asset_timelocks.Items[i].EndTime
-    if tm >= web3fsn.fsn.BN():
+    if tm >= web3fsn.BN():
         endtime = 'Infinity'
     else:
         endtime = datetime.fromtimestamp(tm).strftime('%c')

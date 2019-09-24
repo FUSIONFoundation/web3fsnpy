@@ -1,11 +1,96 @@
 
+from eth_utils.toolz import (
+    assoc,
+    curry,
+    merge,
+)
+
+from eth_account._utils.signing import (
+    sign_transaction_hash,
+    sign_message_hash,
+    to_eth_v,
+)
+from cytoolz import (
+    pipe,
+)
+
+from eth_utils.curried import (
+    apply_formatters_to_sequence,
+    is_address,
+    text_if_str,
+    to_checksum_address,
+)
+
+
+from web3._utils.formatters import (
+    apply_formatter_at_index,
+    apply_formatter_if,
+    apply_formatter_to_array,
+    apply_formatters_to_dict,
+    apply_one_of_formatters,
+    hex_to_integer,
+    integer_to_hex,
+    is_array_of_dicts,
+    is_array_of_strings,
+    remove_key_if,
+)
+
+from web3.datastructures import (
+    AttributeDict,
+)
+
+
 from .fsn_utils import *
         
-VALID_ASSETCREATE_PARAMS = [
-    'from',
+
+
+
+GENASSET_DEFAULTS = {
+    #'description': 'Default token description'
+    'to':      '0xffffffffffffffffffffffffffffffffffffffff',
+    #'gasPrice':  '0x174876e800',
+    'gasPrice': 100000000000,
+    'gas':     90000,
+    'value':   '0x0',
+    'chainId':  None,
+}
+
+
+ASSETCREATE_FORMATTERS = {
+    'nonce': to_hex_if_integer_or_ascii,
+    'chainId': to_hex_if_integer_or_ascii,
+    'gas': to_integer_if_hex,
+    #'gasPrice': to_integer_if_hex,
+    'gasPrice': to_hex_if_integer_or_ascii,
+    'from': to_checksum_address,
+    'name': to_ascii_if_bytes,
+    'symbol': to_ascii_if_bytes,
+    'decimals': to_integer_if_hex,
+    'total': to_hex_if_integer_or_ascii,
+    'canChange': apply_formatter_if(is_integer, to_boolean),
+}
+
+VALID_GENASSETTX_PARAMS = [
+    'nonce',
+    'to',
     'gas',
     'gasPrice',
+    'value',
+    'chainId',
+    'name',
+    'symbol',
+    'decimals',
+    'total',
+    'description',
+    'canChange',
+]
+
+REQUIRED_GENASSETTX_PARAMS = [
     'nonce',
+    'to',
+    'gas',
+    'gasPrice',
+    'value',
     'chainId',
     'name',
     'symbol',
@@ -14,181 +99,220 @@ VALID_ASSETCREATE_PARAMS = [
     'canChange',
 ]
 
-ASSETCREATE_DEFAULTS = {
-    'nonce':     None,
-    'chainId':   None,
-    'gas':       300000,
-    'gasPrice':  2000000000,
-}
 
-
-ASSETCREATE_FORMATTERS = {
-    'nonce': to_integer_if_hex,
-    'gas': to_integer_if_hex,
-    'gasPrice': to_integer_if_hex,
-    'from': to_checksum_address,
-    #'r': to_hexbytes(32, variable_length=True),
-    #'s': to_hexbytes(32, variable_length=True),
-    #'hash': to_hexbytes(32),
-    #'v': apply_formatter_if(is_not_null, to_integer_if_hex),
-    'name': to_ascii_if_bytes,
-    'symbol': to_ascii_if_bytes,
-    'decimals': to_integer_if_hex,
-    'total': apply_formatter_if(is_not_null, to_integer_if_hex),
-    'canChange': apply_formatter_if(is_integer, to_boolean),
-}
-
-assetcreate_formatter = apply_formatters_to_dict(ASSETCREATE_FORMATTERS)
-
-
-
-def fsn_asset_create(transaction_dict):
-    """
-            Create a Fusion asset suitable for broadcast.
-    """
+def buildGenAssetTx(transaction, defaultChainId):
+    defaults = {}
+    alreadygot = {}
+    for key, default_val in GENASSET_DEFAULTS.items():
+        if key not in transaction:
+            defaults[key] = default_val
+    for key, val in transaction.items():
+        if key in VALID_GENASSETTX_PARAMS:
+            alreadygot[key] = transaction[key]
             
-    assert_valid_asset_create_params(transaction_dict)
-        
-    filled_transaction = pipe(
-        transaction_dict,
-        dict,
-        partial(merge, ASSETCREATE_DEFAULTS),
-        chain_id_to_v,
-        apply_formatters_to_dict(ASSETCREATE_FORMATTERS),
-    )
-
-    return filled_transaction
+    transaction_merged = merge(defaults, alreadygot)
+    transaction_merged['chainId'] = defaultChainId
+    transaction_new = unsigned_assetcreate_formatter(transaction_merged)
+    
+    assert_check_gen_asset_params(transaction_new)
+    
+    return transaction_new
 
 
-def sign_asset_create(transaction_dict, private_key):
-    """
-    Sign an assetCreate using a local private key. Produces signature details
-    and the hex-encoded transaction suitable for broadcast.
-    """
-        
-        
-    if not isinstance(transaction_dict, dict):
-        raise TypeError("transaction_dict must be dict-like, got %r" % transaction_dict)
+unsigned_assetcreate_formatter = apply_formatters_to_dict(ASSETCREATE_FORMATTERS)
 
-    account = Account.from_key(private_key)
-
-    # allow from field, *only* if it matches the private key
-    if 'from' in transaction_dict:
-        if transaction_dict['from'] == account.address:
-            sanitized_transaction = dissoc(transaction_dict, 'from')
-        else:
-            raise TypeError("from field must match key's %s, but it was %s" % (
-                account.address,
-                transaction_dict['from'],
-            ))
-    else:
-        sanitized_transaction = transaction_dict
-
-    # sign transaction
-    (
-        v,
-        r,
-        s,
-        rlp_encoded,
-    ) = sign_assetCreate_dict(private_key, sanitized_transaction)
-
-    transaction_hash = keccak(rlp_encoded)
-
-    return AttributeDict({
-        'rawTransaction': HexBytes(rlp_encoded),
-        'hash': HexBytes(transaction_hash),
-        'r': r,
-        's': s,
-        'v': v,
-    })
-
-
-
-
-def sign_assetCreate_dict(private_key, transaction_dict):
-    # generate RLP-serializable transaction, with defaults filled
-    unsigned_assetcreate = serializable_unsigned_asset_create_from_dict(transaction_dict)
-
-    assetcreate_hash = unsigned_assetcreate.hash()
-
-    # detect chain
-    if isinstance(unsigned_assetcreate, UnsignedAssetCreate):
-        chain_id = None
-    else:
-        chain_id = unsigned_assetcreate.v
-
-    # sign with private key
-    account = keys.PrivateKey(bytes.fromhex(private_key))
-    (v, r, s) = sign_transaction_hash(account, assetcreate_hash, chain_id)
-
-    # serialize transaction with rlp
-    encoded_assetcreate = encode_assetcreate(unsigned_assetcreate, vrs=(v, r, s))
-
-    return (v, r, s, encoded_assetcreate)
-
-
-def serializable_unsigned_asset_create_from_dict(assetcreate_dict):
-    assert_valid_asset_create_params(assetcreate_dict)
-    filled_transaction = pipe(
-        assetcreate_dict,
-        dict,
-        partial(merge, ASSETCREATE_DEFAULTS),
-        chain_id_to_v,
-        apply_formatters_to_dict(ASSETCREATE_FORMATTERS),
-    )
-    if 'v' in filled_transaction:
-        serializer = Transaction
-    else:
-        serializer = UnsignedAssetCreate
-    return serializer.from_dict(filled_transaction)
-
-
-
-def assert_valid_asset_create_params(assetcreate_params):
+def assert_check_gen_asset_params(assetcreate_params):
     for param in assetcreate_params:
-        if param not in VALID_ASSETCREATE_PARAMS:
+        if param not in VALID_GENASSETTX_PARAMS:
             raise ValueError('{} is not a valid asset create parameter'.format(param))
 
+    for param in REQUIRED_GENASSETTX_PARAMS:
+        if param not in assetcreate_params:
+            raise ValueError('{} is required as an asset create parameter'.format(param))
 
 
-SIGNED_ASSETCREATE_FORMATTER = {
-    'raw': HexBytes,
-    'tx': assetcreate_formatter,
+
+################################################################################################
+#  SEND ASSET
+
+
+SENDASSET_DEFAULTS = {
+    'gasPrice': 2000000000,
+    'gas':     90000,
+    'chainId':  None,
 }
 
-signed_assetcreate_formatter = apply_formatters_to_dict(SIGNED_ASSETCREATE_FORMATTER)
+SENDASSET_FORMATTERS = {
+    'from': to_checksum_address,
+    'to': to_checksum_address,
+    'nonce': to_hex_if_integer_or_ascii,
+    'chainId': to_hex_if_integer_or_ascii,
+    'gas': to_hex_if_integer_or_ascii,
+    #'gasPrice': to_integer_if_hex,
+    'gasPrice': to_hex_if_integer_or_ascii,
+    'value': to_hex_if_integer_or_ascii,
+    'asset': to_hex_if_integer_or_ascii,
+}
+
+VALID_SENDASSETTX_PARAMS = [
+    'nonce',
+    'from',
+    'to',
+    'gas',
+    'gasPrice',
+    'value',
+    'chainId',
+    'asset',
+]
+
+REQUIRED_SENDASSETTX_PARAMS = [
+    'nonce',
+    'from',
+    'to',
+    'gas',
+    'gasPrice',
+    'value',
+    'chainId',
+    'asset',
+]
 
 
-UNSIGNED_ASSETCREATE_FIELDS = (
-    ('nonce', big_endian_int),
-    ('gasPrice', big_endian_int),
-    ('gas', big_endian_int),
-    ('name', text),
-    ('symbol', text),
-    ('decimals', big_endian_int),
-    ('total', big_endian_int),
-    ('canChange', boolean),
-)
+def buildSendAssetTx(transaction, defaultChainId):
+    defaults = {}
+    alreadygot = {}
+    for key, default_val in SENDASSET_DEFAULTS.items():
+        if key not in transaction:
+            defaults[key] = default_val
+    for key, val in transaction.items():
+        if key in VALID_SENDASSETTX_PARAMS:
+            alreadygot[key] = transaction[key]
+            
+    transaction_merged = merge(defaults, alreadygot)
+    transaction_merged['chainId'] = defaultChainId
+    transaction_new = unsigned_sendasset_formatter(transaction_merged)
+    
+    assert_check_send_asset_params(transaction_new)
+    
+    return transaction_new
 
 
-def UnsignedAssetCreate(HashableRLP):
-    fields = UNSIGNED_ASSETCREATE_FIELDS
+unsigned_sendasset_formatter = apply_formatters_to_dict(SENDASSET_FORMATTERS)
 
 
 
+def assert_check_send_asset_params(sendasset_params):
+    for param in sendasset_params:
+        if param not in VALID_SENDASSETTX_PARAMS:
+            raise ValueError('{} is not a valid send asset parameter'.format(param))
 
-def AssetCreate(HashableRLP):
-    fields = UNSIGNED_ASSETCREATE_FIELDS + (
-        ('v', big_endian_int),
-        ('r', big_endian_int),
-        ('s', big_endian_int),
-    )
+    for param in REQUIRED_SENDASSETTX_PARAMS:
+        if param not in sendasset_params:
+            raise ValueError('{} is required as a send asset parameter'.format(param))
 
-def encode_assetcreate(unsigned_assetcreate, vrs):
-    (v, r, s) = vrs
-    chain_naive_assetcreate = dissoc(unsigned_assetcreate.as_dict(), 'v', 'r', 's')
-    signed_assetcreate = AssetCreate(v=v, r=r, s=s, **chain_naive_assetcreate)
-    return rlp.encode(signed_assetcreate)
+
+#############################################################################################
+#
+#   Increment and Decrement assets 
+#
+
+INCDECASSET_DEFAULTS = {
+    'gasPrice': 3000000000,
+    'gas':     90000,
+    'chainId':  None,
+}
+
+INCDECASSET_FORMATTERS = {
+    'from': to_checksum_address,
+    'to': to_checksum_address,
+    'nonce': to_hex_if_integer_or_ascii,
+    'chainId': to_hex_if_integer_or_ascii,
+    'gas': to_hex_if_integer_or_ascii,
+    #'gasPrice': to_integer_if_hex,
+    'gasPrice': to_hex_if_integer_or_ascii,
+    'value': to_hex_if_integer_or_ascii,
+    'asset': to_hex_if_integer_or_ascii,
+    'transacData': to_ascii_if_bytes,
+}
+
+VALID_INCDECASSETTX_PARAMS = [
+    'nonce',
+    'from',
+    'to',
+    'gas',
+    'gasPrice',
+    'value',
+    'chainId',
+    'asset',
+    'transacData',
+]
+
+REQUIRED_INCDECASSETTX_PARAMS = [
+    'nonce',
+    'from',
+    'to',
+    'gas',
+    'gasPrice',
+    'value',
+    'chainId',
+    'asset',
+]
+
+
+
+def buildIncAssetTx(transaction, defaultChainId):
+    defaults = {}
+    alreadygot = {}
+    for key, default_val in INCDECASSET_DEFAULTS.items():
+        if key not in transaction:
+            defaults[key] = default_val
+    for key, val in transaction.items():
+        if key in VALID_INCDECASSETTX_PARAMS:
+            alreadygot[key] = transaction[key]
+            
+    transaction_merged = merge(defaults, alreadygot)
+    transaction_merged['chainId'] = defaultChainId
+    transaction_new = unsigned_incasset_formatter(transaction_merged)
+    
+    assert_check_incdec_asset_params(transaction_new)
+    
+    return transaction_new
+
+
+unsigned_incasset_formatter = apply_formatters_to_dict(INCDECASSET_FORMATTERS)
+
+
+def buildDecAssetTx(transaction, defaultChainId):
+    defaults = {}
+    alreadygot = {}
+    for key, default_val in INCDECASSET_DEFAULTS.items():
+        if key not in transaction:
+            defaults[key] = default_val
+    for key, val in transaction.items():
+        if key in VALID_INCDECASSETTX_PARAMS:
+            alreadygot[key] = transaction[key]
+            
+    transaction_merged = merge(defaults, alreadygot)
+    transaction_merged['chainId'] = defaultChainId
+    transaction_new = unsigned_decasset_formatter(transaction_merged)
+    
+    assert_check_incdec_asset_params(transaction_new)
+    
+    return transaction_new
+
+
+unsigned_decasset_formatter = apply_formatters_to_dict(INCDECASSET_FORMATTERS)
+
+
+
+def assert_check_incdec_asset_params(incdecasset_params):
+    for param in incdecasset_params:
+        if param not in VALID_INCDECASSETTX_PARAMS:
+            raise ValueError('{} is not a valid inc or dec asset parameter'.format(param))
+
+    for param in REQUIRED_INCDECASSETTX_PARAMS:
+        if param not in incdecasset_params:
+            raise ValueError('{} is required as an inc or dec asset parameter'.format(param))
+
 
 
 

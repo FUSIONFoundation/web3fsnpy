@@ -1,4 +1,6 @@
-from web3.fusion.fsn import Fsn
+from web3.fusion.fsn import (
+    Fsn,
+)
 
 __all__ = [
     "__version__",

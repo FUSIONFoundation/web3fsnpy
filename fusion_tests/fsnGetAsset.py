@@ -3,33 +3,27 @@
 # Demonstrate getting asset information
 #
 #
-from web3fsnpy import Web3Fsn
-import os
-import sys
-from eth_utils import (
-    to_hex,
-)
-from getpass import getpass
-from eth_keys import keys
+#web3fusion
+from  web3.fusion import Fsn
 
-#import pdb ; pdb.set_trace()
+linkToChain = {
+    'network'     : 'testnet',     # One of 'testnet', or 'mainnet'
+    'provider'    : 'WebSocket',   # One of 'WebSocket', 'HTTP', or 'IPC'
+    'gateway'     : 'default',
+}
 
-testnet = "wss://testnetpublicgateway1.fusionnetwork.io:10001"
-mainnet = "wss://mainnetpublicgateway1.fusionnetwork.io:10001"
-httptestnet = "http://testnetpublicgateway1.fusionnetwork.io:10000"
+web3fsn = Fsn(linkToChain)
 #
-web3fsn = Web3Fsn(Web3Fsn.WebsocketProvider(testnet))
-#web3fsn = Web3Fsn(Web3Fsn.HTTPProvider(httptestnet))
 #
 asset_name = 'FSN'
 blockNo = 'latest'
 #
 #
-asset_Id = web3fsn.fsn.getAssetId(asset_name)
+asset_Id = web3fsn.getAssetId(asset_name)
 #
-asset_dict = web3fsn.fsn.getAsset(asset_Id,blockNo)
+asset_dict = web3fsn.getAsset(asset_Id,blockNo)
 #
-print(asset_dict,'\n')
+#print(asset_dict,'\n')
 #
 #
 for key, Id in asset_dict.items():
