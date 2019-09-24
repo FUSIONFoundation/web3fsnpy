@@ -121,12 +121,26 @@ from web3.fusion.fsn_timelocks import (
     buildTimeLockToTimeLockTx,
 )
 
+from web3.fusion.fsn_swaps import (
+    buildMakeSwapTx,
+    buildRecallSwapTx,
+    buildTakeSwapTx,
+)
+
+from web3.fusion.fsn_tickets import (
+    buildBuyTicketTx,
+)
+
 from web3.fusion.fsn_utils import (
     get_default_modules,
     is_named_block,
     is_hexstr,
     block_number_formatter,
     to_boolean,
+)
+
+from web3.fusion.fsn_api import (
+    apiWallet,
 )
 
 from web3 import Web3
@@ -154,6 +168,8 @@ class Fsn(web3.eth.Eth):
     toChecksumAddress = staticmethod(to_checksum_address)
     
     acct = None            # This is the Fusion account.
+    
+    api = None             # This is Fusion's api
 
 
     def __init__(self, linkToChain):
@@ -226,11 +242,15 @@ class Fsn(web3.eth.Eth):
         if gotprivatekey:
             #print('Adding account to list')
             self.addAccount()
+  
+  
+        # Connect to the fusion api 
+        self.api = apiWallet(self.acct.address)
             
         
         
         self.consts = {
-            "TimeForever":       0xffffffffffffffff, # javascript will convert this to 0x10000000000
+            "TimeForever":       0xffffffffffffffff, 
             "TimeForeverStr":   "0xffffffffffffffff",
 
             "OwnerUSANAssetID": "0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe",
@@ -250,7 +270,7 @@ class Fsn(web3.eth.Eth):
             
             "EMPTY_HASH":                            "0x0000000000000000000000000000000000000000000000000000000000000000",
             
-            "BN":                                    18446744073709551615,   # = '0xffffffffffffffff' Used in time locks to signify infinity
+            "BN":                                    int('0xffffffffffffffff',16)  # 18446744073709551615, used in time locks to signify infinity
         }
             
         self.tokens = {
@@ -258,13 +278,17 @@ class Fsn(web3.eth.Eth):
             "FSN":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         }
 
-        self.__defaultGenAssetGasPrice              = 0.0000001            # Default gasPrice in FSN for genAsset
-        self.__defaultSendAssetGasPrice             = 0.000000002          # Default gasPrice in FSN for sendAsset
-        self.__defaultIncDecAssetGasPrice           = 0.000000003          # Default gasPrice in FSN for incAsset, or decAsset
-        self.__defaultGenNotationGasPrice           = 0.1                  # Default gasPrice in FSN for genNotation
-        self.__defaultAssetToTimeLockGasPrice       = 0.000000002          # Default gasPrice in FSN for assetToTimeLock
-        self.__defaultTimeLockToAssetGasPrice       = 0.000000002          # Default gasPrice in FSN for TimeLockToAsset
-        self.__defaultTimeLockToTimeLockGasPrice    = 0.000000002          # Default gasPrice in FSN for TimeLockToTimeLock
+        self.__defaultGenAssetGasPrice              = 0.00009              # Default gasPrice in FSN for genAsset
+        self.__defaultSendAssetGasPrice             = 0.00005              # Default gasPrice in FSN for sendAsset
+        self.__defaultIncDecAssetGasPrice           = 0.00003              # Default gasPrice in FSN for incAsset, or decAsset
+        self.__defaultGenNotationGasPrice           = 0.00005              # Default gasPrice in FSN for genNotation
+        self.__defaultAssetToTimeLockGasPrice       = 0.00003              # Default gasPrice in FSN for assetToTimeLock
+        self.__defaultTimeLockToAssetGasPrice       = 0.00003              # Default gasPrice in FSN for TimeLockToAsset
+        self.__defaultTimeLockToTimeLockGasPrice    = 0.00005              # Default gasPrice in FSN for TimeLockToTimeLock
+        self.__defaultMakeSwapGasPrice              = 0.00006              # Default gasPrice in FSN for makeSwap
+        self.__defaultRecallSwapGasPrice            = 0.00005              # Default gasPrice in FSN for recallSwap
+        self.__defaultTakeSwapGasPrice              = 0.00003              # Default gasPrice in FSN for takeSwap
+        self.__defaultBuyTicketGasPrice             = 0.00003              # Default gasPrice in FSN for buyTicket
         
         
 
@@ -329,13 +353,6 @@ class Fsn(web3.eth.Eth):
         return TxHash
 
 
-    def buyTicket(self, account):
-        block_identifier = self.defaultBlock
-        TxHash = self.web3.manager.request_blocking(
-            "fsntx_buyTicket",
-            [account],
-        )
-        return TxHash
                 
 
 
@@ -392,6 +409,70 @@ class Fsn(web3.eth.Eth):
             [transaction],
         )
     
+    
+    
+    def buyRawTicket(self, transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the buyRawTicket method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultBuyTicketGasPrice, 'ether'))    #  Fusion gas price for GenAsset
+        
+        Tx =  buildBuyTicketTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildBuyTicketTx",
+            [Tx],
+        )
+        Tx_dict = dict(Tx)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+        
+     
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
+    def buyTicket(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the buyTicket method'
+            )
+        
+        
+        Tx =  buildBuyTicketTx(transaction, self.__defaultChainId)
+      
+        print('\n',Tx,'\n')
+
+        TxHash = self.web3.manager.request_blocking(
+            "fsntx_buyTicket", 
+            [Tx]
+        )
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_buyTicket",Tx)
+        #print(json_rpc)
+        return TxHash
+
+    
 
     def genRawNotation(self,transaction, prepareOnly=False):
         
@@ -409,6 +490,10 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the genRawNotation method'
             )
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultGenNotationGasPrice, 'ether'))    #  Fusion gas price for GenNotation
+        
         Tx =  buildGenNotationTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildGenNotationTx",
@@ -416,7 +501,6 @@ class Fsn(web3.eth.Eth):
         )
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultGenNotationGasPrice, 'ether'))    #  Fusion gas price for GenNotation
         Tx_dict['chainId'] = self.__defaultChainId
         
      
@@ -450,7 +534,7 @@ class Fsn(web3.eth.Eth):
             "fsntx_genNotation", 
             [Tx]
         )
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genNotation",Tx)
         #print(json_rpc)
         return TxHash
 
@@ -467,7 +551,11 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the createRawAsset method'
             )
-            
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultGenAssetGasPrice, 'ether'))    #  Fusion gas price for GenAsset
+        
         Tx =  buildGenAssetTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildGenAssetTx",
@@ -475,7 +563,7 @@ class Fsn(web3.eth.Eth):
         )
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultGenAssetGasPrice, 'ether'))    #  Fusion gas price for GenAsset
+        
         Tx_dict['chainId'] = self.__defaultChainId
         
      
@@ -526,7 +614,11 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the incRawAsset method'
             )
-            
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for incAsset
+        
         Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildIncAssetTx",
@@ -534,7 +626,7 @@ class Fsn(web3.eth.Eth):
         )
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for incAsset
+        
         Tx_dict['chainId'] = self.__defaultChainId
         
         
@@ -543,6 +635,8 @@ class Fsn(web3.eth.Eth):
         else:
             return self.signAndTransmit(Tx_dict)
  
+    
+    
     def incAsset(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
@@ -566,7 +660,7 @@ class Fsn(web3.eth.Eth):
             "fsntx_incAsset", 
             [Tx]
         )
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_incAsset",Tx)
         #print(json_rpc)
         return TxHash
  
@@ -586,7 +680,11 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the decRawAsset method'
             )
-            
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for decAsset
+        
         Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildDecAssetTx",
@@ -594,7 +692,7 @@ class Fsn(web3.eth.Eth):
         )
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for decAsset
+        
         Tx_dict['chainId'] = self.__defaultChainId
         
      
@@ -627,7 +725,7 @@ class Fsn(web3.eth.Eth):
             "fsntx_decAsset", 
             [Tx]
         )
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_decAsset",Tx)
         #print(json_rpc)
         return TxHash
 
@@ -648,6 +746,10 @@ class Fsn(web3.eth.Eth):
             )
         
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultSendAssetGasPrice, 'ether'))    #  Fusion gas price for SendAsset
+        
         Tx = buildSendAssetTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildSendAssetTx",
@@ -656,7 +758,7 @@ class Fsn(web3.eth.Eth):
         
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultSendAssetGasPrice, 'ether'))    #  Fusion gas price for SendAsset
+        
         Tx_dict['chainId'] = self.__defaultChainId
              
         if prepareOnly == True:
@@ -710,6 +812,10 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the assetToRawTimeLock method'
             )
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultAssetToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
         Tx = buildAssetToTimeLockTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildAssetToTimeLockTx",
@@ -718,7 +824,7 @@ class Fsn(web3.eth.Eth):
         
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultAssetToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
         Tx_dict['chainId'] = self.__defaultChainId
              
         if prepareOnly == True:
@@ -746,7 +852,7 @@ class Fsn(web3.eth.Eth):
         
         print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_assetToTimeLock",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
@@ -772,6 +878,10 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the timeLockToRawAsset method'
             )
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultTimeLockToAssetGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
         Tx = buildTimeLockToAssetTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildTimeLockToAssetTx",
@@ -780,8 +890,6 @@ class Fsn(web3.eth.Eth):
         
         Tx_dict = dict(Tx)
         
-        
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultTimeLockToAssetGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
         Tx_dict['chainId'] = self.__defaultChainId
              
         if prepareOnly == True:
@@ -810,7 +918,7 @@ class Fsn(web3.eth.Eth):
         
         print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_timeLockToAsset",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
@@ -836,6 +944,10 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the timeLockToRawTimeLock method'
             )
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultTimeLockToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
         Tx = buildTimeLockToTimeLockTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildTimeLockToTimeLockTx",
@@ -844,7 +956,7 @@ class Fsn(web3.eth.Eth):
         
         Tx_dict = dict(Tx)
         
-        Tx_dict['gasPrice'] = hex(to_wei(self.__defaultTimeLockToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
         Tx_dict['chainId'] = self.__defaultChainId
              
         if prepareOnly == True:
@@ -873,7 +985,7 @@ class Fsn(web3.eth.Eth):
         
         print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_timeLockToTimeLock",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
@@ -882,6 +994,239 @@ class Fsn(web3.eth.Eth):
         )
         return TxHash
 
+
+
+    def makeRawSwap(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the makeRawSwap method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultMakeSwapGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
+        Tx = buildMakeSwapTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildMakeSwapTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
+    def makeSwap(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the makeSwap method'
+            )
+        
+        
+        Tx =  buildMakeSwapTx(transaction, self.__defaultChainId)
+        
+        print('\n',Tx,'\n')
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_makeSwap",Tx)
+        #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_makeSwap",
+            [Tx],
+        )
+        return TxHash
+
+
+
+    def recallRawSwap(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the recallRawSwap method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultRecallSwapGasPrice, 'ether'))    #  Fusion gas price for recallSwap
+        
+        Tx = buildRecallSwapTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildRecallSwapTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
+    def recallSwap(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the recallSwap method'
+            )
+        
+        
+        Tx =  buildMakeSwapTx(transaction, self.__defaultChainId)
+        
+        print('\n',Tx,'\n')
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_recallSwap",Tx)
+        #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_recallSwap",
+            [Tx],
+        )
+        return TxHash
+
+
+
+    def takeRawSwap(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the takeRawSwap method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultTakeSwapGasPrice, 'ether'))    #  Fusion gas price for recallSwap
+        
+        Tx = buildTakeSwapTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildTakeSwapTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
+    def takeSwap(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the takeSwap method'
+            )
+        
+        
+        Tx =  buildTakeSwapTx(transaction, self.__defaultChainId)
+        
+        print('\n',Tx,'\n')
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_takeSwap",Tx)
+        #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_takeSwap",
+            [Tx],
+        )
+        return TxHash
+
+
+
+    def isAutoBuyTicket(self):
+        
+        isAuto =  self.web3.manager.request_blocking(
+            "fsntx_isAutoBuyTicket",
+            ['latest'],
+        )
+        return isAuto
+
+
+
+    def startAutoBuyTicket(self):
+        
+        self.web3.manager.request_blocking(
+            "fsntx_startAutoBuyTicket",
+            [None],
+        )
+        return
+
+
+
+    def stopAutoBuyTicket(self):
+        
+        self.web3.manager.request_blocking(
+            "fsntx_stopAutoBuyTicket",
+            [None],
+        )
+        return
 
        
     def getAssetId(self,asset_name):
@@ -995,7 +1340,16 @@ class Fsn(web3.eth.Eth):
         )
         return timelock_dict       
             
+    
+    def getSwaps(self):
         
+        swaps = self.api.fsnapi_swaps()
+        
+        print('swaps = ',swaps)
+        
+        return swaps
+        
+    
 
     def estimateGas(self, transaction, block_identifier=None):
             

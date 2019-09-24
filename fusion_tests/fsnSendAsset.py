@@ -22,7 +22,7 @@ from  web3.fusion import Fsn
 
 linkToChain = {
     'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'HTTP',                             # One of 'WebSocket', 'HTTP', or 'IPC'
+    'provider'    : 'IPC',                             # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
     'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read operations
 }

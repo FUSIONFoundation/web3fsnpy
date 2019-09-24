@@ -133,10 +133,9 @@ TRANSACTION_DEFAULTS = {
 #    'data': b'',
 #    'gas': lambda web3, tx: web3.fsn.estimateGas(tx),
 #    'gasPrice': lambda web3, tx: web3.fsn.generateGasPrice(tx) or web3.fsn.gasPrice,
-#    'nonce':     None,
     'chainId':   None,
-    'gas':       300000,
-    'gasPrice':  2000000000,
+    #'gas':       300000,
+    #'gasPrice':  2000000000,
 }
 
 
@@ -259,8 +258,8 @@ def SignTx(Tx_tosign, account):
 #
 
 GENNOTATION_DEFAULTS = {
-    'gasPrice': 100000000000000000,
-    'gas':     1000,
+    #'gasPrice': 100000000000000000,
+    #'gas':     1000,
     'chainId':  None,
 }
 
@@ -283,8 +282,8 @@ VALID_GENNOTATIONTX_PARAMS = [
 REQUIRED_GENNOTATIONTX_PARAMS = [
     'from',
     'nonce',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'chainId',
 ]
 

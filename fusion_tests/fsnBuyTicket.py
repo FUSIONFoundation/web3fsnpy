@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 #
 """
- Demonstrate creating asset tokens on the Fusion blockchain. You can use this method
- when you have an unlocked wallet (i.e. you are using the IPC mode and are running a node).
+ Demonstrate buying a ticket. 
+ You can use this method when you wish to sign the transaction offline and broadcast it later, 
+ or if you do not have an unlocked wallet (i.e. you are not using the IPC mode).
 """
 #
 #
@@ -15,43 +16,40 @@ import sys
 #web3fusion
 from  web3.fusion import Fsn
 
-#   Remember to set your environment variables to run this test
+#   Remember to set your environment variable to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
 
 
 
 linkToChain = {
     'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'IPC',                              # One of 'WebSocket', 'HTTP', or 'IPC'
+    'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
-    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read operations
+    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read, or signed raw transactions
 }
 
 #
 
 web3fsn = Fsn(linkToChain)
 
-#pdb.set_trace()
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
-
+pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'  # For a private swap
 
 
-nonce = web3fsn.getTransactionCount(pub_key_sender)  # Get the nonce for the wallet
+print('Is autoBuyTicket set? : ',web3fsn.isAutoBuyTicket())
+
+
+nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
 
 # Construct the transaction
+#
 
 transaction = {
-  "from":       pub_key_sender,
-  "name":       "TestCoin",
-  "nonce":       nonce,
-  "symbol":     "TST4",
-  "decimals":   1,
-  "total":      2000,
-  "canChange":  True,
+    'from':             pub_key,
+    'nonce':            nonce,
 }
 
-TxHash = web3fsn.createAsset(transaction)
+TxHash = web3fsn.buyRawTicket(transaction)
 
 #
 print('Transaction hash = ',TxHash)

@@ -57,7 +57,7 @@ web3fsn.waitForTransactionReceipt(TxHash, timeout=20)
 #
 res = web3fsn.getTransaction(TxHash)
 #
-print(res)
+#print(res)
 #
 #
 # Request the value back
