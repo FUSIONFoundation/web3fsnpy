@@ -251,3 +251,70 @@ def SignTx(Tx_tosign, account):
     rawTx['chainId'] = defaultChainId
     
     return rawTx
+
+
+######################################################################################################
+#
+#   GenNotation
+#
+
+GENNOTATION_DEFAULTS = {
+    'gasPrice': 100000000000000000,
+    'gas':     1000,
+    'chainId':  None,
+}
+
+GENNOTATION_FORMATTERS = {
+    'from': to_checksum_address,
+    'nonce': to_hex_if_integer_or_ascii,
+    'chainId': to_hex_if_integer_or_ascii,
+    'gas': to_hex_if_integer_or_ascii,
+    'gasPrice': to_hex_if_integer_or_ascii,
+}
+
+VALID_GENNOTATIONTX_PARAMS = [
+    'from',
+    'nonce',
+    'gas',
+    'gasPrice',
+    'chainId',
+]
+
+REQUIRED_GENNOTATIONTX_PARAMS = [
+    'from',
+    'nonce',
+    'gas',
+    'gasPrice',
+    'chainId',
+]
+
+def buildGenNotationTx(transaction, defaultChainId):
+    defaults = {}
+    alreadygot = {}
+    for key, default_val in GENNOTATION_DEFAULTS.items():
+        if key not in transaction:
+            defaults[key] = default_val
+    for key, val in transaction.items():
+        if key in VALID_GENNOTATIONTX_PARAMS:
+            alreadygot[key] = transaction[key]
+            
+    transaction_merged = merge(defaults, alreadygot)
+    transaction_merged['chainId'] = defaultChainId
+    transaction_new = unsigned_gennotation_formatter(transaction_merged)
+    
+    assert_check_gen_notation_params(transaction_new)
+    
+    return transaction_new
+
+
+unsigned_gennotation_formatter = apply_formatters_to_dict(GENNOTATION_FORMATTERS)
+
+def assert_check_gen_notation_params(gennotation_params):
+    for param in gennotation_params:
+        if param not in VALID_GENNOTATIONTX_PARAMS:
+            raise ValueError('{} is not a valid gen notation parameter'.format(param))
+
+    for param in REQUIRED_GENNOTATIONTX_PARAMS:
+        if param not in gennotation_params:
+            raise ValueError('{} is required as a gen notation parameter'.format(param))
+
