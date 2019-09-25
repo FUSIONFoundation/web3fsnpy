@@ -245,7 +245,7 @@ class Fsn(web3.eth.Eth):
   
   
         # Connect to the fusion api 
-        self.api = apiWallet(self.acct.address)
+        #self.api = apiWallet(self.acct.address)
             
         
         
@@ -1341,13 +1341,13 @@ class Fsn(web3.eth.Eth):
         return timelock_dict       
             
     
-    def getSwaps(self):
+    #def getSwaps(self):
         
-        swaps = self.api.fsnapi_swaps()
+        #swaps = self.api.fsnapi_swaps()
         
-        print('swaps = ',swaps)
+        #print('swaps = ',swaps)
         
-        return swaps
+        #return swaps
         
     
 
