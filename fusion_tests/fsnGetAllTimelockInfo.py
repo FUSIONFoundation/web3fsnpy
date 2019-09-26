@@ -3,7 +3,7 @@
 # Demonstrate getting asset information
 #
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 import os
 import sys
@@ -27,7 +27,7 @@ pub_key = '0x432baf0AB7261819fCf587De7e6D68f902E43195'
 blockNo = 'latest'
 #
 #
-asset_timelocks = web3fsn.fsnGetAllTimeLockBalances(pub_key, block_identifier=None)
+asset_timelocks = web3fsn.GetAllTimeLockBalances(pub_key, block_identifier=None)
 #
 print(asset_timelocks,'\n')
 #

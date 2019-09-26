@@ -13,7 +13,7 @@ import sys
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 #   Remember to set your environment variable to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
@@ -43,7 +43,7 @@ transaction = {
   "from":       pub_key,
   "name":       "TestCoin",
   "nonce":       nonce,
-  "symbol":     "TST3",
+  "symbol":     "TST4",
   "decimals":   1,
   "total":      2000,
   "canChange":  True,

@@ -15,7 +15,7 @@ from datetime import datetime
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 #   Remember to set your environment variable to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
@@ -68,7 +68,7 @@ transaction = {
   'end':        'Infinity',
 }
 
-TxHash = web3fsn.assetToRawTimeLockTx(transaction)
+TxHash = web3fsn.assetToRawTimeLock(transaction)
 
 #
 print('Transaction hash = ',TxHash)
@@ -121,7 +121,7 @@ transaction = {
 }
     
     
-TxHash = web3fsn.timeLockToRawTimeLockTx(transaction)
+TxHash = web3fsn.timeLockToRawTimeLock(transaction)
 
 #
 print('Transaction hash = ',TxHash)

@@ -13,7 +13,7 @@ import sys
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 #   Remember to set your environment variables to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 

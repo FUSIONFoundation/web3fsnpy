@@ -3,7 +3,7 @@
 # Demonstrate getting asset information
 #
 #
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 import os
 import sys
 from eth_utils import (

@@ -1,10 +1,9 @@
+
+import web3
+
 from eth_account import (
     Account,
 ) 
-
-#from eth_account.account import (
-    #signTransaction,
-#)
 
 from web3.middleware import (
     construct_sign_and_send_raw_middleware,
@@ -95,43 +94,44 @@ from web3._utils.threads import (
     Timeout,
 )
 
-from web3.fusion.exceptions import (
+
+from web3fsnpy.fusion.exceptions import (
     NotRawTransaction,
     _notConnected,
     BadSendingAddress,
     PrivateKeyNotSet,
 )
 
-from web3.fusion.fsn_transactions import (
+from web3fsnpy.fusion.fsn_transactions import (
     fill_transaction_defaults,
     SignTx,
     buildGenNotationTx,
 )
 
-from web3.fusion.fsn_assets import (
+from web3fsnpy.fusion.fsn_assets import (
     buildGenAssetTx,
     buildSendAssetTx,
     buildIncAssetTx,
     buildDecAssetTx,
 )
 
-from web3.fusion.fsn_timelocks import (
+from web3fsnpy.fusion.fsn_timelocks import (
     buildAssetToTimeLockTx,
     buildTimeLockToAssetTx,
     buildTimeLockToTimeLockTx,
 )
 
-from web3.fusion.fsn_swaps import (
+from web3fsnpy.fusion.fsn_swaps import (
     buildMakeSwapTx,
     buildRecallSwapTx,
     buildTakeSwapTx,
 )
 
-from web3.fusion.fsn_tickets import (
+from web3fsnpy.fusion.fsn_tickets import (
     buildBuyTicketTx,
 )
 
-from web3.fusion.fsn_utils import (
+from web3fsnpy.fusion.fsn_utils import (
     get_default_modules,
     is_named_block,
     is_hexstr,
@@ -139,7 +139,7 @@ from web3.fusion.fsn_utils import (
     to_boolean,
 )
 
-from web3.fusion.fsn_api import (
+from web3fsnpy.fusion.fsn_api import (
     apiWallet,
 )
 
@@ -278,6 +278,7 @@ class Fsn(web3.eth.Eth):
             "FSN":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         }
 
+        self.__defaultSendTransactionGasPrice       = 0.000000021          # Default gasPrice in FSN for sendTransaction
         self.__defaultGenAssetGasPrice              = 0.00009              # Default gasPrice in FSN for genAsset
         self.__defaultSendAssetGasPrice             = 0.00005              # Default gasPrice in FSN for sendAsset
         self.__defaultIncDecAssetGasPrice           = 0.00003              # Default gasPrice in FSN for incAsset, or decAsset
@@ -301,8 +302,8 @@ class Fsn(web3.eth.Eth):
     def BN(self):
         return self.consts['BN']
 
-    def fill_tx_defaults(self, transaction):
-        return fill_transaction_defaults(transaction,self.__defaultChainId)
+    #def fill_tx_defaults(self, transaction):
+        #return fill_transaction_defaults(transaction,self.__defaultChainId)
     
     def isConnected(self):
         try:
@@ -352,7 +353,6 @@ class Fsn(web3.eth.Eth):
         )
         return TxHash
 
-
                 
 
 
@@ -389,6 +389,45 @@ class Fsn(web3.eth.Eth):
             "fsn_totalNumberOfTicketsByAddress",
             [account, block_identifier],
         )
+
+
+    def sendRawTransaction(self,transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the sendRawTransaction method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultSendTransactionGasPrice, 'ether'))    #  Fusion gas price for Transaction
+            
+
+        transaction = fill_transaction_defaults(web3,transaction, self.__defaultChainId)
+        
+        
+     
+        if prepareOnly == True:
+            return transaction
+        else:
+            Tx_signed = self.acct.sign_transaction(transaction)
+            TxHash =  self.web3.manager.request_blocking(
+                "eth_sendRawTransaction",
+                [Tx_signed.rawTransaction],
+            )
+            return TxHash
+       
+
+
     
     def sendTransaction(self, transaction):
         if self.acct == None:
@@ -796,7 +835,7 @@ class Fsn(web3.eth.Eth):
         return TxHash
 
 
-    def assetToRawTimeLockTx(self, transaction, prepareOnly=False):
+    def assetToRawTimeLock(self, transaction, prepareOnly=False):
 
         if prepareOnly == False:
             if self.acct == None:
@@ -833,7 +872,7 @@ class Fsn(web3.eth.Eth):
             return self.signAndTransmit(Tx_dict)
 
 
-    def assetToTimeLockTx(self, transaction):
+    def assetToTimeLock(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -862,7 +901,7 @@ class Fsn(web3.eth.Eth):
         return TxHash
 
 
-    def timeLockToRawAssetTx(self, transaction, prepareOnly=False):
+    def timeLockToRawAsset(self, transaction, prepareOnly=False):
 
         if prepareOnly == False:
             if self.acct == None:
@@ -899,7 +938,7 @@ class Fsn(web3.eth.Eth):
 
 
 
-    def timeLockToAssetTx(self, transaction):
+    def timeLockToAsset(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -928,7 +967,7 @@ class Fsn(web3.eth.Eth):
         return TxHash
 
 
-    def timeLockToRawTimeLockTx(self, transaction, prepareOnly=False):
+    def timeLockToRawTimeLock(self, transaction, prepareOnly=False):
 
         if prepareOnly == False:
             if self.acct == None:
@@ -966,7 +1005,7 @@ class Fsn(web3.eth.Eth):
 
 
 
-    def timeLockToTimeLockTx(self, transaction):
+    def timeLockToTimeLock(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -1322,7 +1361,7 @@ class Fsn(web3.eth.Eth):
         return timelock_dict
         
         
-    def fsnGetAllTimeLockBalances(self, account, block_identifier=None):
+    def GetAllTimeLockBalances(self, account, block_identifier=None):
         if is_integer(account):
             account = to_hex(account)
         if not is_address(account):
@@ -1350,11 +1389,23 @@ class Fsn(web3.eth.Eth):
         #return swaps
         
     
+    #def estimateGas(self, transaction, block_identifier=None):
+        #if 'from' not in transaction and is_checksum_address(self.defaultAccount):
+            #transaction = assoc(transaction, 'from', self.defaultAccount)
 
-    def estimateGas(self, transaction, block_identifier=None):
+        #if block_identifier is None:
+            #params = [transaction]
+        #else:
+            #params = [transaction, block_identifier]
             
-        return web3fsn.toWei(21,'gwei')    # value from MyFusionWallet JS code
-            
+        
+
+        #return self.web3.manager.request_blocking(
+            #"eth_estimateGas",
+            #params,
+        #)
+
+
 
             
 

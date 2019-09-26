@@ -14,7 +14,7 @@ from datetime import datetime
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 #   Remember to set your environment variable to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
@@ -23,7 +23,7 @@ from  web3.fusion import Fsn
 
 linkToChain = {
     'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'WebSocket',                             # One of 'WebSocket', 'HTTP', or 'IPC'
+    'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
     'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read, or signed raw transactions
 }
@@ -65,7 +65,7 @@ transaction = {
   'end':        '2019-11-01T06:00:00',
 }
 
-TxHash = web3fsn.assetToRawTimeLockTx(transaction)
+TxHash = web3fsn.assetToRawTimeLock(transaction)
 
 #
 print('Transaction hash = ',TxHash)
