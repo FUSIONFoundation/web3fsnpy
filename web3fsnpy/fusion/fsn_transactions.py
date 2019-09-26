@@ -72,6 +72,8 @@ import operator
 
 from eth_utils import (
     add_0x_prefix,
+    to_checksum_address,
+    is_address,
     big_endian_to_int,
     decode_hex,
     encode_hex,
@@ -213,6 +215,18 @@ def fill_transaction_defaults(web3,transaction, chain=None):
             defaults['gasPrice'] = estimateGas(transaction)
         if 'gas' not in defaults:
             defaults['gas'] = TRANSACTION_DEFAULTS['gas']
+        if is_address(transaction['to']):
+            transaction['to'] = to_checksum_address(transaction['to'])
+        else:
+            raise TypeError(
+                'Error: Bad \'to\' field in sendRawTransaction'
+            )
+        if is_address(transaction['from']):
+            transaction['from'] = to_checksum_address(transaction['from'])
+        else:
+            raise TypeError(
+                'Error: Bad \'from\' field in sendRawTransaction'
+            )
     
     return merge(defaults, transaction)
 

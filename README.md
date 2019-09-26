@@ -66,9 +66,9 @@ python module, including math and scientific modules, specialist financial modul
 
 # Fusion's developer community
 
-You can easily interact with other Fusion developers though its Telegram channel https://t.me/FsnDevCommunity.
+You can easily interact with other Fusion developers through its Telegram channel https://t.me/FsnDevCommunity.
 
-Here you discuss new project ideas, or seek technical assistance from other developers and the Fusion technical team.
+Here you can discuss new project ideas, or seek technical assistance from other developers and the Fusion technical team.
 
 If you have some code that you would like to add to the repository, please create a pull request at https://github.com/FUSIONFoundation/web3fsnpy 
 
