@@ -1,6 +1,8 @@
 
 import web3
 
+import sys
+
 from eth_account import (
     Account,
 ) 
@@ -19,8 +21,14 @@ from eth_utils import (
     remove_0x_prefix,
     to_checksum_address,
     to_wei,
+    to_int,
     is_string,
 )
+
+from web3._utils.formatters import (
+    hex_to_integer,
+)
+
 from eth_utils.curried import (
     is_address,
     is_bytes,
@@ -345,13 +353,25 @@ class Fsn(web3.eth.Eth):
                 'No private key was set for this unsigned transaction'
             )
         
-        Tx_signed = SignTx(Tx_dict, self.acct)    
-        
-        TxHash =  self.web3.manager.request_blocking(
-            "fsntx_sendRawTransaction",
-            [Tx_signed],
-        )
-        return TxHash
+        if 'r' in Tx_dict and 's' in Tx_dict:
+            if hex_to_integer(Tx_dict['r']) == 0 and hex_to_integer(Tx_dict['s']) == 0:
+                Tx_signed = SignTx(Tx_dict, self.acct)    
+            
+                TxHash =  self.web3.manager.request_blocking(
+                    "fsntx_sendRawTransaction",
+                    [Tx_signed],
+                )
+        else:
+            Tx_signed = self.acct.sign_transaction(Tx_dict)
+            TxHash =  self.web3.manager.request_blocking(
+                "eth_sendRawTransaction",
+                [Tx_signed.rawTransaction],
+            )
+            
+        if is_bytes(TxHash):
+            return to_hex(TxHash)
+        else:
+            return TxHash
 
                 
 
