@@ -19,7 +19,7 @@ You will probably need to set the environmental variable FSN_PRIVATE_KEY to be a
 
 Get your private key from your Fusion wallet (click on 'View details') and then :-
 
-#> export FSN_PRIVATE_KEY=<put your number here>
+#> export FSN_PRIVATE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXX
 
 
 
