@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 #
 """
- Demonstrate generating a USAN notation on Fusion. 
+ Demonstrate buying a ticket. 
+ You can use this method when you wish to sign the transaction offline and broadcast it later, 
+ or if you do not have an unlocked wallet (i.e. you are not using the IPC mode).
 """
 #
 #
@@ -14,7 +16,7 @@ import sys
 #web3fusion
 from  web3fsnpy import Fsn
 
-#   Remember to set your environment variables to run this test
+#   Remember to set your environment variable to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
 
 
@@ -23,29 +25,31 @@ linkToChain = {
     'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
     'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
-    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read operations
+    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read, or signed raw transactions
 }
 
 #
 
 web3fsn = Fsn(linkToChain)
 
-#pdb.set_trace()
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
+pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'  # For a private swap
 
 
-nonce = web3fsn.getTransactionCount(pub_key_sender)  # Get the nonce for the wallet
+print('Is autoBuyTicket set? : ',web3fsn.isAutoBuyTicket())
+
+
+nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
 
 # Construct the transaction
+#
 
 transaction = {
-  'from':       pub_key_sender,
-  'nonce':      nonce,
+    'from':             pub_key,
+    'nonce':            nonce,
 }
 
-TxHash = web3fsn.genRawNotation(transaction)
-
+TxHash = web3fsn.buyRawTicket(transaction)
 
 #
 print('Transaction hash = ',TxHash)
@@ -57,20 +61,6 @@ web3fsn.waitForTransactionReceipt(TxHash, timeout=20)
 #
 res = web3fsn.getTransaction(TxHash)
 #
-#print(res)
+print(res)
 #
-#
-# Request the value back
-#
-notation = web3fsn.getNotation(pub_key_sender)
-#
-print('The generated notation is ',notation)
-#
-# Check that this notation refers to our public key 
-#
-pubk = web3fsn.getAddressByNotation(notation)
-#
-print('The public address is ',pubk)
-#
-
 

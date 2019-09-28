@@ -88,8 +88,8 @@ def to_hex_if_datestring(datestring):
 
 
 ASSETTOTL_DEFAULTS = {
-    'gasPrice': 2000000000,
-    'gas':     90000,
+    #'gasPrice': 2000000000,
+    #'gas':     90000,
     'chainId':  None,
 }
 
@@ -124,8 +124,8 @@ REQUIRED_ASSETTOTL_PARAMS = [
     'to',
     'from',
     'nonce',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'asset',
     'value',
     'chainId',
@@ -209,8 +209,8 @@ def assert_check_tltoasset_params(tltoasset_params):
 #
 #
 TLTOTL_DEFAULTS = {
-    'gasPrice': 2000000000,
-    'gas':     90000,
+    #'gasPrice': 2000000000,
+    #'gas':     90000,
     'chainId':  None,
 }
 
@@ -245,8 +245,8 @@ REQUIRED_TLTOTL_PARAMS = [
     'to',
     'from',
     'nonce',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'asset',
     'value',
     'chainId',

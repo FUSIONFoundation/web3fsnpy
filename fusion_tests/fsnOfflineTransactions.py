@@ -16,7 +16,7 @@ import json
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 
 linkToChain = {
@@ -35,7 +35,7 @@ web3fsn = Fsn(linkToChain)
 pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
 pub_key_receiver = "0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1"
 
-asset_Id = '0x5fd3f254ae34bf9bf9dc46f72e4fbbc75844dbe6823f970fa3f7aaedb2925ff6'
+asset_Id = '0x54cbfda5d4cb46ef1f63d6642f561dcd38dec9fa27a68a0408e9b2b17cc5cfc7'
 number_to_transfer = 5  # The number of tokens you wish to send
 
 # Find out some information about this asset
@@ -69,6 +69,22 @@ transaction['nonce'] = nonce + 1
 Tx_dict = web3fsn.sendRawAsset(transaction, prepareOnly=True)
 json_tx = json.dumps(Tx_dict)
 fp.write(json_tx+'\n')
+#
+# Send some FSN too
+value = web3fsn.toWei(0.02,'ether')    # How much FSN are we sending?
+
+transaction = {
+            "from"  : pub_key_sender,
+            "to"    : pub_key_receiver,
+            "nonce" : nonce + 2,
+            "value" : value,
+}
+
+# Send the raw transaction. 
+Tx_dict = web3fsn.sendRawTransaction(transaction, prepareOnly=True)
+json_tx = json.dumps(Tx_dict)
+fp.write(json_tx+'\n')
+#
 #
 fp.close()
 del web3fsn    # Clean up and delete the Fsn object

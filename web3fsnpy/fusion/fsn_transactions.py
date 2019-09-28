@@ -29,10 +29,6 @@ from eth_utils import (
 
 from eth_account._utils.transactions import (
     ChainAwareUnsignedTransaction,
-    #UnsignedTransaction,
-    #Transaction,
-    #encode_transaction,
-    #serializable_unsigned_transaction_from_dict,
     strip_signature,
     Transaction,
     vrs_from,
@@ -76,6 +72,8 @@ import operator
 
 from eth_utils import (
     add_0x_prefix,
+    to_checksum_address,
+    is_address,
     big_endian_to_int,
     decode_hex,
     encode_hex,
@@ -87,7 +85,10 @@ from eth_utils import (
     is_list_like,
     remove_0x_prefix,
     to_hex,
+    to_wei,
+    from_wei,
 )
+
 
 from web3._utils.formatters import (
     apply_formatter_at_index,
@@ -125,19 +126,6 @@ VALID_TRANSACTION_PARAMS = [
     'nonce',
     'chainId',
 ]
-
-
-
-TRANSACTION_DEFAULTS = {
-#    'value': 0,
-#    'data': b'',
-#    'gas': lambda web3, tx: web3.fsn.estimateGas(tx),
-#    'gasPrice': lambda web3, tx: web3.fsn.generateGasPrice(tx) or web3.fsn.gasPrice,
-#    'nonce':     None,
-    'chainId':   None,
-    'gas':       300000,
-    'gasPrice':  2000000000,
-}
 
 
 def bytes_to_ascii(value):
@@ -188,8 +176,25 @@ def fill_nonce(web3, transaction):
         return transaction
 
 
+
+TRANSACTION_DEFAULTS = {
+#    'value': 0,
+#    'data': b'',
+    #'gas': lambda web3, tx: web3.fsn.estimateGas(tx),
+    #'gasPrice': lambda web3, tx: web3.fsn.generateGasPrice(tx) or web3.fsn.gasPrice,
+    'chainId':   None,
+    'gas':       300000,
+}
+
+    
+
+def estimateGas(transaction):
+    return to_wei(21,'gwei')    # value from MyFusionWallet JS code
+            
+
+
 @curry
-def fill_transaction_defaults(web3, transaction, chain=None):
+def fill_transaction_defaults(web3,transaction, chain=None):
     """
     if web3 is None, fill as much as possible while offline
     """
@@ -206,7 +211,26 @@ def fill_transaction_defaults(web3, transaction, chain=None):
             defaults[key] = default_val
             if key=='chainId':
                 defaults['chainId'] = chain
+        if 'gasPrice' not in defaults:
+            defaults['gasPrice'] = estimateGas(transaction)
+        if 'gas' not in defaults:
+            defaults['gas'] = TRANSACTION_DEFAULTS['gas']
+        if is_address(transaction['to']):
+            transaction['to'] = to_checksum_address(transaction['to'])
+        else:
+            raise TypeError(
+                'Error: Bad \'to\' field in sendRawTransaction'
+            )
+        if is_address(transaction['from']):
+            transaction['from'] = to_checksum_address(transaction['from'])
+        else:
+            raise TypeError(
+                'Error: Bad \'from\' field in sendRawTransaction'
+            )
+    
     return merge(defaults, transaction)
+
+
 
 
 def wait_for_transaction_receipt(web3, txn_hash, timeout=30, poll_latency=0.1):
@@ -259,8 +283,8 @@ def SignTx(Tx_tosign, account):
 #
 
 GENNOTATION_DEFAULTS = {
-    'gasPrice': 100000000000000000,
-    'gas':     1000,
+    #'gasPrice': 100000000000000000,
+    #'gas':     1000,
     'chainId':  None,
 }
 
@@ -283,8 +307,8 @@ VALID_GENNOTATIONTX_PARAMS = [
 REQUIRED_GENNOTATIONTX_PARAMS = [
     'from',
     'nonce',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'chainId',
 ]
 

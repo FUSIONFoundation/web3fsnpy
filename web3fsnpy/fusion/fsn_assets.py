@@ -48,9 +48,8 @@ from .fsn_utils import *
 GENASSET_DEFAULTS = {
     #'description': 'Default token description'
     'to':      '0xffffffffffffffffffffffffffffffffffffffff',
-    #'gasPrice':  '0x174876e800',
-    'gasPrice': 100000000000,
-    'gas':     90000,
+    #'gasPrice': 100000000000,
+    #'gas':     90000,
     'value':   '0x0',
     'chainId':  None,
 }
@@ -88,8 +87,8 @@ VALID_GENASSETTX_PARAMS = [
 REQUIRED_GENASSETTX_PARAMS = [
     'nonce',
     'to',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'value',
     'chainId',
     'name',
@@ -137,8 +136,8 @@ def assert_check_gen_asset_params(assetcreate_params):
 
 
 SENDASSET_DEFAULTS = {
-    'gasPrice': 2000000000,
-    'gas':     90000,
+    #'gasPrice': 2000000000,
+    #'gas':     90000,
     'chainId':  None,
 }
 
@@ -169,8 +168,8 @@ REQUIRED_SENDASSETTX_PARAMS = [
     'nonce',
     'from',
     'to',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'value',
     'chainId',
     'asset',
@@ -216,8 +215,8 @@ def assert_check_send_asset_params(sendasset_params):
 #
 
 INCDECASSET_DEFAULTS = {
-    'gasPrice': 3000000000,
-    'gas':     90000,
+    #'gasPrice': 3000000000,
+    #'gas':     90000,
     'chainId':  None,
 }
 
@@ -250,8 +249,8 @@ REQUIRED_INCDECASSETTX_PARAMS = [
     'nonce',
     'from',
     'to',
-    'gas',
-    'gasPrice',
+    #'gas',
+    #'gasPrice',
     'value',
     'chainId',
     'asset',

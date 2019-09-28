@@ -9,12 +9,13 @@ from getpass import getpass
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 linkToChain = {
-    'network'     : 'testnet',     # One of 'testnet', or 'mainnet'
-    'provider'    : 'HTTP',   # One of 'WebSocket', 'HTTP', or 'IPC'
-    'gateway'     : 'default',
+    'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
+    'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
+    'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
+    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read transactions
 }
 
 web3fsn = Fsn(linkToChain)
@@ -49,18 +50,8 @@ transaction = {
             "value" : value,
 }
 
-# Fill in the defaults, including gas and gasLimit
-
-tx = web3fsn.fill_tx_defaults(transaction)
-
-#print(tx)
-
-# Sign the transaction if you want to send a raw transaction, so that it can be signed offline for security.
-
-signed_tx = web3fsn.account.sign_transaction(tx,private_key_sender)
-
-# Send the raw transaction (i.e. signed). The signed_tx can be copied from the offline signing and now sent securely
-TxHash = web3fsn.sendRawTransaction(signed_tx.rawTransaction)
+# Send the raw transaction. 
+TxHash = web3fsn.sendRawTransaction(transaction)
 #
 #
 print('TxHash = ',web3fsn.toHex(TxHash))

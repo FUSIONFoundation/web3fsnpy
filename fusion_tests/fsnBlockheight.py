@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #web3fusion
-from  web3.fusion import Fsn
+from  web3fsnpy import Fsn
 
 linkToChain = {
     'network'     : 'testnet',     # One of 'testnet', or 'mainnet'

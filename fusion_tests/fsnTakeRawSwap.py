@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 #
 """
- Demonstrate creating asset tokens on the Fusion blockchain using the raw transaction method. You can use this method
- when you wish to sign the transaction offline and broadcast it later, or if you do not have an unlocked wallet (i.e. you are not using the IPC mode).
+ Demonstrate taking asset tokens on the Quantum Swap market of the Fusion blockchain using the raw transaction method. 
+ You can use this method when you wish to sign the transaction offline and broadcast it later, 
+ or if you do not have an unlocked wallet (i.e. you are not using the IPC mode).
 """
 #
 #
@@ -22,7 +23,7 @@ from  web3fsnpy import Fsn
 
 linkToChain = {
     'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'HTTP',                             # One of 'WebSocket', 'HTTP', or 'IPC'
+    'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
     'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read, or signed raw transactions
 }
@@ -32,24 +33,30 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
+pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'  # For a private swap
 
+balanceInfo = web3fsn.getSwaps()
+
+
+number_to_receive = 1   # The number of tokens you wish to receive
+
+#nToReceive = int(number_to_receive*10**float(asset_TST2_decimals))
+
+swapHash = '0xffffff'  # Fill in correct value
 
 nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
 
 # Construct the transaction
+#
 
 transaction = {
-  "from":       pub_key,
-  "name":       "TestCoin",
-  "nonce":       nonce,
-  "symbol":     "TST4",
-  "decimals":   1,
-  "total":      2000,
-  "canChange":  True,
+    'from':             pub_key,
+    'nonce':            nonce,
+    'SwapID':           swapHash,
+    'Size':             number_to_receive,
 }
 
-TxHash = web3fsn.createRawAsset(transaction)
+TxHash = web3fsn.takeRawSwap(transaction)
 
 #
 print('Transaction hash = ',TxHash)

@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+
+echo "Fusion Foundation's extension to web3.py to use the blockchain API"
+
+echo "Please look at the README.md file to see how to install web3fsnpy"
+
+

@@ -13,7 +13,7 @@ import sys
 
 
 #web3fusion
-from  web3.fusion import Fsn
+from  from  web3fsnpy import Fsn
 
 #   Remember to set your environment variables to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
@@ -22,7 +22,7 @@ from  web3.fusion import Fsn
 
 linkToChain = {
     'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'HTTP',                             # One of 'WebSocket', 'HTTP', or 'IPC'
+    'provider'    : 'IPC',                              # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
     'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read operations
 }
