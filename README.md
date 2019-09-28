@@ -53,15 +53,9 @@ Please report bugs or suggest enhancements by creating a git pull request at htt
 
 
 By creating a pythonic version of the JavaScript web3.js API for it's blockchain, Fusion Foundation has made it possible
+to easily unlock all the functionality that makes Fusion unique. With only single function calls, a user can now create assets, send tokens, or generate time locks to unlock the time value of assets and other cryptocurrencies locked in to Fusion's blockchain.
 
-to easily unlock all the functionality that makes Fusion unique. With only single function calls, a user can now create assets, send tokens, 
-
-or generate time locks to unlock the time value of assets and other cryptocurrencies locked in to Fusion's blockchain.
-
-
-Because python is easy to learn and is platform independent, every user now has access to Fusion's features and can combine them with every other
-
-python module, including math and scientific modules, specialist financial modules, to assist them in developing feature rich applications. 
+Because python is easy to learn and is platform independent, every user now has access to Fusion's features and can combine them with every other python module, including math and scientific modules, specialist financial modules, to assist them in developing feature rich applications. 
 
 
 # Fusion's developer community
