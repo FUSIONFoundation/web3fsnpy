@@ -123,12 +123,17 @@ for i in range(n_items):
 print('\nNow recall the swap...')
 reply = input('Check your wallet Quantum Swaps and hit enter to continue > ')
 #
-HashSwap = '0xfffffffffff'   # Fill with correct value
+swap_dict = web3fsn.getAllSwaps()   # THIS ONLY WORKS FOR THE MAINNET SWAPS
+
+for ii in range(len(swap_dict)):
+    if swap_dict[ii]['fromAddress'] == pub_key_sender :     # This should be the most recent swap created by the pub_key_sender
+        swap = swap_dict[ii]['swapID']
+
 #
 transaction = {
     'from':                 pub_key_sender,
     'nonce':                nonce + 1,
-    'SwapID':               HashSwap,
+    'SwapID':               swap,
 }
 
 TxHash = web3fsn.recallRawSwap(transaction)

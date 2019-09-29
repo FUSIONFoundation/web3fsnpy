@@ -48,6 +48,8 @@ from eth_keys import (
     keys,
 )
 
+import json
+
 from hexbytes import (
     HexBytes,
 )
@@ -147,8 +149,13 @@ from web3fsnpy.fusion.fsn_utils import (
     to_boolean,
 )
 
+from web3fsnpy.fusion.fsn_timelocks import (
+    numToDatetime,
+)
+
+
 from web3fsnpy.fusion.fsn_api import (
-    apiWallet,
+    fsnapi,
 )
 
 from web3 import Web3
@@ -253,7 +260,10 @@ class Fsn(web3.eth.Eth):
   
   
         # Connect to the fusion api 
-        #self.api = apiWallet(self.acct.address)
+        if defaultAccount == None:
+            self.api = fsnapi(None)
+        else:
+            self.api = fsnapi(self.acct.address)
             
         
         
@@ -1381,7 +1391,7 @@ class Fsn(web3.eth.Eth):
         return timelock_dict
         
         
-    def GetAllTimeLockBalances(self, account, block_identifier=None):
+    def getAllTimeLockBalances(self, account, block_identifier=None):
         if is_integer(account):
             account = to_hex(account)
         if not is_address(account):
@@ -1400,14 +1410,65 @@ class Fsn(web3.eth.Eth):
         return timelock_dict       
             
     
-    #def getSwaps(self):
+    def getAllSwaps(self):
         
-        #swaps = self.api.fsnapi_swaps()
+        swap_rawdict = self.api.fsnapi_swaps()
         
-        #print('swaps = ',swaps)
+        #print('swaps = ',swap_rawdict)
         
-        #return swaps
+        swap_dict = [{k:[] for k in ['swapID', 'timeStamp', 'fromAddress', 'fromAsset', 'toAsset', 'recCreated',
+                                    'height', 'timeStamp', 'hash', 'size', 'Description', 
+                                    'FromStartTime', 'ToEndTime', 'MinFromAmount', 'MinToAmount', 
+                                    'SwapSize', 'Targes', 'Time', 'ToAssetID'
+                                    ]
+        } for ii in range(len(swap_rawdict)-1)]
         
+        for ii in range(len(swap_rawdict)-1):
+        
+            data_string = swap_rawdict[ii]['data']
+            #print(data_string)
+            data_dict = json.loads(data_string)
+            
+            swap_dict[ii]['swapID'] = swap_rawdict[ii]['swapID']
+            swap_dict[ii]['timeStamp'] = swap_rawdict[ii]['timeStamp']
+            swap_dict[ii]['fromAddress'] = swap_rawdict[ii]['fromAddress']
+            swap_dict[ii]['fromAsset'] = swap_rawdict[ii]['fromAsset']
+            swap_dict[ii]['toAsset'] = swap_rawdict[ii]['toAsset']
+            swap_dict[ii]['recCreated'] = swap_rawdict[ii]['recCreated']
+            swap_dict[ii]['height'] = swap_rawdict[ii]['height']
+            swap_dict[ii]['hash'] = swap_rawdict[ii]['hash']
+            swap_dict[ii]['size'] = swap_rawdict[ii]['size']
+            swap_dict[ii]['Description'] = data_dict['Description']
+            swap_dict[ii]['FromStartTime'] = data_dict['FromStartTime']
+            swap_dict[ii]['ToEndTime'] = data_dict['ToEndTime']
+            swap_dict[ii]['MinFromAmount'] = data_dict['MinFromAmount']
+            swap_dict[ii]['MinToAmount'] = data_dict['MinToAmount']
+            swap_dict[ii]['SwapSize'] = data_dict['SwapSize']
+            swap_dict[ii]['Targes'] = data_dict['Targes']
+            swap_dict[ii]['Time'] = data_dict['Time']
+            swap_dict[ii]['ToAssetID'] = data_dict['ToAssetID']
+        
+        
+        
+        return swap_dict
+ 
+ 
+ 
+ #{'swapID': '0xcd03aab4578cf888ccb7f1b85789f47b28e575dbf47fe08ad8f07999ecaab9c8', 'recCreated': '2019-09-27T20:51:05.000Z', 'height': 591526, 'timeStamp': 1569617445, 'hash': '0x83b7b3df2120f988d7c689b55ecc1633684d7b8c12c4c741758c52a35a6b87bb', 'fromAddress': '0xe447440240fa0b591c54bdd60cc7310b65b57da7', 'fromAsset': '0xdb8906b30dd27229a30c08045828fabb7fdf63c1290748186f3ce1bfdcd1e2df', 'toAsset': '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'size': 1, 'data': '{"Description":"","FromAssetID":"0xdb8906b30dd27229a30c08045828fabb7fdf63c1290748186f3ce1bfdcd1e2df","FromEndTime":18446744073709551615,"FromStartTime":0,"MinFromAmount":100,"MinToAmount":10000000000000000000,"SwapID":"0xcd03aab4578cf888ccb7f1b85789f47b28e575dbf47fe08ad8f07999ecaab9c8","SwapSize":1,"Targes":[],"Time":1569617432,"ToAssetID":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","ToEndTime":18446744073709551615,"ToStartTime":0}'}
+
+
+    def numToDatetime(self,tdelta):
+        if tdelta >= self.consts['BN']:
+            return 'infinity'
+        else:
+            return numToDatetime(tdelta)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
     
     #def estimateGas(self, transaction, block_identifier=None):
         #if 'from' not in transaction and is_checksum_address(self.defaultAccount):

@@ -11,16 +11,7 @@ from getpass import getpass
 #web3fusion
 from  web3fsnpy import Fsn
 
-linkToChain = {
-    'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
-    'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
-    'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
-    'private_key'     : os.environ["FSN_PRIVATE_KEY"],  # Do not include (comment out) for just read transactions
-}
 
-web3fsn = Fsn(linkToChain)
-
-#
 #
 # Don't leave a private key hardcoded, so you could use an environmental variable to store it
 #
@@ -29,6 +20,19 @@ try:
 except KeyError: 
    print('Set environment variable FSN_PRIVATE_KEY to be private key of sending wallet (without 0x prefix)')
    sys.exit(1)
+
+
+
+linkToChain = {
+    'network'     : 'testnet',                          # One of 'testnet', or 'mainnet'
+    'provider'    : 'WebSocket',                        # One of 'WebSocket', 'HTTP', or 'IPC'
+    'gateway'     : 'default',                          # Either set to 'default', or specify your uri endpoint
+    'private_key' : private_key_sender,                 # Do not include (comment out) for just read transactions
+}
+
+web3fsn = Fsn(linkToChain)
+
+#
 
 
 pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"

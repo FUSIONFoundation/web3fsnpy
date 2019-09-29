@@ -45,7 +45,7 @@ It is best practice to operate within a virtualenv when modifying code, so as to
 
 # Bugs and enhancements
 
-Please report bugs or suggest enhancements by creating a git pull request at https://github.com/FUSIONFoundation/web3fsnpy
+Please report bugs or suggest enhancements by creating a git pull request to https://github.com/FUSIONFoundation/web3fsnpy
 
 
 
@@ -70,7 +70,7 @@ You can easily interact with other Fusion developers through its Telegram channe
 
 Here you can discuss new project ideas, or seek technical assistance from other developers and the Fusion technical team.
 
-If you have some code that you would like to add to the repository, please create a pull request at https://github.com/FUSIONFoundation/web3fsnpy 
+If you have some code that you would like to add to the repository, please create a pull request to https://github.com/FUSIONFoundation/web3fsnpy 
 
 and let's create a powerful resource for all developers.
 
