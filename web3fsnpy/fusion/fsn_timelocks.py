@@ -5,6 +5,22 @@ from eth_utils.toolz import (
     merge,
 )
 
+
+from eth_utils import (
+    to_bytes,
+    to_int,
+    is_bytes,
+    is_boolean,
+    is_bytes,
+    is_hex,
+    is_null,
+    is_integer,
+    is_string,
+    is_dict,
+    is_list_like,
+    keccak,
+)
+
 from cytoolz import (
     pipe,
 )
@@ -44,10 +60,11 @@ from dateutil import tz
 def dateStringToDatetime(datestring):
 #
 # Example of valid dates 
-#"2007-03-01T13:00:00+0100"  or  UTC = "2007-03-01T12:00:00"
+#"2007-03-01T13:00:00+0100"  or  UTC = "2007-03-01T12:00:00" or UTC = "2019-09-18T19:29:05.000Z"
     
-    if len(datestring) == 19:
+    if len(datestring) == 19 or datestring[23] == 'Z':
         datestring = datestring + '+0000'          # Assume the user meant UTC
+        
     
     try:
         dt = datetime.strptime(datestring, '%Y-%m-%dT%H:%M:%S%z')
@@ -64,6 +81,24 @@ def datetimeToHex(dt):
     #print('tdelta = ',tdelta)
     
     return hex(tdelta)
+
+
+def numToDatetime(tdelta):
+    tzero = datetime.strptime('1970-01-01T00:00:00+0000', '%Y-%m-%dT%H:%M:%S%z')
+    if is_integer(tdelta):
+        pass
+    elif is_hex(tdelta):
+        tdelta = hex_to_integer(tdelta)
+    
+    else:
+        raise TypeError(
+            'Unrecognised raw date ', tdelta
+        )
+    
+    return tzero + timedelta(seconds = tdelta)
+
+
+
 
 
 @curry

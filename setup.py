@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     setup(
         name='web3fsnpy',  
-        version='0.7',
+        version='0.9',
         scripts=['fsnpyscript'] ,
         author="Marcel Cure",
         author_email="marcel.cure@gmail.com",
@@ -16,7 +16,6 @@ with open("README.md", "r") as fh:
         long_description_content_type="text/markdown",
         url="https://github.com/FUSIONFoundation/web3fsnpy",
         packages=find_packages(),
-        #packages=['web3fsnpy', 'fusion_tests'],
         install_requires=[
             "attrdict>=2.0.1",
             "attrs>=19.1.0",
@@ -52,7 +51,6 @@ with open("README.md", "r") as fh:
             "web3>=5.1.0",
         ],
         setup_requires=['setuptools-markdown'],
-        #py_modules=['webfsnpy', 'fusion_tests'],
         classifiers=[
          "Programming Language :: Python :: 3",
          "License :: OSI Approved :: MIT License",

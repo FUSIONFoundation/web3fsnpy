@@ -2,7 +2,7 @@ from web3fsnpy.fsn import (
     Fsn,
 )
 
-__version__ = "0.7"
+__version__ = "0.9"
 
 
 __all__ = [
@@ -11,6 +11,7 @@ __all__ = [
     "ticketsByAddress",
     "totalNumberOfTickets",
     "totalNumberOfTicketsByAddress",
+    "signAndTransmit",
     "sendRawTransaction",
     "sendTransaction",
     "buyRawTicket",
@@ -45,6 +46,8 @@ __all__ = [
     "getNotation",
     "getAddressByNotation",
     "getTimeLockBalance",
-    "GetAllTimeLockBalances",
+    "getAllTimeLockBalances",
+    "getAllSwaps",
+    "numToDatetime",
 ]
 
