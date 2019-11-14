@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 """
- Demonstrate sending asset tokens from your timelock balance on the Fusion blockchain to someone else's timelock using the raw transaction method. 
+ Demonstrate creating a swap on the Quantum Swap market and then recalling that swap. 
  You can use this method when you wish to sign the transaction offline and broadcast it later, 
  or if you do not have an unlocked wallet (i.e. you are not using the IPC mode).
 """

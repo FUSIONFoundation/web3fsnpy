@@ -9,7 +9,7 @@ Install some dependencies (you will need > python3.6) :-
 
 #> sudo apt install python3 python3-pip
 
-#> sudo pip3 install web3fsnpy  (or pip3 install web3fsnpy --user if you want to install a local copy)
+#> sudo pip3 install web3fsnpy  (or pip3 install web3fsnpy --user if you want to install a username only copy)
 
 You can find some example python programs at https://github.com/FUSIONFoundation/web3fsnpy/tree/master/fusion_tests 
 
@@ -20,6 +20,10 @@ You will probably need to set the environmental variable FSN_PRIVATE_KEY to be a
 Get your private key from your Fusion wallet (click on 'View details') and then :-
 
 #> export FSN_PRIVATE_KEY=XXXXXXXXXXXXXXXXXXXXXXXXXXX
+
+To update (frequent updates available) just type :-
+
+#> sudo pip3 install --update web3fsnpy  (or pip3 install --update web3fsnpy --user)
 
 
 

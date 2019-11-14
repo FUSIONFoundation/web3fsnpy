@@ -182,6 +182,9 @@ class Fsn(web3.eth.Eth):
     isChecksumAddress = staticmethod(is_checksum_address)
     toChecksumAddress = staticmethod(to_checksum_address)
     
+    
+    provider = None
+    
     acct = None            # This is the Fusion account.
     
     api = None             # This is Fusion's api
@@ -234,7 +237,7 @@ class Fsn(web3.eth.Eth):
                 elif linkToChain['provider'] == 'HTTP':
                     linkToChain['gateway'] = 'https://mainnetpublicgateway1.fusionnetwork.io:10000/'
                 elif linkToChain['provider'] == 'IPC':
-                    raise TypeError('Error: Cannot specify a default gateway for IPC')
+                    linkToChain['gateway'] = '/home/root/fusion-node/data/efsn.ipc'
         
 
         print('Connecting to : ',linkToChain['network'],linkToChain['gateway'], ' with the ',linkToChain['provider'], ' method')
@@ -245,9 +248,15 @@ class Fsn(web3.eth.Eth):
         elif linkToChain['provider'] == 'HTTP':
             self.manager = self.RequestManager(Web3.HTTPProvider(linkToChain['gateway']))
             self.web3 = Web3(Web3.HTTPProvider(linkToChain['gateway']))
-        else:
+        elif linkToChain['provider'] == 'IPC':
             self.manager = self.RequestManager(Web3.IPCProvider(linkToChain['gateway']))
             self.web3 = Web3(Web3.IPCProvider(linkToChain['gateway']))
+        else:
+            raise ValueError(
+                'Error: You must specify a provider'
+            )
+        
+        self.provider =  linkToChain['provider']
             
         modules = get_default_modules()
         attach_modules(self, modules)
@@ -331,7 +340,7 @@ class Fsn(web3.eth.Eth):
             return False
      
     def addAccount(self):
-        self.web3.middleware_onion.add(construct_sign_and_send_raw_middleware(self.acct))
+        #self.web3.middleware_onion.add(construct_sign_and_send_raw_middleware(self.acct))
         self.defaultAccount = self.acct.address
 
     def getBalance(self, account, assetId, block_identifier=None):
@@ -1307,7 +1316,26 @@ class Fsn(web3.eth.Eth):
             if key == asset_name:
                 return tokenId
         else:
+            token = self.assetNameToAssetInfo(asset_name)
+            if token == None:
+                return None
+            if not token['disabled'] and token['whiteListEnabled']:
+                return token['assetID']
             return None
+        
+        
+    def getAssetDecimals(self,asset_name):
+        if not is_string(asset_name):
+            raise TypeError(
+            'In getAssetId, the variable asset_name must be the name of an asset as a string'   
+            )
+        
+        token = self.assetNameToAssetInfo(asset_name)
+        if token == None:
+            return None
+        if not token['disabled'] and token['whiteListEnabled']:
+            return token['decimals']
+        return None
             
             
         
@@ -1451,10 +1479,17 @@ class Fsn(web3.eth.Eth):
         
         
         return swap_dict
+    
+    
  
- 
- 
- #{'swapID': '0xcd03aab4578cf888ccb7f1b85789f47b28e575dbf47fe08ad8f07999ecaab9c8', 'recCreated': '2019-09-27T20:51:05.000Z', 'height': 591526, 'timeStamp': 1569617445, 'hash': '0x83b7b3df2120f988d7c689b55ecc1633684d7b8c12c4c741758c52a35a6b87bb', 'fromAddress': '0xe447440240fa0b591c54bdd60cc7310b65b57da7', 'fromAsset': '0xdb8906b30dd27229a30c08045828fabb7fdf63c1290748186f3ce1bfdcd1e2df', 'toAsset': '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 'size': 1, 'data': '{"Description":"","FromAssetID":"0xdb8906b30dd27229a30c08045828fabb7fdf63c1290748186f3ce1bfdcd1e2df","FromEndTime":18446744073709551615,"FromStartTime":0,"MinFromAmount":100,"MinToAmount":10000000000000000000,"SwapID":"0xcd03aab4578cf888ccb7f1b85789f47b28e575dbf47fe08ad8f07999ecaab9c8","SwapSize":1,"Targes":[],"Time":1569617432,"ToAssetID":"0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff","ToEndTime":18446744073709551615,"ToStartTime":0}'}
+    def assetNameToAssetInfo(self,asset_name):
+        return self.api.assetNameToAssetInfo(asset_name)
+    
+    
+    def assetIdToAssetInfo(self,asset_Id):
+        return self.api.assetIdToAssetInfo(asset_Id)
+    
+        
 
 
     def numToDatetime(self,tdelta):
