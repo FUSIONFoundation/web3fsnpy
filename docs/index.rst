@@ -24,11 +24,9 @@ Because python is easy to learn and is platform independent, every user now has 
    
 
 
-Indices and tables
-==================
+Search
+======
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
 
 .. _Web3.js: https://github.com/ethereum/wiki/wiki/JavaScript-API

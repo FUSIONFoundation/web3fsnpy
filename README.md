@@ -2,7 +2,7 @@
 
 The Python3 implementation of FUSION’s Web3 functions
 
-All installation instructions, description of functions and examples of usage are described on http://web3fsnpy.readthedocs.io/
+All installation instructions, description of functions and examples of usage are described on the [web3fsnpy readthedocs page](https://web3fsnpy.readthedocs.io/en/latest/index.html)
 
 # Quick start
 

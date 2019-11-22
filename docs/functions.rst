@@ -16,6 +16,7 @@ The functions in *Fsn* are split up into categories below.
 Tickets
 ^^^^^^^
 
+.. function::  buyRawTicket
 
 buyRawTicket
 &&&&&&&&&&&&
@@ -36,11 +37,13 @@ def buyRawTicket(self, transaction):
 Here is an example of the function usage
     
     
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnBuyTicket.py
+.. literalinclude:: ../fusion_tests/fsnBuyTicket.py
    :language: python
    :lines: 41-65
    :emphasize-lines: 12
    
+
+.. function::  allTickets
    
 allTickets
 &&&&&&&&&&
@@ -65,7 +68,7 @@ def allTickets(self, block_identifier):
     
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnAllTickets.py
+.. literalinclude:: ../fusion_tests/fsnAllTickets.py
    :language: python
    :lines: 16-36
    :emphasize-lines: 5
@@ -100,6 +103,8 @@ Output:-
 
 
     
+.. function::  totalNumberOfTickets
+    
 totalNumberOfTickets
 &&&&&&&&&&&&&&&&&&&&
 
@@ -112,7 +117,9 @@ def totalNumberOfTickets(self, block_identifier=None):
     Returns:
         totalNoTickets (int)
         
-   
+
+        
+.. function::  ticketsByAddress
    
 ticketsByAddress
 &&&&&&&&&&&&&&&&
@@ -136,7 +143,7 @@ def ticketsByAddress(self, account, block_identifier=None):
     
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnTicketsByAddress.py
+.. literalinclude:: ../fusion_tests/fsnTicketsByAddress.py
    :language: python
    :lines: 21-33
    :emphasize-lines: 2
@@ -155,6 +162,9 @@ Output:-
 
 
     
+.. function::  totalNumberOfTicketsByAddress
+
+    
 totalNumberOfTicketsByAddress
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -170,6 +180,7 @@ def totalNumberOfTicketsByAddress(self, account, block_identifier=None):
         
     """
 
+.. function::  isAutoBuyTicket
         
 isAutoBuyTicket
 &&&&&&&&&&&&&&&
@@ -184,7 +195,8 @@ def isAutoBuyTicket(self):
         isAuto (bool)
         
     """
-    
+
+.. function::  startAutoBuyTicket
     
 startAutoBuyTicket
 &&&&&&&&&&&&&&&&&&
@@ -199,7 +211,9 @@ def startAutoBuyTicket(self):
         None
         
     """
-    
+
+.. function::   stopAutoBuyTicket   
+
 stopAutoBuyTicket
 &&&&&&&&&&&&&&&&&&
 
@@ -222,6 +236,8 @@ Transactions
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
 
+.. function::  getTransaction
+
 getTransaction
 &&&&&&&&&&&&&&
 
@@ -235,7 +251,7 @@ def getTransaction(self, TxHash):
     
 Example of usage :-
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnSendRawFSN.py
+.. literalinclude:: ../fusion_tests/fsnSendRawFSN.py
    :language: python
    :lines: 67-78
    :emphasize-lines: 2
@@ -252,7 +268,7 @@ Output :-
     Gas price   :  21  gwei
 
    
-
+.. function::  sendTransaction
 
 sendTransaction
 &&&&&&&&&&&&&&&
@@ -273,8 +289,12 @@ def sendTransaction(self,transaction):
         
     """
 
+
+
+.. function::  sendRawTransaction
+
 .. _sendRawTransaction:
-    
+
 sendRawTransaction
 &&&&&&&&&&&&&&&&&&
 
@@ -298,12 +318,14 @@ def sendRawTransaction(self,transaction, prepareOnly=False):
 
     Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnSendRawFSN.py
+.. literalinclude:: ../fusion_tests/fsnSendRawFSN.py
    :language: python
    :lines: 42-66
    :emphasize-lines: 17
    
-
+   
+.. function::  getTransactionCount
+   
 getTransactionCount
 &&&&&&&&&&&&&&&&&&&
 
@@ -321,6 +343,8 @@ def getTransactionCount(self, pub_key):
 See :ref:`sendRawTransaction` for an example of usage
 
 
+.. function::  waitForTransactionReceipt
+
 waitForTransactionReceipt
 &&&&&&&&&&&&&&&&&&&&&&&&&
 
@@ -336,6 +360,8 @@ def waitForTransactionReceipt(self, TxHash, timeout):
     
 See :ref:`sendRawTransaction` for an example of usage    
 
+
+.. function::  signAndTransmit
 
 signAndTransmit
 &&&&&&&&&&&&&&&
@@ -356,6 +382,7 @@ Assets
 
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
+.. function::  getAssetId
 
 getAssetId
 &&&&&&&&&&
@@ -376,11 +403,13 @@ def getAssetId(self, asset_name):
         
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnGetAsset.py
+.. literalinclude:: ../fusion_tests/fsnGetAsset.py
    :language: python
    :lines: 16-30
    :emphasize-lines: 8
    
+
+.. function::  getAssetDecimals
    
 
 getAssetDecimals
@@ -400,8 +429,12 @@ def getAssetId(self, asset_name):
 
     """
 
+
+
+.. function::  assetNameToAssetInfo
+
 .. _assetNameToAssetInfo:
-    
+
 assetNameToAssetInfo
 &&&&&&&&&&&&&&&&&&&&
 
@@ -419,7 +452,7 @@ def assetNameToAssetInfo(self, asset_name):
     
  Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnAssetNameToAssetInfo.py
+.. literalinclude:: ../fusion_tests/fsnAssetNameToAssetInfo.py
    :language: python
    :lines: 7-24
    :emphasize-lines: 15
@@ -450,6 +483,8 @@ def assetNameToAssetInfo(self, asset_name):
     ec5244d04ce5584eb59029d11d453b9cf92057ecc194ce2d4f12bd97'
     }
 
+
+.. function::  assetIdToAssetInfo
     
 assetIdToAssetInfo
 &&&&&&&&&&&&&&&&&&&&
@@ -465,6 +500,8 @@ def assetIdToAssetInfo(self, assetId):
         assetInfo (dict)   See :ref:`assetNameToAssetInfo` for typical output
         
     """
+
+.. function::  getAsset
     
 getAsset
 &&&&&&&&
@@ -485,7 +522,7 @@ def getAsset(self, assetId, block_identifier=None):
         
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnGetAsset.py
+.. literalinclude:: ../fusion_tests/fsnGetAsset.py
    :language: python
    :lines: 16-30
    :emphasize-lines: 9
@@ -507,6 +544,8 @@ Outputs :-
     }
 
 
+.. function::  createAsset
+    
 
 createAsset
 &&&&&&&&&&&
@@ -531,6 +570,8 @@ def createAsset(self, transaction):
         
     """
 
+.. function::  createRawAsset
+    
 createRawAsset
 &&&&&&&&&&&&&&
 
@@ -557,12 +598,13 @@ def createRawAsset(self, transaction, prepareOnly=False):
     
  Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnCreateRawAsset.py
+.. literalinclude:: ../fusion_tests/fsnCreateRawAsset.py
    :language: python
    :lines: 37-56
    :emphasize-lines: 16
    
-
+   
+.. function::  incAsset
    
 incAsset
 &&&&&&&&
@@ -584,6 +626,8 @@ def incAsset(self, transaction):
         TxHash transaction hash (hex str)
         
     """
+
+.. function:: incRawAsset 
     
 incRawAsset
 &&&&&&&&&&&
@@ -610,12 +654,13 @@ def incRawAsset(self, transaction, prepareOnly=False):
 
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnInc_and_DecRawAsset.py
+.. literalinclude:: ../fusion_tests/fsnInc_and_DecRawAsset.py
    :language: python
    :lines: 38-63
    :emphasize-lines: 22
 
    
+.. function::  decAsset
 
 decAsset
 &&&&&&&&
@@ -637,7 +682,7 @@ def decAsset(self, transaction, prepareOnly=False):
         
     """
       
-   
+.. function::  decRawAsset   
    
 decRawAsset
 &&&&&&&&&&&
@@ -661,7 +706,8 @@ def decRawAsset(self, transaction, prepareOnly=False):
         TxHash transaction hash (hex str). If prepareOnly=True, the return a Tx_dict (dict)
         
     """
-
+    
+.. function::  sendAsset
     
 sendAsset
 &&&&&&&&&
@@ -683,6 +729,7 @@ def sendAsset(self, transaction):
         
     """
 
+.. function:: sendRawAsset 
     
 sendRawAsset
 &&&&&&&&&&&&
@@ -708,7 +755,7 @@ def sendRawAsset(self, transaction, prepareOnly=False):
 
     Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnSendRawAsset.py
+.. literalinclude:: ../fusion_tests/fsnSendRawAsset.py
    :language: python
    :lines: 39-63
    :emphasize-lines: 21
@@ -721,6 +768,9 @@ Timelocks
 ^^^^^^^^^
 
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
+
+
+.. function::  getAllTimeLockBalances
 
 getAllTimeLockBalances
 &&&&&&&&&&&&&&&&&&&&&&
@@ -739,7 +789,7 @@ def getAllTimeLockBalances(self, account, block_identifier=None):
     
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnGetAllTimelockInfo.py
+.. literalinclude:: ../fusion_tests/fsnGetAllTimelockInfo.py
    :language: python
    :lines: 25-31
    :emphasize-lines: 6
@@ -768,6 +818,8 @@ Here is an example of the function usage
     AttributeDict({'StartTime': 1593031827, 'EndTime': 18446744073709551615, 'Value': '10000'})]})})
 
 
+.. function::  getTimeLockBalance
+    
 getTimeLockBalance
 &&&&&&&&&&&&&&&&&&
 
@@ -786,7 +838,7 @@ def getTimeLockBalance(self, assetId, account, block_identifier=None):
     
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnGetTimelockInfo.py
+.. literalinclude:: ../fusion_tests/fsnGetTimelockInfo.py
    :language: python
    :lines: 24-32
    :emphasize-lines: 9
@@ -830,6 +882,7 @@ Here is an example of the function usage
     5000   FSN
 
 
+.. function::  assetToTimeLock
     
     
 assetToTimeLock
@@ -855,6 +908,11 @@ def assetToTimeLock(self, transaction):
     """
     
     
+
+
+
+
+.. function::  assetToRawTimeLock
 
 .. _assetToRawTimeLock: 
 
@@ -885,11 +943,14 @@ def assetToRawTimeLock(self, transaction, prepareOnly=False):
 Here is an example of the function usage without start and end dates (see :ref:`timeLockToRawTimeLock` function below for 
 an example using 'start' and 'end'
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnToAndFromRawTimeLock.py
+.. literalinclude:: ../fusion_tests/fsnToAndFromRawTimeLock.py
    :language: python
    :lines: 40-101
    :emphasize-lines: 27,51
 
+
+.. function::  timeLockToAsset
+   
    
 timeLockToAsset
 &&&&&&&&&&&&&&&
@@ -909,7 +970,8 @@ def timeLockToAsset(self, transaction):
         
     """      
     
-   
+    
+.. function::   timeLockToRawAsset  
    
 
 timeLockToRawAsset
@@ -937,7 +999,7 @@ def timeLockToRawAsset(self, transaction, prepareOnly=False):
     See the example code for :ref:`assetToRawTimeLock` for usage
 
     
-    
+.. function::  timeLockToTimeLock   
 
 timeLockToTimeLock
 &&&&&&&&&&&&&&&&&&
@@ -961,8 +1023,12 @@ def timeLockToTimeLock(self, transaction):
     """
     
 
+
+
+.. function::  timeLockToRawTimeLock
+
 .. _timeLockToRawTimeLock:
-    
+
 timeLockToRawTimeLock
 &&&&&&&&&&&&&&&&&&&&&
 
@@ -988,7 +1054,7 @@ def timeLockToRawTimeLock(self, transaction, prepareOnly=False):
     
 Here is an example of the function usage
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnTimeLockToRawTimeLock.py
+.. literalinclude:: ../fusion_tests/fsnTimeLockToRawTimeLock.py
    :language: python
    :lines: 40-157
    :emphasize-lines: 85
@@ -1041,6 +1107,8 @@ Swaps
 
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
+.. function::  getAllSwaps
+
 getAllSwaps
 &&&&&&&&&&&
 
@@ -1076,7 +1144,7 @@ def getAllSwaps(self):
     
     Example code
     
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnGetAllSwaps.py
+.. literalinclude:: ../fusion_tests/fsnGetAllSwaps.py
    :language: python
    :lines: 28-45
    :emphasize-lines: 3
@@ -1147,6 +1215,8 @@ Output from this code :-
     
     etc.
 
+
+.. function::  makeSwap
     
 makeSwap
 &&&&&&&&
@@ -1177,7 +1247,8 @@ def makeSwap(self, transaction):
         TxHash transaction hash (hex str)
         
     """
-    
+
+.. function:: makeRawSwap 
 
 makeRawSwap
 &&&&&&&&&&&
@@ -1208,11 +1279,13 @@ def makeRawSwap(self, transaction, prepareOnly=False):
         
     """
     
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnMakeAndRecallRawSwap.py
+.. literalinclude:: ../fusion_tests/fsnMakeAndRecallRawSwap.py
    :language: python
    :lines: 39-94
    :emphasize-lines: 45
    
+
+.. function::  recallSwap
    
 recallSwap
 &&&&&&&&&&
@@ -1232,7 +1305,8 @@ def recallSwap(self, transaction):
         
     """
     
- 
+.. function::  recallRawSwap
+    
 recallRawSwap
 &&&&&&&&&&&&&
 
@@ -1255,11 +1329,13 @@ def recallRawSwap(self, transaction, prepareOnly=False):
 
 Example code :-
     
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnMakeAndRecallRawSwap.py
+.. literalinclude:: ../fusion_tests/fsnMakeAndRecallRawSwap.py
    :language: python
    :lines: 132-139
    :emphasize-lines: 8
 
+   
+.. function::  takeSwap
     
 takeSwap
 &&&&&&&&
@@ -1279,7 +1355,9 @@ def takeSwap(self, transaction):
         TxHash transaction hash (hex str)
         
     """
-  
+
+    
+.. function:: takeRawSwap 
    
 takeRawSwap
 &&&&&&&&&&&
@@ -1304,7 +1382,7 @@ def takeRawSwap(self, transaction, prepareOnly=False):
 
 Example code :-
     
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnTakeRawSwap.py
+.. literalinclude:: ../fusion_tests/fsnTakeRawSwap.py
    :language: python
    :lines: 40-60
    :emphasize-lines: 20
@@ -1315,6 +1393,8 @@ Notation (USAN)
 ^^^^^^^^^^^^^^^
 
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
+
+.. function:: getNotation 
 
 getNotation
 &&&&&&&&&&&
@@ -1333,7 +1413,9 @@ def getNotation(self, account, block_identifier=None):
     """
     
 See :ref:`genRawNotation` for an example of usage
-    
+
+.. function::  getAddressByNotation
+
 getAddressByNotation
 &&&&&&&&&&&&&&&&&&&&
 
@@ -1352,8 +1434,12 @@ def getAddressByNotation(self, notation, block_identifier=None):
     
 See :ref:`genRawNotation` for an example of usage
  
+
+
+.. function:: genRawNotation 
+
 .. _genRawNotation:
- 
+
 genRawNotation
 &&&&&&&&&&&&&&
 
@@ -1375,7 +1461,7 @@ def genRawNotation(self,transaction, prepareOnly=False):
 
 Example code :-
     
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnGenNotation.py
+.. literalinclude:: ../fusion_tests/fsnGenNotation.py
    :language: python
    :lines: 37-74
    :emphasize-lines: 11

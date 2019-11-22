@@ -7,6 +7,6 @@ We can separate out the preparation of a transaction (sending FSN, or assets, cr
 
 Here we show an example of how this is accomplished. The initial part is done using the optional *prepareOnly* flag in the function calls. The transaction dictionaries are written as JSON strings to a text file. This same text file could be sent to someone else and used to sign and send the transactions at a later time.
 
-.. literalinclude:: ../../web3fsnpy/fusion_tests/fsnOfflineTransactions.py
+.. literalinclude:: ../fusion_tests/fsnOfflineTransactions.py
    :language: python
    :lines: 42-127
