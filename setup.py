@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     setup(
         name='web3fsnpy',  
-        version='0.9',
+        version='0.9.5',
         scripts=['fsnpyscript'] ,
         author="Marcel Cure",
         author_email="marcel.cure@gmail.com",
@@ -24,7 +24,6 @@ with open("README.md", "r") as fh:
             "chardet>=3.0.4",
             "cytoolz>=0.10.0",
             "eth-abi>=2.0.0",
-            "eth-account>=0.4.0",
             "eth-hash>=0.2.0",
             "eth-keyfile>=0.5.1",
             "eth-rlp>=0.1.2",

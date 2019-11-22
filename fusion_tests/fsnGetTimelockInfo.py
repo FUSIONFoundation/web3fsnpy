@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Demonstrate getting asset information
+# Demonstrate getting timelock information about an asset for a public key
 #
 #
 from  web3fsnpy import Fsn
@@ -22,7 +22,7 @@ web3fsn = Fsn(linkToChain)
 
 
 #
-pub_key = '0x432baf0AB7261819fCf587De7e6D68f902E43195'
+pub_key = '0x3333333333333333333333333333333333333333'
 asset_name = 'FSN'
 blockNo = 'latest'
 #
@@ -35,7 +35,7 @@ print(asset_timelocks,'\n')
 #
 #
 n_items = len(asset_timelocks.Items)
-print('\nNumber of timelocked ', asset_name, ' = ',n_items,'\n')
+print('\nNumber of timelocked ', asset_name, ' items = ',n_items,'\n')
 #
 
 #

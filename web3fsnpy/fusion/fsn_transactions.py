@@ -27,7 +27,7 @@ from eth_utils import (
 )
 
 
-from eth_account._utils.transactions import (
+from ..eth_account._utils.transactions import (
     ChainAwareUnsignedTransaction,
     strip_signature,
     Transaction,
@@ -90,18 +90,22 @@ from eth_utils import (
 )
 
 
-from web3._utils.formatters import (
+from eth_utils.curried import (
     apply_formatter_at_index,
     apply_formatter_if,
     apply_formatter_to_array,
     apply_formatters_to_dict,
     apply_one_of_formatters,
+)
+
+from web3._utils.formatters import(
     hex_to_integer,
     integer_to_hex,
     is_array_of_dicts,
     is_array_of_strings,
     remove_key_if,
 )
+
 from web3._utils.encoding import (
     to_int,
     to_text,

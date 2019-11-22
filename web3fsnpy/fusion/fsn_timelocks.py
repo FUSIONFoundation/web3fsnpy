@@ -30,13 +30,13 @@ from eth_utils.curried import (
     is_address,
     text_if_str,
     to_checksum_address,
+    apply_formatter_if,
+    apply_formatters_to_dict,
+    apply_one_of_formatters,
 )
 
 
 from web3._utils.formatters import (
-    apply_formatter_if,
-    apply_formatters_to_dict,
-    apply_one_of_formatters,
     hex_to_integer,
     integer_to_hex,
     is_array_of_dicts,

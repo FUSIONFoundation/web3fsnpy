@@ -13,7 +13,7 @@ import sys
 
 
 #web3fusion
-from  from  web3fsnpy import Fsn
+from  web3fsnpy import Fsn
 
 #   Remember to set your environment variables to run this test
 #    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
@@ -33,7 +33,7 @@ web3fsn = Fsn(linkToChain)
 
 #pdb.set_trace()
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
+pub_key_sender = "0x3333333333333333333333333333333333333333"
 
 
 

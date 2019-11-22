@@ -32,8 +32,8 @@ web3fsn = Fsn(linkToChain)
 
 #pdb.set_trace()
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
-pub_key_receiver = "0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1"
+pub_key_sender = "0x3333333333333333333333333333333333333333"
+pub_key_receiver = "0x3333333333333333333333333333333333333334"
 
 asset_Id = '0x54cbfda5d4cb46ef1f63d6642f561dcd38dec9fa27a68a0408e9b2b17cc5cfc7'
 number_to_transfer = 5  # The number of tokens you wish to send
@@ -95,7 +95,6 @@ del web3fsn    # Clean up and delete the Fsn object
 print('\nWe have finished generating the transactions now. At a later time we can actually sign and transmit them...\n')
 #
 #   Remember to set your environment variables to run this test
-#    e.g. export FSN_PRIVATE_KEY=123456789123456789ABCDEF 
 
 
 

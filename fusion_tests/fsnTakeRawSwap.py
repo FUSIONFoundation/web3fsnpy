@@ -33,16 +33,16 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'  # For a private swap
+pub_key = '0x3333333333333333333333333333333333333333'  # For a private swap
 
 balanceInfo = web3fsn.getSwaps()
 
 
 number_to_receive = 1   # The number of tokens you wish to receive
 
-#nToReceive = int(number_to_receive*10**float(asset_TST2_decimals))
 
-swapHash = '0xffffff'  # Fill in correct value
+
+swapHash = '0xfffffffffffffffffffffffffffffffffffffff'  # Fill in correct value
 
 nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
 
