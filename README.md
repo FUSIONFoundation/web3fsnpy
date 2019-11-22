@@ -2,6 +2,7 @@
 
 The Python3 implementation of FUSION’s Web3 functions
 
+All installation instructions, description of functions and examples of usage are described on http://web3fsnpy.readthedocs.io/
 
 # Quick start
 
@@ -53,26 +54,10 @@ Please report bugs or suggest enhancements by creating a git pull request to htt
 
 
 
-# INTRODUCTION
+ 
 
 
-By creating a pythonic version of the JavaScript web3.js API for it's blockchain, Fusion Foundation has made it possible
-to easily unlock all the functionality that makes Fusion unique. With only single function calls, a user can now create assets, send tokens, or generate time locks to unlock the time value of assets and other cryptocurrencies locked in to Fusion's blockchain.
 
-Because python is easy to learn and is platform independent, every user now has access to Fusion's features and can combine them with every other python module, including math and scientific modules, specialist financial modules, to assist them in developing feature rich applications. 
-
-
-# Fusion's developer community
-
-You can easily interact with other Fusion developers through its Telegram channel https://t.me/FsnDevCommunity.
-
-Here you can discuss new project ideas, or seek technical assistance from other developers and the Fusion technical team.
-
-If you have some code that you would like to add to the repository, please create a pull request to https://github.com/FUSIONFoundation/web3fsnpy 
-
-and let's create a powerful resource for all developers.
-
-Don't be a stranger!
 
 
 

@@ -40,8 +40,8 @@ if not web3fsn.isConnected():
 #
 
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
-pub_key_receiver = "0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1"
+pub_key_sender = "0x3333333333333333333333333333333333333333"
+pub_key_receiver = "0x3333333333333333333333333333333333333334"
 
 
 

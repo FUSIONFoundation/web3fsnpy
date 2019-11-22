@@ -3,7 +3,7 @@ import web3
 
 import sys
 
-from eth_account import (
+from .eth_account import (
     Account,
 ) 
 
@@ -37,6 +37,7 @@ from eth_utils.curried import (
     is_string,
     remove_0x_prefix,
     text_if_str,
+    apply_formatter_if,
 )
 from eth_utils.toolz import (
     assoc,
@@ -80,10 +81,6 @@ from web3.geth import (
     GethPersonal,
     GethShh,
     GethTxPool,
-)
-
-from web3._utils.formatters import (
-    apply_formatter_if,
 )
 
 from web3._utils.blocks import (
@@ -374,7 +371,9 @@ class Fsn(web3.eth.Eth):
         
         if 'r' in Tx_dict and 's' in Tx_dict:
             if hex_to_integer(Tx_dict['r']) == 0 and hex_to_integer(Tx_dict['s']) == 0:
-                Tx_signed = SignTx(Tx_dict, self.acct)    
+                #print(Tx_dict)
+                Tx_signed = SignTx(Tx_dict, self.acct) 
+                #print('\n\nTx_signed = : ',Tx_signed)
             
                 TxHash =  self.web3.manager.request_blocking(
                     "fsntx_sendRawTransaction",
@@ -428,7 +427,29 @@ class Fsn(web3.eth.Eth):
             "fsn_totalNumberOfTicketsByAddress",
             [account, block_identifier],
         )
-
+   
+   
+   
+    def sendTransaction(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict of a transaction'
+            )
+        
+        return self.web3.manager.request_blocking(
+            "eth_sendTransaction",
+            [transaction],
+        )
+    
+   
 
     def sendRawTransaction(self,transaction, prepareOnly=False):
         
@@ -459,6 +480,7 @@ class Fsn(web3.eth.Eth):
             return transaction
         else:
             Tx_signed = self.acct.sign_transaction(transaction)
+            #print(Tx_signed)
             TxHash =  self.web3.manager.request_blocking(
                 "eth_sendRawTransaction",
                 [Tx_signed.rawTransaction],
@@ -467,27 +489,7 @@ class Fsn(web3.eth.Eth):
        
 
 
-    
-    def sendTransaction(self, transaction):
-        if self.acct == None:
-            raise PrivateKeyNotSet (
-                'No private key was set for this unsigned transaction'
-            )
-        if transaction['from'] != self.acct.address:
-            raise BadSendingAddress (
-                'The public key you are sending from does not match the account for the private key'
-            )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict of a transaction'
-            )
-        
-        return self.web3.manager.request_blocking(
-            "eth_sendTransaction",
-            [transaction],
-        )
-    
-    
+  
     
     def buyRawTicket(self, transaction, prepareOnly=False):
         
@@ -540,7 +542,7 @@ class Fsn(web3.eth.Eth):
         
         Tx =  buildBuyTicketTx(transaction, self.__defaultChainId)
       
-        print('\n',Tx,'\n')
+        #print('\n',Tx,'\n')
 
         TxHash = self.web3.manager.request_blocking(
             "fsntx_buyTicket", 
@@ -551,71 +553,6 @@ class Fsn(web3.eth.Eth):
         return TxHash
 
     
-
-    def genRawNotation(self,transaction, prepareOnly=False):
-        
-        if prepareOnly == False:
-            if self.acct == None:
-                raise PrivateKeyNotSet (
-                    'No private key was set for this unsigned transaction'
-                )
-            if transaction['from'] != self.acct.address:
-                raise BadSendingAddress (
-                    'The public key you are sending from does not match the account for the private key'
-                )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict that is required for the genRawNotation method'
-            )
-        
-        if 'gasPrice' in transaction:
-            if transaction['gasPrice'] == 'default':
-                transaction['gasPrice'] = hex(to_wei(self.__defaultGenNotationGasPrice, 'ether'))    #  Fusion gas price for GenNotation
-        
-        Tx =  buildGenNotationTx(transaction, self.__defaultChainId)
-        Tx =  self.web3.manager.request_blocking(
-            "fsntx_buildGenNotationTx",
-            [Tx],
-        )
-        Tx_dict = dict(Tx)
-        
-        Tx_dict['chainId'] = self.__defaultChainId
-        
-     
-        if prepareOnly == True:
-            return Tx_dict
-        else:
-            return self.signAndTransmit(Tx_dict)
-
-
-
-    def genNotation(self, transaction):
-        if self.acct == None:
-            raise PrivateKeyNotSet (
-                'No private key was set for this unsigned transaction'
-            )
-        if transaction['from'] != self.acct.address:
-            raise BadSendingAddress (
-                'The public key you are sending from does not match the account for the private key'
-            )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict that is required for the genNotation method'
-            )
-        
-        
-        Tx =  buildGenNotationTx(transaction, self.__defaultChainId)
-      
-        print('\n',Tx,'\n')
-
-        TxHash = self.web3.manager.request_blocking(
-            "fsntx_genNotation", 
-            [Tx]
-        )
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genNotation",Tx)
-        #print(json_rpc)
-        return TxHash
-
 
 
     def createRawAsset(self, transaction, prepareOnly=False):
@@ -635,15 +572,14 @@ class Fsn(web3.eth.Eth):
                 transaction['gasPrice'] = hex(to_wei(self.__defaultGenAssetGasPrice, 'ether'))    #  Fusion gas price for GenAsset
         
         Tx =  buildGenAssetTx(transaction, self.__defaultChainId)
-        Tx =  self.web3.manager.request_blocking(
+        Txnew =  self.web3.manager.request_blocking(
             "fsntx_buildGenAssetTx",
             [Tx],
         )
-        Tx_dict = dict(Tx)
+        Tx_dict = dict(Txnew)
         
         
         Tx_dict['chainId'] = self.__defaultChainId
-        
      
         if prepareOnly == True:
             return Tx_dict
@@ -663,9 +599,13 @@ class Fsn(web3.eth.Eth):
             )
         
         
-        Tx =  buildGenAssetTx(transaction, self.__defaultChainId)
+        Txnew =  buildGenAssetTx(transaction, self.__defaultChainId)
+        
+        Tx_dict = dict(Txnew)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
       
-        print('\n',Tx,'\n')
 
         TxHash = self.web3.manager.request_blocking(
             "fsntx_genAsset", 
@@ -729,6 +669,9 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the incAsset method'
             )
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultIncDecAssetGasPrice, 'ether'))    #  Fusion gas price for incAsset
         
         Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
       
@@ -739,6 +682,35 @@ class Fsn(web3.eth.Eth):
             [Tx]
         )
         #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_incAsset",Tx)
+        #print(json_rpc)
+        return TxHash
+  
+
+  
+    def decAsset(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the decAsset method'
+            )
+        
+        
+        Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
+      
+        print('\n',Tx,'\n')
+
+        TxHash = self.web3.manager.request_blocking(
+            "fsntx_decAsset", 
+            [Tx]
+        )
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_decAsset",Tx)
         #print(json_rpc)
         return TxHash
  
@@ -778,9 +750,10 @@ class Fsn(web3.eth.Eth):
             return Tx_dict
         else:
             return self.signAndTransmit(Tx_dict)
+
  
-  
-    def decAsset(self, transaction):
+
+    def sendAsset(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -791,21 +764,23 @@ class Fsn(web3.eth.Eth):
             )
         if not isinstance(transaction,dict):
             raise TypeError(
-                'This does not look like a dict that is required for the decAsset method'
+                'This does not look like a dict that is required for the sendAsset method'
             )
         
         
-        Tx =  buildIncAssetTx(transaction, self.__defaultChainId)
-      
+        Tx =  buildSendAssetTx(transaction, self.__defaultChainId)
+        
         print('\n',Tx,'\n')
-
-        TxHash = self.web3.manager.request_blocking(
-            "fsntx_decAsset", 
-            [Tx]
-        )
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_decAsset",Tx)
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendAsset",Tx)
         #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_sendAsset",
+            [Tx],
+        )
         return TxHash
+
 
 
     def sendRawAsset(self, transaction, prepareOnly=False):
@@ -845,71 +820,6 @@ class Fsn(web3.eth.Eth):
             return self.signAndTransmit(Tx_dict)
 
 
-    def sendAsset(self, transaction):
-        if self.acct == None:
-            raise PrivateKeyNotSet (
-                'No private key was set for this unsigned transaction'
-            )
-        if transaction['from'] != self.acct.address:
-            raise BadSendingAddress (
-                'The public key you are sending from does not match the account for the private key'
-            )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict that is required for the sendAsset method'
-            )
-        
-        
-        Tx =  buildSendAssetTx(transaction, self.__defaultChainId)
-        
-        print('\n',Tx,'\n')
-        
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendAsset",Tx)
-        #print(json_rpc)
-        
-        TxHash =  self.web3.manager.request_blocking(
-            "fsntx_sendAsset",
-            [Tx],
-        )
-        return TxHash
-
-
-    def assetToRawTimeLock(self, transaction, prepareOnly=False):
-
-        if prepareOnly == False:
-            if self.acct == None:
-                raise PrivateKeyNotSet (
-                    'No private key was set for this unsigned transaction'
-                )
-            if transaction['from'] != self.acct.address:
-                raise BadSendingAddress (
-                    'The public key you are sending from does not match the account for the private key'
-                )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict that is required for the assetToRawTimeLock method'
-            )
-        
-        if 'gasPrice' in transaction:
-            if transaction['gasPrice'] == 'default':
-                transaction['gasPrice'] = hex(to_wei(self.__defaultAssetToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
-        
-        Tx = buildAssetToTimeLockTx(transaction, self.__defaultChainId)
-        Tx =  self.web3.manager.request_blocking(
-            "fsntx_buildAssetToTimeLockTx",
-            [Tx],
-        )
-        
-        Tx_dict = dict(Tx)
-        
-        
-        Tx_dict['chainId'] = self.__defaultChainId
-             
-        if prepareOnly == True:
-            return Tx_dict
-        else:
-            return self.signAndTransmit(Tx_dict)
-
 
     def assetToTimeLock(self, transaction):
         if self.acct == None:
@@ -938,6 +848,76 @@ class Fsn(web3.eth.Eth):
             [Tx],
         )
         return TxHash
+
+
+
+
+    def assetToRawTimeLock(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the assetToRawTimeLock method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultAssetToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
+        Tx = buildAssetToTimeLockTx(transaction, self.__defaultChainId)
+        Txnew =  self.web3.manager.request_blocking(
+            "fsntx_buildAssetToTimeLockTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Txnew)
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
+    def timeLockToAsset(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the timeLockToAsset method'
+            )
+        
+        
+        Tx =  buildTimeLockToAssetTx(transaction, self.__defaultChainId)
+        
+        print('\n',Tx,'\n')
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_timeLockToAsset",Tx)
+        #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_timeLockToAsset",
+            [Tx],
+        )
+        return TxHash
+
+
 
 
     def timeLockToRawAsset(self, transaction, prepareOnly=False):
@@ -977,7 +957,7 @@ class Fsn(web3.eth.Eth):
 
 
 
-    def timeLockToAsset(self, transaction):
+    def timeLockToTimeLock(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -988,22 +968,23 @@ class Fsn(web3.eth.Eth):
             )
         if not isinstance(transaction,dict):
             raise TypeError(
-                'This does not look like a dict that is required for the timeLockToAsset method'
+                'This does not look like a dict that is required for the timeLockToTimeLock method'
             )
         
         
-        Tx =  buildAssetToTimeLockTx(transaction, self.__defaultChainId)
+        Tx =  buildTimeLockToTimeLockTx(transaction, self.__defaultChainId)
         
-        print('\n',Tx,'\n')
+        #print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_timeLockToAsset",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_timeLockToTimeLock",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
-            "fsntx_timeLockToAsset",
+            "fsntx_timeLockToTimeLock",
             [Tx],
         )
         return TxHash
+
 
 
     def timeLockToRawTimeLock(self, transaction, prepareOnly=False):
@@ -1027,12 +1008,12 @@ class Fsn(web3.eth.Eth):
                 transaction['gasPrice'] = hex(to_wei(self.__defaultTimeLockToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
         
         Tx = buildTimeLockToTimeLockTx(transaction, self.__defaultChainId)
-        Tx =  self.web3.manager.request_blocking(
+        Txnew =  self.web3.manager.request_blocking(
             "fsntx_buildTimeLockToTimeLockTx",
             [Tx],
         )
         
-        Tx_dict = dict(Tx)
+        Tx_dict = dict(Txnew)
         
         
         Tx_dict['chainId'] = self.__defaultChainId
@@ -1044,7 +1025,7 @@ class Fsn(web3.eth.Eth):
 
 
 
-    def timeLockToTimeLock(self, transaction):
+    def makeSwap(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -1055,22 +1036,23 @@ class Fsn(web3.eth.Eth):
             )
         if not isinstance(transaction,dict):
             raise TypeError(
-                'This does not look like a dict that is required for the timeLockToTimeLock method'
+                'This does not look like a dict that is required for the makeSwap method'
             )
         
         
-        Tx =  buildTimeLockToTimeLockTx(transaction, self.__defaultChainId)
+        Tx =  buildMakeSwapTx(transaction, self.__defaultChainId)
         
-        print('\n',Tx,'\n')
+        #print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_timeLockToTimeLock",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_makeSwap",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
-            "fsntx_timeLockToTimeLock",
+            "fsntx_makeSwap",
             [Tx],
         )
         return TxHash
+
 
 
 
@@ -1112,7 +1094,7 @@ class Fsn(web3.eth.Eth):
 
 
 
-    def makeSwap(self, transaction):
+    def recallSwap(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -1123,19 +1105,19 @@ class Fsn(web3.eth.Eth):
             )
         if not isinstance(transaction,dict):
             raise TypeError(
-                'This does not look like a dict that is required for the makeSwap method'
+                'This does not look like a dict that is required for the recallSwap method'
             )
         
         
         Tx =  buildMakeSwapTx(transaction, self.__defaultChainId)
         
-        print('\n',Tx,'\n')
+        #print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_makeSwap",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_recallSwap",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
-            "fsntx_makeSwap",
+            "fsntx_recallSwap",
             [Tx],
         )
         return TxHash
@@ -1180,7 +1162,7 @@ class Fsn(web3.eth.Eth):
 
 
 
-    def recallSwap(self, transaction):
+    def takeSwap(self, transaction):
         if self.acct == None:
             raise PrivateKeyNotSet (
                 'No private key was set for this unsigned transaction'
@@ -1191,19 +1173,19 @@ class Fsn(web3.eth.Eth):
             )
         if not isinstance(transaction,dict):
             raise TypeError(
-                'This does not look like a dict that is required for the recallSwap method'
+                'This does not look like a dict that is required for the takeSwap method'
             )
         
         
-        Tx =  buildMakeSwapTx(transaction, self.__defaultChainId)
+        Tx =  buildTakeSwapTx(transaction, self.__defaultChainId)
         
-        print('\n',Tx,'\n')
+        #print('\n',Tx,'\n')
         
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_recallSwap",Tx)
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_takeSwap",Tx)
         #print(json_rpc)
         
         TxHash =  self.web3.manager.request_blocking(
-            "fsntx_recallSwap",
+            "fsntx_takeSwap",
             [Tx],
         )
         return TxHash
@@ -1245,36 +1227,6 @@ class Fsn(web3.eth.Eth):
             return Tx_dict
         else:
             return self.signAndTransmit(Tx_dict)
-
-
-
-    def takeSwap(self, transaction):
-        if self.acct == None:
-            raise PrivateKeyNotSet (
-                'No private key was set for this unsigned transaction'
-            )
-        if transaction['from'] != self.acct.address:
-            raise BadSendingAddress (
-                'The public key you are sending from does not match the account for the private key'
-            )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict that is required for the takeSwap method'
-            )
-        
-        
-        Tx =  buildTakeSwapTx(transaction, self.__defaultChainId)
-        
-        print('\n',Tx,'\n')
-        
-        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_takeSwap",Tx)
-        #print(json_rpc)
-        
-        TxHash =  self.web3.manager.request_blocking(
-            "fsntx_takeSwap",
-            [Tx],
-        )
-        return TxHash
 
 
 
@@ -1393,7 +1345,74 @@ class Fsn(web3.eth.Eth):
             [notation, block_identifier],
         )
         return notation
-    
+
+
+    def genNotation(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the genNotation method'
+            )
+        
+        
+        Tx =  buildGenNotationTx(transaction, self.__defaultChainId)
+      
+        #print('\n',Tx,'\n')
+
+        TxHash = self.web3.manager.request_blocking(
+            "fsntx_genNotation", 
+            [Tx]
+        )
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_genNotation",Tx)
+        #print(json_rpc)
+        return TxHash
+
+ 
+   
+    def genRawNotation(self,transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the genRawNotation method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultGenNotationGasPrice, 'ether'))    #  Fusion gas price for GenNotation
+        
+        Tx =  buildGenNotationTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildGenNotationTx",
+            [Tx],
+        )
+        Tx_dict = dict(Tx)
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+        
+     
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
 
         
     def getTimeLockBalance(self, assetId, account, block_identifier=None):

@@ -34,11 +34,11 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
-pub_key_receiver = "0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1"
+pub_key_sender = "0x3333333333333333333333333333333333333333"
+pub_key_receiver = "0x3333333333333333333333333333333333333334"
 
 asset_Id = '0x3ddec7217915b0c145da683402cfbb94c1b160d23a432f75a39e33e2db091437'
-number_to_transfer = 5  # The number of tokens you wish to send
+number_to_transfer = 0.4  # The number of tokens you wish to send
 
 # Find out some information about this asset
 asset_dict = web3fsn.getAsset(asset_Id,'latest')
@@ -75,7 +75,7 @@ print('Transaction hash = ',TxHash)
 #
 # We can optionally wait for the transaction to occur and block execution until it has done so, or times out after timeout seconds
 print('Waiting for transaction to go through...')
-web3fsn.waitForTransactionReceipt(TxHash, timeout=20)
+web3fsn.waitForTransactionReceipt(TxHash, timeout=120)
 #
 #
 res = web3fsn.getTransaction(TxHash)
@@ -87,7 +87,7 @@ res = web3fsn.getTransaction(TxHash)
 asset_timelocks = web3fsn.getTimeLockBalance(asset_Id, pub_key_sender, 'latest')
 #
 n_items = len(asset_timelocks.Items)
-print('\nNumber of timelocked ', asset_name, ' = ',n_items,'\n')
+print('\nNumber of timelocked ', asset_name, ' items = ',n_items,'\n')
 #
 #
 for i in range(n_items):
@@ -128,18 +128,19 @@ print('Transaction hash = ',TxHash)
 #
 # We can optionally wait for the transaction to occur and block execution until it has done so, or times out after timeout seconds
 print('Waiting for transaction to go through...')
-web3fsn.waitForTransactionReceipt(TxHash, timeout=20)
+web3fsn.waitForTransactionReceipt(TxHash, timeout=120)
 #
 #
 res = web3fsn.getTransaction(TxHash)
 #
+#print(res)
 #
 # Show the timelocks for the pub_key_sender
 #
 asset_timelocks = web3fsn.getTimeLockBalance(asset_Id, pub_key_sender, 'latest')
 #
 n_items = len(asset_timelocks.Items)
-print('\nNumber of timelocked ', asset_name, ' = ',n_items,'\n')
+print('\nNumber of timelocked ', asset_name, ' items = ',n_items,'\n')
 #
 #
 for i in range(n_items):

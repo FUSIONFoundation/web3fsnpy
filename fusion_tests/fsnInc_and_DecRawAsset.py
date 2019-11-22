@@ -32,8 +32,8 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
-pub_key_receiver = "0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1"
+pub_key_sender = "0x3333333333333333333333333333333333333333"
+pub_key_receiver = "0x3333333333333333333333333333333333333333"
 
 asset_Id = '0x5fd3f254ae34bf9bf9dc46f72e4fbbc75844dbe6823f970fa3f7aaedb2925ff6'
 number_to_increase = 5  # The number of tokens you wish to increment by and to send

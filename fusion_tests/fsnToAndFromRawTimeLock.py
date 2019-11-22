@@ -34,8 +34,8 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
-pub_key_receiver = "0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1"
+pub_key_sender = "0x3333333333333333333333333333333333333333"
+pub_key_receiver = "0x3333333333333333333333333333333333333334"
 
 asset_Id = '0x3ddec7217915b0c145da683402cfbb94c1b160d23a432f75a39e33e2db091437'
 number_to_transfer = 5  # The number of tokens you wish to send

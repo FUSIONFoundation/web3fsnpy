@@ -48,6 +48,9 @@ __all__ = [
     "getTimeLockBalance",
     "getAllTimeLockBalances",
     "getAllSwaps",
+    "assetNameToAssetInfo",
+    "assetIdToAssetInfo",
     "numToDatetime",
+    
 ]
 

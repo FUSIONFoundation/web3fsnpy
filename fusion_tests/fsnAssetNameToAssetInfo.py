@@ -15,20 +15,11 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 #
 #
-#asset_name = 'FSN'
-asset_name = 'TST5'
-blockNo = 'latest'
+asset_name = 'FSN'
 #
 #
-asset_Id = web3fsn.getAssetId(asset_name)
-print('asset_Id = ',asset_Id)
+assetInfo = web3fsn.assetNameToAssetInfo(asset_name)
 #
-if asset_Id != None:
-    asset_dict = web3fsn.getAsset(asset_Id,blockNo)
+print(assetInfo)
 #
-#   print(asset_dict,'\n')
-#
-#
-    for key, Id in asset_dict.items():
-        print(key, ' :    ', Id)
 

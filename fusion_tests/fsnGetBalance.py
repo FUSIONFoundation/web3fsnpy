@@ -19,7 +19,7 @@ blockNo = 'latest'
 #
 asset_Id = web3fsn.getAssetId(asset_name)   # Or you can put the asset ID as a hex number here if it is not a 'standard' asset.
 #
-pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'
+pub_key = '0x3333333333333333333333333333333333333333'
 #
 bal = web3fsn.getBalance(pub_key, asset_Id, blockNo)
 #

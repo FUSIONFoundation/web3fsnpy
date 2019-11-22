@@ -32,7 +32,7 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
+pub_key = "0x3333333333333333333333333333333333333333"
 
 
 nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
@@ -43,7 +43,7 @@ transaction = {
   "from":       pub_key,
   "name":       "TestCoin",
   "nonce":       nonce,
-  "symbol":     "TST4",
+  "symbol":     "TST5",
   "decimals":   1,
   "total":      2000,
   "canChange":  True,

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Demonstrate getting asset information
+# Demonstrate getting timelock balances information
 #
 #web3fusion
 from  web3fsnpy import Fsn
@@ -23,7 +23,7 @@ web3fsn = Fsn(linkToChain)
 
 
 #
-pub_key = '0x432baf0AB7261819fCf587De7e6D68f902E43195'
+pub_key = '0x3333333333333333333333333333333333333333'
 blockNo = 'latest'
 #
 #
