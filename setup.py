@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
     setup(
         name='web3fsnpy',  
-        version='0.9.5',
+        version='0.9.8',
         scripts=['fsnpyscript'] ,
         author="Marcel Cure",
         author_email="marcel.cure@gmail.com",

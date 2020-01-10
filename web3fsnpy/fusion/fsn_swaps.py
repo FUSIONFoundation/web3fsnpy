@@ -19,6 +19,20 @@ from eth_utils.curried import (
     apply_one_of_formatters,
 )
 
+from eth_utils import (
+    to_bytes,
+    to_int,
+    is_bytes,
+    is_boolean,
+    is_bytes,
+    is_hex,
+    is_null,
+    is_integer,
+    is_string,
+    is_dict,
+    is_list_like,
+    keccak,
+)
 
 from web3._utils.formatters import (
     hex_to_integer,
@@ -26,6 +40,11 @@ from web3._utils.formatters import (
     is_array_of_dicts,
     is_array_of_strings,
     remove_key_if,
+)
+
+from web3._utils.encoding import (
+    to_hex,
+    to_int,
 )
 
 from web3.datastructures import (
@@ -74,7 +93,7 @@ MAKESWAP_FORMATTERS = {
     'ToEndTime':        apply_formatter_if(ascii, to_hex_if_datestring),
     'MinToAmount':      to_hex_if_integer_or_ascii,
     'SwapSize':         to_integer_if_hex,
-    #'Targes':           to_checksum_address,
+    'Targes':           to_checksum_address,
     'chainId':          to_hex_if_integer_or_ascii,
 }
 
@@ -145,6 +164,136 @@ def assert_check_makeswap_params(makeswap_params):
     for param in REQUIRED_MAKESWAP_PARAMS:
         if param not in makeswap_params:
             raise ValueError('{} is required as an make swap parameter'.format(param))
+
+
+
+##############################################################################################
+
+
+
+def buildMakeMultiSwapTx(transaction, defaultChainId):
+    tx = transaction['params']
+    if len(tx) > 0:
+        #print(tx)
+        for ii in range(len(tx)):
+            if 'ToAssetID' not in tx[ii]:
+                raise ValueError('In buildMakeMultiSwapTx, could not find ToAssetID in tx')
+            elif not isinstance(tx[ii]['ToAssetID'], list):
+                raise ValueError('In buildMakeMultiSwapTx, ToAssetID is not a list')
+            else:
+                nToAsset = len(tx[ii]['ToAssetID'])
+                if 'ToStartTime' not in tx[ii]:
+                    tx[ii]['ToStartTime'] = []
+                    for jj in range(nToAsset):
+                        tx[ii]['ToStartTime'].append(to_hex_if_datestring('now'))
+                else:
+                    if not isinstance(tx[ii]['ToStartTime'], list):
+                        raise ValueError('In buildMakeMultiSwapTx, ToStartTime is not a list')
+                    elif len(tx[ii]['ToStartTime']) != nToAsset:
+                        raise ValueError('In buildMakeMultiSwapTx, ToStartTime list is not the same length as ToAssetID')
+                    else:
+                        for jj in range(nToAsset):
+                            tx[ii]['ToStartTime'][jj] = to_hex_if_datestring(tx[ii]['ToStartTime'][jj])
+                if 'ToEndTime' not in tx[ii]:
+                    tx[ii]['ToEndTime'] = []
+                    for jj in range(nToAsset):
+                        tx[ii]['ToEndTime'].append(to_hex_if_datestring('infinity'))
+                else:
+                    if not isinstance(tx[ii]['ToEndTime'], list):
+                        raise ValueError('In buildMakeMultiSwapTx, ToEndTime is not a list')
+                    elif len(tx[ii]['ToEndTime']) != nToAsset:
+                        raise ValueError('In buildMakeMultiSwapTx, ToEndTime list is not the same length as ToAssetID')
+                    else:
+                        for jj in range(nToAsset):
+                            tx[ii]['ToEndTime'][jj] = to_hex_if_datestring(tx[ii]['ToEndTime'][jj])
+            
+                if 'MinToAmount' not in tx[ii]:
+                    raise ValueError('In buildMakeMultiSwapTx, could not find MinToAmount in tx')
+                else:
+                    if not isinstance(tx[ii]['MinToAmount'], list):
+                        raise ValueError('In buildMakeMultiSwapTx, MinToAmount is not a list')
+                    elif len(tx[ii]['MinToAmount']) != nToAsset:
+                        raise ValueError('In buildMakeMultiSwapTx, MinToAmount list is not the same length as ToAssetID')
+                    else:
+                        for jj in range(nToAsset):
+                            tx[ii]['MinToAmount'][jj] = to_hex_if_integer_or_ascii(tx[ii]['MinToAmount'][jj])
+            
+            if 'FromAssetID' not in tx[ii]:
+                raise ValueError('In buildMakeMultiSwapTx, could not find FromAssetID in tx')
+            elif not isinstance(tx[ii]['FromAssetID'], list):
+                raise ValueError('In buildMakeMultiSwapTx, FromAssetID is not a list')
+            else:
+                nFromAsset = len(tx[ii]['FromAssetID'])
+                if 'FromStartTime' not in tx[ii]:
+                    tx[ii]['FromStartTime'] = []
+                    for jj in range(nFromAsset):
+                        tx[ii]['FromStartTime'].append(to_hex_if_datestring('now'))
+                else:
+                    if not isinstance(tx[ii]['FromStartTime'], list):
+                        raise ValueError('In buildMakeMultiSwapTx, FromStartTime is not a list')
+                    elif len(tx[ii]['FromStartTime']) != nFromAsset:
+                        raise ValueError('In buildMakeMultiSwapTx, FromStartTime list is not the same length as FromAssetID')
+                    else:
+                        for jj in range(nFromAsset):
+                            tx[ii]['FromStartTime'][jj] = to_hex_if_datestring(tx[ii]['FromStartTime'][jj])
+                    
+                if 'FromEndTime' not in tx[ii]:
+                    tx[ii]['FromEndTime'] = []
+                    for jj in range(nFromAsset):
+                        tx[ii]['FromEndTime'].append(to_hex_if_datestring('infinity'))
+                else:
+                    if not isinstance(tx[ii]['FromEndTime'], list):
+                        raise ValueError('In buildMakeMultiSwapTx, FromEndTime is not a list')
+                    elif len(tx[ii]['FromEndTime']) != nFromAsset:
+                        raise ValueError('In buildMakeMultiSwapTx, FromEndTime list is not the same length as FromAssetID')
+                    else:
+                        for jj in range(nFromAsset):
+                            tx[ii]['FromEndTime'][jj] = to_hex_if_datestring(tx[ii]['FromEndTime'][jj])
+            
+                if 'MinFromAmount' not in tx[ii]:
+                    raise ValueError('In buildMakeMultiSwapTx, could not find MinFromAmount in tx')
+                else:
+                    if not isinstance(tx[ii]['MinFromAmount'], list):
+                        raise ValueError('In buildMakeMultiSwapTx, MinFromAmount is not a list')
+                    elif len(tx[ii]['MinFromAmount']) != nFromAsset:
+                        raise ValueError('In buildMakeMultiSwapTx, MinFromAmount list is not the same length as FromAssetID')
+                    else:
+                        for jj in range(nFromAsset):
+                            tx[ii]['MinFromAmount'][jj] = to_hex_if_integer_or_ascii(tx[ii]['MinFromAmount'][jj])
+                    
+            if 'SwapSize' not in tx[ii]:
+                raise ValueError('In buildMakeMultiSwapTx, could not find SwapSize in tx')
+            else:
+                tx[ii]['SwapSize'] = to_int(tx[ii]['SwapSize'])
+        #    
+            if 'Targes' not in tx[ii]:
+                raise ValueError('In buildMakeMultiSwapTx, could not find Targes in tx')
+            elif not isinstance(tx[ii]['Targes'], list):
+                raise ValueError('In buildMakeMultiSwapTx, Targes is not a list')
+            else:
+                for jj in range(len(tx[ii]['Targes'])):
+                    if not is_address(tx[ii]['Targes'][jj]):
+                        raise ValueError('In buildMakeMultiSwapTx, found an invalid address in Targes ',tx[ii]['Targes'][jj])
+                    
+    transaction['params'] = tx
+            
+    if 'nonce' not in transaction:
+        raise ValueError('In buildMakeMultiSwapTx, could not find nonce in transaction')
+    else:
+        transaction['nonce'] = to_hex_if_integer_or_ascii(transaction['nonce'])
+        
+    if 'gas' in transaction:
+        transaction['gas'] = to_hex_if_integer_or_ascii(transaction['gas'])
+        
+    if 'gasPrice' in transaction:
+        transaction['gasPrice'] = to_hex_if_integer_or_ascii(transaction['gasPrice'])
+    
+    
+    transaction['chainId'] = to_hex_if_integer_or_ascii(defaultChainId)
+    
+    return transaction
+
+
 
 ##############################################################################################
 #

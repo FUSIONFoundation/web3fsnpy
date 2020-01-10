@@ -33,8 +33,8 @@ from .validation import (
     is_valid_address,
 )
 
-VALID_EMPTY_ADDRESSES = {None, b'', ''}
-
+#VALID_EMPTY_ADDRESSES = {None, b'', ''}
+VALID_EMPTY_ADDRESSES = {None, b'', '','0xffffffffffffffffffffffffffffffffffffffff'}
 
 def serializable_unsigned_transaction_from_dict(transaction_dict):
     assert_valid_fields(transaction_dict)

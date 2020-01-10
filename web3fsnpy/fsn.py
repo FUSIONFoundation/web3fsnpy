@@ -3,7 +3,7 @@ import web3
 
 import sys
 
-from .eth_account import (
+from eth_account import (
     Account,
 ) 
 
@@ -22,6 +22,7 @@ from eth_utils import (
     to_checksum_address,
     to_wei,
     to_int,
+    to_hex,
     is_string,
 )
 
@@ -89,6 +90,9 @@ from web3._utils.blocks import (
 from web3._utils.empty import (
     empty,
 )
+from web3._utils.request import (
+    make_post_request,
+)
 from web3._utils.encoding import (
     hex_encode_abi_type,
     to_bytes,
@@ -130,6 +134,7 @@ from web3fsnpy.fusion.fsn_timelocks import (
 
 from web3fsnpy.fusion.fsn_swaps import (
     buildMakeSwapTx,
+    buildMakeMultiSwapTx,
     buildRecallSwapTx,
     buildTakeSwapTx,
 )
@@ -144,10 +149,12 @@ from web3fsnpy.fusion.fsn_utils import (
     is_hexstr,
     block_number_formatter,
     to_boolean,
+    hex2a,
 )
 
 from web3fsnpy.fusion.fsn_timelocks import (
     numToDatetime,
+    datetimeToHex
 )
 
 
@@ -253,12 +260,12 @@ class Fsn(web3.eth.Eth):
                 'Error: You must specify a provider'
             )
         
-        self.provider =  linkToChain['provider']
+        self.gateway = linkToChain['gateway']
             
         modules = get_default_modules()
         attach_modules(self, modules)
         
-        defaultAccount = None      
+        self.defaultAccount = None      
         
         if gotprivatekey:
             #print('Adding account to list')
@@ -266,10 +273,10 @@ class Fsn(web3.eth.Eth):
   
   
         # Connect to the fusion api 
-        if defaultAccount == None:
+        if self.defaultAccount == None:
             self.api = fsnapi(None)
         else:
-            self.api = fsnapi(self.acct.address)
+            self.api = fsnapi(self.acct.address, linkToChain['network'])
             
         
         
@@ -301,6 +308,8 @@ class Fsn(web3.eth.Eth):
             "FSNToken":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
             "FSN":         "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         }
+        
+        self.burn = '0xffffffffffffffffffffffffffffffffffffffff'
 
         self.__defaultSendTransactionGasPrice       = 0.000000021          # Default gasPrice in FSN for sendTransaction
         self.__defaultGenAssetGasPrice              = 0.00009              # Default gasPrice in FSN for genAsset
@@ -342,10 +351,10 @@ class Fsn(web3.eth.Eth):
 
     def getBalance(self, account, assetId, block_identifier=None):
         if is_integer(account):
-            account = to_hex(account)
+            account = self.getAddressByNotation(account)
         if not is_address(account):
             raise TypeError(
-                'The account does not have a valid address format'
+                'The account {} does not have a valid address format. Should be a 20 character hex address'.format(account)
             )
         if not is_hexstr(assetId):
             raise TypeError(
@@ -356,10 +365,10 @@ class Fsn(web3.eth.Eth):
         else:
             block_identifier = block_number_formatter(block_identifier)
         
-        return self.web3.manager.request_blocking(
+        return int(self.web3.manager.request_blocking(
             "fsn_getBalance",
             [assetId, account, block_identifier],
-        )
+        ))
     
     
     def signAndTransmit(self, Tx_dict):
@@ -371,7 +380,7 @@ class Fsn(web3.eth.Eth):
         
         if 'r' in Tx_dict and 's' in Tx_dict:
             if hex_to_integer(Tx_dict['r']) == 0 and hex_to_integer(Tx_dict['s']) == 0:
-                #print(Tx_dict)
+                #print('before SignTx = : ',Tx_dict)
                 Tx_signed = SignTx(Tx_dict, self.acct) 
                 #print('\n\nTx_signed = : ',Tx_signed)
             
@@ -391,18 +400,37 @@ class Fsn(web3.eth.Eth):
         else:
             return TxHash
 
+
+    def allInfoByAddress(self, account, block_identifier=None):
+        if is_integer(account):
+            account = to_hex(account)
+        if not is_address(account):
+            raise TypeError(
+                'The account does not have a valid address format'
+            )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+            
+        account_dict =  self.web3.manager.request_blocking(
+            "fsn_allInfoByAddress",
+            [account, block_identifier],
+        )
+        return account_dict
                 
 
 
-    def allTickets(self, block_identifier):
-        method = "fsn_allTickets"
+    def allTickets(self, block_identifier=None):
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+            
         result = self.web3.manager.request_blocking(
-            method,
+            "fsn_allTickets",
             [block_identifier],
         )
-        if result is None:
-            raise BlockNotFound(f"Block with id: {block_identifier} not found.")
         return result
+
 
     def ticketsByAddress(self, account, block_identifier=None):
         if block_identifier is None:
@@ -427,67 +455,44 @@ class Fsn(web3.eth.Eth):
             "fsn_totalNumberOfTicketsByAddress",
             [account, block_identifier],
         )
-   
-   
-   
-    def sendTransaction(self, transaction):
-        if self.acct == None:
-            raise PrivateKeyNotSet (
-                'No private key was set for this unsigned transaction'
-            )
-        if transaction['from'] != self.acct.address:
-            raise BadSendingAddress (
-                'The public key you are sending from does not match the account for the private key'
-            )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict of a transaction'
-            )
+
+    def ticketPrice(self, block_identifier='latest'):
+        
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+        
+        return int(self.web3.manager.request_blocking(
+            "fsn_ticketPrice",
+            [block_identifier],
+        ))
+
+
+    def getStakeInfo(self, block_identifier='latest'):
+        
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
         
         return self.web3.manager.request_blocking(
-            "eth_sendTransaction",
-            [transaction],
+            "fsn_getStakeInfo",
+            [block_identifier],
         )
-    
-   
 
-    def sendRawTransaction(self,transaction, prepareOnly=False):
-        
-        if prepareOnly == False:
-            if self.acct == None:
-                raise PrivateKeyNotSet (
-                    'No private key was set for this unsigned transaction'
-                )
-            if transaction['from'] != self.acct.address:
-                raise BadSendingAddress (
-                    'The public key you are sending from does not match the account for the private key'
-                )
-        if not isinstance(transaction,dict):
-            raise TypeError(
-                'This does not look like a dict that is required for the sendRawTransaction method'
-            )
-        
-        if 'gasPrice' in transaction:
-            if transaction['gasPrice'] == 'default':
-                transaction['gasPrice'] = hex(to_wei(self.__defaultSendTransactionGasPrice, 'ether'))    #  Fusion gas price for Transaction
-            
 
-        transaction = fill_transaction_defaults(web3,transaction, self.__defaultChainId)
+    def getBlockReward(self, block_identifier='latest'):
         
-        
-     
-        if prepareOnly == True:
-            return transaction
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
         else:
-            Tx_signed = self.acct.sign_transaction(transaction)
-            #print(Tx_signed)
-            TxHash =  self.web3.manager.request_blocking(
-                "eth_sendRawTransaction",
-                [Tx_signed.rawTransaction],
-            )
-            return TxHash
-       
-
+            block_identifier = block_number_formatter(block_identifier)
+        
+        return int(self.web3.manager.request_blocking(
+            "fsn_getBlockReward",
+            [block_identifier],
+        ))
 
   
     
@@ -552,6 +557,78 @@ class Fsn(web3.eth.Eth):
         #print(json_rpc)
         return TxHash
 
+   
+   
+   
+    def sendTransaction(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict of a transaction'
+            )
+        
+        return self.web3.manager.request_blocking(
+            "eth_sendTransaction",
+            [transaction],
+        )
+    
+   
+
+    def sendRawTransaction(self,transaction, prepareOnly=False):
+        
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the sendRawTransaction method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultSendTransactionGasPrice, 'ether'))    #  Fusion gas price for Transaction
+            
+
+        transaction = fill_transaction_defaults(web3,transaction, self.__defaultChainId)
+        
+        
+     
+        if prepareOnly == True:
+            return transaction
+        else:
+            Tx_signed = self.acct.sign_transaction(transaction)
+            #print(Tx_signed)
+            TxHash =  self.web3.manager.request_blocking(
+                "eth_sendRawTransaction",
+                [Tx_signed.rawTransaction],
+            )
+            return TxHash
+       
+    
+    def getTransactionAndReceipt(self, TxHash):
+        if not is_string(TxHash):
+            raise TypeError(
+            'In getTransactionAndReceipt, the variable TxHash must be a hex string'   
+            )
+        
+        Tx_dict = self.web3.manager.request_blocking(
+            "fsn_getTransactionAndReceipt", 
+            [TxHash]
+        )
+        return dict(Tx_dict)
     
 
 
@@ -577,6 +654,8 @@ class Fsn(web3.eth.Eth):
             [Tx],
         )
         Tx_dict = dict(Txnew)
+        
+        #print('Tx = ',Tx)
         
         
         Tx_dict['chainId'] = self.__defaultChainId
@@ -873,6 +952,7 @@ class Fsn(web3.eth.Eth):
                 transaction['gasPrice'] = hex(to_wei(self.__defaultAssetToTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
         
         Tx = buildAssetToTimeLockTx(transaction, self.__defaultChainId)
+
         Txnew =  self.web3.manager.request_blocking(
             "fsntx_buildAssetToTimeLockTx",
             [Tx],
@@ -1039,6 +1119,9 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the makeSwap method'
             )
         
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultMakeSwapGasPrice, 'ether'))    #  Fusion gas price for makeSwap
         
         Tx =  buildMakeSwapTx(transaction, self.__defaultChainId)
         
@@ -1074,7 +1157,7 @@ class Fsn(web3.eth.Eth):
         
         if 'gasPrice' in transaction:
             if transaction['gasPrice'] == 'default':
-                transaction['gasPrice'] = hex(to_wei(self.__defaultMakeSwapGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+                transaction['gasPrice'] = hex(to_wei(self.__defaultMakeSwapGasPrice, 'ether'))    #  Fusion gas price for makeSwap
         
         Tx = buildMakeSwapTx(transaction, self.__defaultChainId)
         Tx =  self.web3.manager.request_blocking(
@@ -1091,6 +1174,52 @@ class Fsn(web3.eth.Eth):
             return Tx_dict
         else:
             return self.signAndTransmit(Tx_dict)
+
+
+
+    def makeRawMultiSwap(self, transaction, prepareOnly=False):
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the makeRawMultiSwap method'
+            )
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+        
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultMakeSwapGasPrice, 'ether'))    #  Fusion gas price for makeSwap
+        
+        Tx = buildMakeMultiSwapTx(transaction, self.__defaultChainId)
+        
+        #print('\n',Tx,'\n')
+        
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_makeMultiSwap",Tx['params'])
+        #print('\n',json_rpc,'\n')
+        
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildMakeMultiSwapTx",
+            Tx['params'],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        #print('After fsntx_buildMakeMultiSwapTx Tx_dict = ',Tx_dict)
+#
+        Tx_dict['nonce'] = Tx['nonce']
+        Tx_dict['chainId'] = self.__defaultChainId
+        
+       
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
 
 
 
@@ -1161,6 +1290,43 @@ class Fsn(web3.eth.Eth):
             return self.signAndTransmit(Tx_dict)
 
 
+    def recallRawMultiSwap(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the recallRawSwap method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultRecallSwapGasPrice, 'ether'))    #  Fusion gas price for recallSwap
+        
+        Tx = buildRecallSwapTx(transaction, self.__defaultChainId)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildRecallMultiSwapTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
 
     def takeSwap(self, transaction):
         if self.acct == None:
@@ -1210,11 +1376,57 @@ class Fsn(web3.eth.Eth):
         
         if 'gasPrice' in transaction:
             if transaction['gasPrice'] == 'default':
-                transaction['gasPrice'] = hex(to_wei(self.__defaultTakeSwapGasPrice, 'ether'))    #  Fusion gas price for recallSwap
+                transaction['gasPrice'] = hex(to_wei(self.__defaultTakeSwapGasPrice, 'ether'))    #  Fusion gas price for takeSwap
         
         Tx = buildTakeSwapTx(transaction, self.__defaultChainId)
+        Tx['Size'] = hex_to_integer(Tx['Size'])  # Deals with a parsing bug in fsntx_buildTakeSwapTx
+        
+        
+        #print('\n\n',transaction,'\n',Tx)
         Tx =  self.web3.manager.request_blocking(
             "fsntx_buildTakeSwapTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Tx)
+        
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+        
+
+        
+    def takeRawMultiSwap(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the takeRawSwap method'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultTakeSwapGasPrice, 'ether'))    #  Fusion gas price for takeSwap
+        
+        Tx = buildTakeSwapTx(transaction, self.__defaultChainId)
+        Tx['Size'] = hex_to_integer(Tx['Size'])  # Deals with a parsing bug in fsntx_buildTakeSwapTx
+        
+        
+        #print('\n\n',transaction,'\n',Tx)
+        Tx =  self.web3.manager.request_blocking(
+            "fsntx_buildTakeMultiSwapTx",
             [Tx],
         )
         
@@ -1276,6 +1488,8 @@ class Fsn(web3.eth.Eth):
             return None
         
         
+   
+        
     def getAssetDecimals(self,asset_name):
         if not is_string(asset_name):
             raise TypeError(
@@ -1326,6 +1540,25 @@ class Fsn(web3.eth.Eth):
             [account, block_identifier],
         )
         return notation
+    
+    
+    def getLatestNotation(self, account, block_identifier='latest'):
+        if is_integer(account):
+            account = to_hex(account)
+        if not is_address(account):
+            raise TypeError(
+                'The account does not have a valid address format'
+        )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+            
+        notation = self.web3.manager.request_blocking(
+            "fsn_getLatestNotation",
+            [account, block_identifier],
+        )
+        return notation
 
 
 
@@ -1339,6 +1572,9 @@ class Fsn(web3.eth.Eth):
             block_identifier = self.defaultBlock
         else:
             block_identifier = block_number_formatter(block_identifier)
+            
+        json_rpc = self.web3.manager.provider.encode_rpc_request("fsn_getAddressByNotation",[notation, block_identifier])
+        print(json_rpc)
             
         pub_key = self.web3.manager.request_blocking(
             "fsn_getAddressByNotation",
@@ -1457,9 +1693,9 @@ class Fsn(web3.eth.Eth):
         return timelock_dict       
             
     
-    def getAllSwaps(self):
+    def getAllSwaps(self, pageNo):
         
-        swap_rawdict = self.api.fsnapi_swaps()
+        swap_rawdict = self.api.fsnapi_swaps(pageNo)
         
         #print('swaps = ',swap_rawdict)
         
@@ -1498,30 +1734,176 @@ class Fsn(web3.eth.Eth):
         
         
         return swap_dict
+
+
+    
+    def getSwap(self, txHash, block_identifier='latest'):
+        if not is_hexstr(txHash):
+            raise TypeError(
+                'txHash must be a hex string'
+            )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+
+        swap_dict =  self.web3.manager.request_blocking(
+            "fsn_getSwap",
+            [txHash, block_identifier],
+        )
+        return swap_dict       
+    
+    
+    
+    def getMultiSwap(self, txHash, block_identifier='latest'):
+        if not is_hexstr(txHash):
+            raise TypeError(
+                'txHash must be a hex string'
+            )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+
+        swap_dict =  self.web3.manager.request_blocking(
+            "fsn_getMultiSwap",
+            [txHash, block_identifier],
+        )
+        return dict(swap_dict)
     
     
  
-    def assetNameToAssetInfo(self,asset_name):
+    def assetNameToAssetInfo(self, asset_name):
         return self.api.assetNameToAssetInfo(asset_name)
     
     
-    def assetIdToAssetInfo(self,asset_Id):
+    
+    def fsnapiVerifiedAssetInfo(self):
+        asset_dict = self.api.fsnapiVerifiedAssetInfo()
+        
+        verified_assets = []
+        ii = 0
+        
+        for asset in asset_dict:
+            if isinstance(asset, dict):
+                if not asset['disabled'] and asset['whiteListEnabled']:
+                    ii = ii+1
+                    verified_assets.append(asset['shortName'])
+                    
+        return verified_assets
+    
+    
+    def assetIdToAssetInfo(self, asset_Id):
         return self.api.assetIdToAssetInfo(asset_Id)
     
-        
+    
+    def fsnapi_swaps_pubkey(self, pubKey, pageNo):
+        swap_dict = self.api.fsnapi_swaps_pubkey(pubKey, pageNo)
+        pubkey_swaps = []
+        ii = 0
+        for swap in swap_dict:
+            if isinstance(swap, dict):
+                ii = ii+1
+                swap['data'] = json.loads(swap['data'])
+                pubkey_swaps.append(swap)   
+        if ii == 0:
+            pubkey_swaps = None
+        return pubkey_swaps
+    
+    
+    def fsnapi_swaps_target(self, pubKey, pageNo):
+        swap_dict = self.api.fsnapi_swaps_target(pubKey, pageNo)
+        target_swaps = []
+        ii = 0
+        for swap in swap_dict:
+            if isinstance(swap, dict):
+                swap['data'] = json.loads(swap['data'])
+                target_swaps.append(swap)
+        if ii == 0:
+            target_swaps = None
+        return target_swaps
+    
+    
+    def fsnapiAssetAllInfo(self, pageNo):
+        return self.api.fsnapiAssetAllInfo(pageNo)
 
 
+
+    def pubKeyInfo(self, pubKey):
+        add_info = self.api.pubKeyInfo(pubKey)['address'][0]
+        balanceInfo = json.loads(add_info['balanceInfo'])
+            
+        info_dict = {
+            'recCreated':           add_info['recCreated'],
+            'recEdited':            add_info['recEdited'],
+            'ticketsWon':           add_info['ticketsWon'],
+            'rewardEarn':           add_info['rewardEarn'],
+            'fsnBalance':           add_info['fsnBalance'],
+            'numberOfTransactions': add_info['numberOfTransactions'],
+            'usan':                 add_info['san'],
+            'assetsHeld':           add_info['assetsHeld'],
+            'balanceInfo':          balanceInfo,     # holds 'balances' and 'timeLockBalances'
+        }
+        return info_dict
+    
+    
+    def fsnprice(self):
+        return self.api.fsnprice()
+    
+    
     def numToDatetime(self,tdelta):
         if tdelta >= self.consts['BN']:
             return 'infinity'
         else:
             return numToDatetime(tdelta)
  
+    def datetimeToHex(self, dt):
+        return datetimeToHex(dt)
+    
+    def datetimeToInt(self, dt):
+        dt_hex = datetimeToHex(dt)
+        return hex_to_integer(dt_hex)
+    
+    def hex2a(self, datastr):
+        return hex2a(datastr)
  
  
+    def getBlock(self, block_identifier=None):
+        
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+            
+        
+        return int(self.web3.manager.request_blocking(
+            "eth_getBlockByNumber",
+            [block_identifier, True],
+        ))
+    
+    
+    def getTransactionByBlockNumberAndIndex(self, indx, block_identifier=None):
+        
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+            
+        
+        return self.web3.manager.request_blocking(
+            "eth_getTransactionByBlockNumberAndIndex",
+            [block_identifier, indx],
+        )
  
- 
- 
+    def transactionNoTicketsDesc(self, pageNo):
+        return self.api.transactionNoTicketsDesc(pageNo)
+    
+    
+    def transactionsDesc(self, pageNo):
+        return self.api.transactionsDesc(pageNo)
+    
+    def takeSwapsDesc(self, pageNo):
+        return self.api.takeSwapsDesc(pageNo)
  
     
     #def estimateGas(self, transaction, block_identifier=None):

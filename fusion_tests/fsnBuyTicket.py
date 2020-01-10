@@ -33,7 +33,7 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key = '0x3333333333333333333333333333333333333333'  # For a private swap
+pub_key = '0x3333333333333333333333333333333333333333' 
 
 
 print('Is autoBuyTicket set? : ',web3fsn.isAutoBuyTicket())

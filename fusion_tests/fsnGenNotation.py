@@ -32,7 +32,7 @@ web3fsn = Fsn(linkToChain)
 
 #pdb.set_trace()
 
-pub_key_sender = "0x3333333333333333333333333333333333333333"
+pub_key_sender = "0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6"
 
 
 nonce = web3fsn.getTransactionCount(pub_key_sender)  # Get the nonce for the wallet
@@ -72,5 +72,13 @@ pubk = web3fsn.getAddressByNotation(notation)
 #
 print('The public address is ',pubk)
 #
+#
+# Get the latest notation from the blockchain
+#
+##latest_notation = web3fsn.getLatestNotation(pub_key_sender)
+
+##print('Latest USAN is ',latest_notation)
+#
+
 
 

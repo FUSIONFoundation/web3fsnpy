@@ -46,9 +46,6 @@ from .fsn_utils import *
 
 
 GENASSET_DEFAULTS = {
-    #'description': 'Default token description'
-    'to':      '0xffffffffffffffffffffffffffffffffffffffff',
-    #'to':       None,
     #'gasPrice': 100000000000,
     #'gas':     90000,
     'value':   '0x0',
@@ -72,7 +69,6 @@ ASSETCREATE_FORMATTERS = {
 
 VALID_GENASSETTX_PARAMS = [
     'nonce',
-    'to',
     'gas',
     'gasPrice',
     'value',
@@ -87,7 +83,6 @@ VALID_GENASSETTX_PARAMS = [
 
 REQUIRED_GENASSETTX_PARAMS = [
     'nonce',
-    'to',
     #'gas',
     #'gasPrice',
     'value',
@@ -129,6 +124,7 @@ def assert_check_gen_asset_params(assetcreate_params):
     for param in REQUIRED_GENASSETTX_PARAMS:
         if param not in assetcreate_params:
             raise ValueError('{} is required as an asset create parameter'.format(param))
+        
 
 
 
@@ -145,6 +141,7 @@ SENDASSET_DEFAULTS = {
 SENDASSET_FORMATTERS = {
     'from': to_checksum_address,
     'to': to_checksum_address,
+    'toUSAN': apply_formatter_if(is_string, int),
     'nonce': to_hex_if_integer_or_ascii,
     'chainId': to_hex_if_integer_or_ascii,
     'gas': to_hex_if_integer_or_ascii,
@@ -158,6 +155,7 @@ VALID_SENDASSETTX_PARAMS = [
     'nonce',
     'from',
     'to',
+    'toUSAN',
     'gas',
     'gasPrice',
     'value',
@@ -168,7 +166,6 @@ VALID_SENDASSETTX_PARAMS = [
 REQUIRED_SENDASSETTX_PARAMS = [
     'nonce',
     'from',
-    'to',
     #'gas',
     #'gasPrice',
     'value',
@@ -208,6 +205,8 @@ def assert_check_send_asset_params(sendasset_params):
     for param in REQUIRED_SENDASSETTX_PARAMS:
         if param not in sendasset_params:
             raise ValueError('{} is required as a send asset parameter'.format(param))
+    if 'to' not in sendasset_params and 'toUSAN' not in sendasset_params:
+            raise ValueError('Either \'to\' or \'toUSAN\' is required as a send asset parameter'.format(param))
 
 
 #############################################################################################

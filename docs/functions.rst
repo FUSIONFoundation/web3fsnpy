@@ -16,6 +16,112 @@ The functions in *Fsn* are split up into categories below.
 Tickets
 ^^^^^^^
 
+.. function::  ticketPrice
+
+ticketPrice
+&&&&&&&&&&&
+
+def ticketPrice(self, block_identifier='latest'):
+    """Get the most recent ticket price
+    
+    Args:
+        block_idenfifier:
+                    blockNo (int), 'latest', 'earliest', or 'pending'
+                    
+    Returns:
+        ticket_price (int) in Wei
+        
+    """
+    
+.. literalinclude:: ../fusion_tests/fsnAllTickets.py
+   :language: python
+   :lines: 16-22
+   :emphasize-lines: 3
+
+   
+.. function::  getStakeInfo
+   
+
+getStakeInfo
+&&&&&&&&&&&&
+
+def getStakeInfo(self, block_identifier='latest'):
+    """Get the latest information about the nodes and their tickets
+    
+    Args:
+        block_idenfifier:
+                    blockNo (int), 'latest', 'earliest', or 'pending'
+                    
+    Returns:
+        stake_info (Attribute dict) |br|
+        'stakeInfo'[{'owner': pub_key1 (hex str), 'tickets':nTickets1 (int)},{'owner':pub_key2, 'tickets':nTickets2 }... ] |br|
+        'summary' (Attribute dict) {'totalMiners': tot, 'totalTickets':tot_tick}
+        
+    """
+    
+.. literalinclude:: ../fusion_tests/fsnAllTickets.py
+   :language: python
+   :lines: 26-33
+   :emphasize-lines: 3
+ 
+Output :-
+   
+.. code-block:: python 
+
+    >>>   
+    0x76c2ae4281fe1ee1a79ccbdda2516d4d7eb0eb37  has  380  tickets
+    0x88817ef0545ca562530f9347b20138edecfd8e30  has  374  tickets
+    0x494a792d704e24309fd778641683502fd30f9913  has  290  tickets
+    0x37afe6319dbd980741cd3bfe701f196694d20564  has  244  tickets
+    0xced7849e100c92768bebda4575db63301f5515e2  has  222  tickets
+    0x47bb222e76ff205677132fba7c6cfcddfb4128d2  has  178  tickets
+    0xb2a46485d73b47af2c7a62ed1868c48a557dddc0  has  136  tickets
+    0x1a77c95b429c0c5646476487d3faab422b541b18  has  109  tickets
+    0xd820a610ddb18dc4f54aad3c822045fd06cd5d0b  has  104  tickets
+    0x8f94b4f175298ab637f1b963a65e7fa958d2770d  has  104  tickets
+    0xf01e34f541caa4a0a1fee65fa55bbf4c19869370  has  91  tickets
+    0xe038cd04b17130a29fa82fc13d97df2f88b0bf61  has  83  tickets
+    0xfe2b17345de9fa23a7d64406b9d3146946edb125  has  78  tickets
+    0x577045c486847fa7bed968d99fa71cf43207a2e9  has  71  tickets
+    0x873aea03ea1d1db7dba59b74ce7942087ee30e12  has  69  tickets
+    0x83c42e8cc244c9f9f760b57d3fb7e5f10608119b  has  68  tickets
+    0x32220e7c4e7448211cd2cd45216bd4cf2e737dea  has  61  tickets
+    0x6aec90e7a10986c6971439784186521e57f5f4cd  has  54  tickets
+    0x0cdee0d8d79380e909be5574ba05962df50039da  has  51  tickets
+    0x8a7ec7b98ec2fbf67c131605868edc5288099005  has  49  tickets
+    0x92fd8ad0a0567d8b07f9e0e437f5728d3dbd79fd  has  46  tickets
+   
+
+   
+.. function:: getBlockReward
+
+getBlockReward
+&&&&&&&&&&&&&&
+
+def getBlockReward(self, block_identifier='latest'):
+    """Get the block reward for a block
+    
+    Args:
+        block_idenfifier:
+                    blockNo (int), 'latest', 'earliest', or 'pending'
+                    
+    Returns:
+        block_reward (int) in Wei
+        
+    """
+    
+.. literalinclude:: ../fusion_tests/fsnAllTickets.py
+   :language: python
+   :lines: 37-43
+   :emphasize-lines: 3
+    
+.. code-block:: python 
+
+    >>>
+    The block reward for the latest block was  2.500043904  FSN
+   
+   
+        
 .. function::  buyRawTicket
 
 buyRawTicket
@@ -70,8 +176,8 @@ Here is an example of the function usage
 
 .. literalinclude:: ../fusion_tests/fsnAllTickets.py
    :language: python
-   :lines: 16-36
-   :emphasize-lines: 5
+   :lines: 45-62
+   :emphasize-lines: 3
    
 
 Output:-
@@ -266,7 +372,27 @@ Output :-
     To          :  0xaa8c70e134a5A88aBD0E390F2B479bc31C70Fee1
     Value       :  0.02  FSN
     Gas price   :  21  gwei
+    
+    
+.. function:: getTransactionByBlockNumberAndIndex
 
+
+getTransactionByBlockNumberAndIndex
+&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+
+def getTransactionByBlockNumberAndIndex(self, index, block_identifier=None):
+    """Get transactions from a block with a particular index
+    
+        Args:
+            index:  (int)  Index starting at 0, |br|
+            block_identifier (int),  'latest', 'earliest', or 'pending',
+            
+        Returns:
+            blockinfo (dict)  See documentation from web3.py, since this function simply redirects to that
+    
+    """
+
+block_identifier (int),  'latest', 'earliest', or 'pending'
    
 .. function::  sendTransaction
 
@@ -382,124 +508,8 @@ Assets
 
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
-.. function::  getAssetId
-
-getAssetId
-&&&&&&&&&&
-
-def getAssetId(self, asset_name):
-    """ Retrieve the hexadecimal assetId for a given verified asset name
-    The asset *must be* 'enabled' and 'whiteListEnabled' in the fsnapi
-    
-    Args:
-        asset_name (str)   Short string asset idenfifier
-        
-    Returns:
-        assetId (hex str)  
-        
-        or None if not found or not enabled/whiteListEnabled
-
-    """
-        
-Here is an example of the function usage
-
-.. literalinclude:: ../fusion_tests/fsnGetAsset.py
-   :language: python
-   :lines: 16-30
-   :emphasize-lines: 8
-   
-
-.. function::  getAssetDecimals
-   
-
-getAssetDecimals
-&&&&&&&&&&&&&&&&
-
-def getAssetId(self, asset_name):
-    """ Retrieve the decimals for a given verified asset name
-    The asset *must be* 'enabled' and 'whiteListEnabled' in the fsnapi
-    
-    Args:
-        asset_name (str)   Short string asset idenfifier
-        
-    Returns:
-        decimals (int)  
-        
-        or None if not found or not enabled/whiteListEnabled
-
-    """
 
 
-
-.. function::  assetNameToAssetInfo
-
-.. _assetNameToAssetInfo:
-
-assetNameToAssetInfo
-&&&&&&&&&&&&&&&&&&&&
-
-def assetNameToAssetInfo(self, asset_name):
-    """ Retrieve inforamtion about a given verified asset name
-    The asset *must be* 'enabled' and 'whiteListEnabled' in the fsnapi
-    
-    Args:
-        asset_name (str)   Short string asset idenfifier
-        
-    Returns:
-        assetInfo (dict)
-        
-    """
-    
- Here is an example of the function usage
-
-.. literalinclude:: ../fusion_tests/fsnAssetNameToAssetInfo.py
-   :language: python
-   :lines: 7-24
-   :emphasize-lines: 15
-   
-.. code-block:: python 
-
-    >>>assetInfo
-    {'assetID': '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-    'recCreated': '2019-07-09T06:40:19.000Z',
-    'recEdited': '2019-07-09T06:40:19.000Z',
-    'assetAuthority': '0xcf62374bc2b4e195ca7f2aecbe0076d9d4f89d1e',
-    'name': 'Fusion',
-    'shortName': 'FSN',
-    'image': 'EFSN_LIGHT.svg',
-    'erc20': 1, 
-    'ethereum': 1, 
-    'address': '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 
-    'disabled': 0, 
-    'whiteListEnabled': 1, 
-    'bitcoin': 0, 
-    'decimals': 18, 
-    'lockInDisabled': 1, 
-    'reservedID': 1, 
-    'totalFusionSupply': '0', 
-    'msgSignedWithAssetAuthority': 'Signed:Fusion:0xfffffffffffffffffffffffffffffffffffffff
-    fffffffffffffffffffffffff:0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff:FSN', 
-    'msgSignature':'0xf92792db22d1bb53c5c2bd8ccbdbfc1745c15fba35c1c0fb65d066f6dd03db937f5257
-    ec5244d04ce5584eb59029d11d453b9cf92057ecc194ce2d4f12bd97'
-    }
-
-
-.. function::  assetIdToAssetInfo
-    
-assetIdToAssetInfo
-&&&&&&&&&&&&&&&&&&&&
-
-def assetIdToAssetInfo(self, assetId):
-    """ Retrieve inforamtion about a given verified asset name
-    The asset must be 'enabled' and 'whiteListEnabled' in the fsnapi
-    
-    Args:
-        assetId (hex str)   Hex string asset idenfifier
-        
-    Returns:
-        assetInfo (dict)   See :ref:`assetNameToAssetInfo` for typical output
-        
-    """
 
 .. function::  getAsset
     
@@ -719,7 +729,7 @@ def sendAsset(self, transaction):
         transaction :
         
         'from':       pub_key_sender (hex str), |br|
-        'to':         pub_key_receiver (hex str), |br|
+        'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
         'nonce':      nonce (int), |br|
         'asset':      asset_Id (hex str), |br|
         'value':      val (int) Number of the asset to send * decimals
@@ -741,7 +751,7 @@ def sendRawAsset(self, transaction, prepareOnly=False):
         transaction :
         
         'from':       pub_key_sender (hex str), |br|
-        'to':         pub_key_receiver (hex str), |br|
+        'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
         'nonce':      nonce (int), |br|
         'asset':      asset_Id (hex str), |br|
         'value':      val (int) Number of the asset to send * decimals
@@ -895,7 +905,7 @@ def assetToTimeLock(self, transaction):
     Args:
         transaction (dict):
             'from':     pub_key_sender (hex str), |br|
-            'to':       pub_key_receiver (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
             'nonce':    nonce (int), |br|
             'asset':    asset_Id (hex str), |br|
             'value':    nToSend (int), |br|
@@ -926,7 +936,7 @@ def assetToRawTimeLock(self, transaction, prepareOnly=False):
     Args:
         transaction (dict):
             'from':     pub_key_sender (hex str), |br|
-            'to':       pub_key_receiver (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
             'nonce':    nonce (int), |br|
             'asset':    asset_Id (hex str), |br|
             'value':    nToSend (int), |br|
@@ -961,7 +971,7 @@ def timeLockToAsset(self, transaction):
     Args:
         transaction (dict):
             'from':     pub_key_sender (hex str), |br|
-            'to':       pub_key_receiver (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
             'nonce':    nonce (int), |br|
             'asset':    asset_Id (hex str), |br|
             'value':    nToSend (int)
@@ -984,7 +994,7 @@ def timeLockToRawAsset(self, transaction, prepareOnly=False):
     Args:
         transaction (dict):
             'from':     pub_key_sender (hex str), |br|
-            'to':       pub_key_receiver (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
             'nonce':    nonce (int), |br|
             'asset':    asset_Id (hex str), |br|
             'value':    nToSend (int)
@@ -1010,7 +1020,7 @@ def timeLockToTimeLock(self, transaction):
     Args:
         transaction (dict):
             'from':     pub_key_sender (hex str), |br|
-            'to':       pub_key_receiver (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
             'nonce':    nonce (int), |br|
             'asset':    asset_Id (hex str), |br|
             'value':    nToSend (int), |br|
@@ -1038,7 +1048,7 @@ def timeLockToRawTimeLock(self, transaction, prepareOnly=False):
     Args:
         transaction (dict):
             'from':     pub_key_sender (hex str), |br|
-            'to':       pub_key_receiver (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
             'nonce':    nonce (int), |br|
             'asset':    asset_Id (hex str), |br|
             'value':    nToSend (int), |br|
@@ -1107,114 +1117,47 @@ Swaps
 
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
-.. function::  getAllSwaps
 
-getAllSwaps
-&&&&&&&&&&&
+    
+.. function::  getSwap
 
-def getAllSwaps(self):
-    """Get information on all current swaps from fsnapi
+getSwap
+&&&&&&&
+
+def getSwap(self, swapId, block_identifier='latest'):
+    """Get the information about one swap
     
     Args:
-        None
+        swapId (hex str), |br| 
+        block_identifier (int),  'latest', 'earliest', or 'pending'
         
     Returns:
-        swap_dict (dict) with fields :-
+        swap_dict (dict) information about the swap.
         
-        'swapID'   (hex str) Can be used for taking swaps etc. |br|
-        'timeStamp' (str) date and time swap appears on chain |br|
-        'fromAddress' (hex str)  public pub_key |br|
-        'fromAsset' (hex str)  assetId |br|
-        'toAsset'   (hex str)  assetId |br|
-        'recCreated' (str)  date and time |br|
-        'height'  (int)  block height swap recCreated |br|
-        'hash'   (hex str)  transaction hash for swap creation |br|
-        'size'  (int) Total swap size |br|
-        'Description' (str) |br|
-        'FromStartTime' (str) start of swap timelock |br|
-        'ToEndTime'  (str) end of swap timelock |br|
-        'MinFromAmount'(int) minimum amount for the swap - from |br|
-        'MinToAmount' (int) minumum amount for the swap - to |br|
-        'SwapSize' (int) |br|
-        'Targes' (list) Target wallets for private swaps |br|
-        'Time' (str) date and time swap created |br|
-        'ToAssetID' (hex str) to assetId |br|
+        "ID": (hex str), |br|
+        "Owner": (hex str) public_key, |br|
+        "FromAssetID": (hex str) asset ID, |br|
+        "FromStartTime": (int) seconds since epoch, |br|
+        "FromEndTime": (int) seconds since epoch, |br|
+        "MinFromAmount": (float) tokens*decimals, |br|
+        "ToAssetID": (hex str) asset ID, |br|
+        "ToStartTime": (int) seconds since epoch, |br|
+        "ToEndTime": (int) seconds since epoch, |br|
+        "MinToAmount": (float) tokens*decimals, |br|
+        "SwapSize": (int), |br|
+        "Targes": (list of hex str) list of private addresses, or [] for none, |br|
+        "Time": (int) seconds since epoch. Time swap initiated, |br|
+        "Description": (str), |br|
+        "Notation": (int) USAN
         
     """
     
-    Example code
-    
-.. literalinclude:: ../fusion_tests/fsnGetAllSwaps.py
+.. literalinclude:: ../fusion_tests/fsnTakeRawSwap.py
    :language: python
-   :lines: 28-45
-   :emphasize-lines: 3
-   
-Output from this code :-
-
-.. code-block:: python 
-
-    >>>
-    No. swaps =  30 
-
-    swapID 0x5a6cb08db87f0519471dcc9fb34a0a3e2163d6e1567db0c140f13e9dbeea51eb
-    timeStamp 2019-11-20 19:29:32+00:00
-    fromAddress 0x048c6f41542e55dd22a9a37b04b8122fa1ce1006
-    fromAsset FSN
-    toAsset FSN
-    recCreated 2019-11-20T19:29:53.000Z
-    height 947735
-    hash 0x8d3ba97b26a633d0e401ebb48546be109901100644144853bbcbaafe4b6020b9
-    size 10
-    Description 
-    FromStartTime 1970-01-01 00:00:00+00:00
-    ToEndTime 2019-12-30 00:00:00+00:00
-    MinFromAmount 29100000000000000000
-    MinToAmount 2500000000000000000000
-    SwapSize 10
-    Targes []
-    Time 2019-11-20 19:29:19+00:00
-    ToAssetID 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+   :lines: 74-82
+   :emphasize-lines: 7    
+        
     
-    swapID 0x9bd0e524e4eef8c9585b43a6c7f6c293428212f8f1900c68dc33780dbe584958
-    timeStamp 2019-11-19 20:40:10+00:00
-    fromAddress 0x24714cc6408cf123979e37e03ed9dbcc84666620
-    fromAsset FSN
-    toAsset FSN
-    recCreated 2019-11-19T20:40:26.000Z
-    height 941439
-    hash 0x7428e50f375dcac87f661583f5e8c97dcb9c4e4adc90dc865fc748d4839aaf08
-    size 1
-    Description 
-    FromStartTime 1970-01-01 00:00:00+00:00
-    ToEndTime 2019-11-30 00:00:00+00:00
-    MinFromAmount 25000000000000000000
-    MinToAmount 5000000000000000000000
-    SwapSize 1
-    Targes []
-    Time 2019-11-19 20:39:57+00:00
-    ToAssetID 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    
-    swapID 0x2a79788a33f87b5a78de7805f6f8c361be47d16f9808b9fbc7f7fd7bf33644e6
-    timeStamp 2019-11-19 20:35:37+00:00
-    fromAddress 0x24714cc6408cf123979e37e03ed9dbcc84666620
-    fromAsset FSN
-    toAsset FSN
-    recCreated 2019-11-19T20:35:58.000Z
-    height 941418
-    hash 0x28740d793691c805c3611d813bcd48196853fed27aebb7fb230e5d0695ec4ce1
-    size 1
-    Description 
-    FromStartTime 1970-01-01 00:00:00+00:00
-    ToEndTime 2019-12-31 00:00:00+00:00
-    MinFromAmount 50000000000000000000
-    MinToAmount 5000000000000000000000
-    SwapSize 1
-    Targes []
-    Time 2019-11-19 20:35:11+00:00
-    ToAssetID 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    
-    etc.
-
 
 .. function::  makeSwap
     
@@ -1262,12 +1205,12 @@ def makeRawSwap(self, transaction, prepareOnly=False):
         'from':                 pub_key_sender (hex str), |br|
         'nonce':                nonce  (int), |br|
         'ToAssetID':            assetId (hex str), |br|
-        'ToStartTime':          to_st_time (str) can be 'now', |br|
-        'ToEndTime':            to_en_time (str) can be 'infinity', or e.g. '2020-06-01T06:00:00+0400', |br|
-        'MinToAmount':          nToSend (str) Minimum No. of tokens*decimals to swap, |br|
+        'ToStartTime':          to_st_time (datetime) can be 'now', |br|
+        'ToEndTime':            to_en_time (datetime) can be 'infinity', or e.g. '2020-06-01T06:00:00+0400', |br|
+        'MinToAmount':          nToSend (int) Minimum No. of tokens*decimals to swap, |br|
         'FromAssetID':          assetId (hex str), |br|
-        'FromStartTime':        from_st_time (str) Defaults to 'now' |br|
-        'FromEndTime':          from_en_time (str) Defaults to 'infinity' |br|
+        'FromStartTime':        from_st_time (datetime) Defaults to 'now' |br|
+        'FromEndTime':          from_en_time (datetime) Defaults to 'infinity' |br|
         'MinFromAmount':        nToReceive (int), Minimum No. tokens to receive * decimals|br|
         'SwapSize':             swap_size (int) swap size, |br|
         'Targes':               target wallets (list),  # Leave as an empty list [] for a public swap.
@@ -1283,6 +1226,40 @@ def makeRawSwap(self, transaction, prepareOnly=False):
    :language: python
    :lines: 39-94
    :emphasize-lines: 45
+
+   
+   
+.. function:: makeRawMultiSwap 
+
+makeRawMultiSwap
+&&&&&&&&&&&&&&&&
+
+def makeRawMultiSwap(self, transaction, prepareOnly=False):
+    """Create a multi swap on the Quantum Swap Market. You can use this method if you have a locked wallet, with a private key, or password
+    
+    Args:
+        transaction (dict) : |br|
+        
+        'from':                 pub_key_sender (hex str), |br|
+        'nonce':                nonce  (int), |br|
+        'ToAssetID':            assetId (list of hex str), |br|
+        'ToStartTime':          to_st_time (datetime), optional, can be 'now', |br|
+        'ToEndTime':            to_en_time (datetime) can be 'infinity', or e.g. '2020-06-01T06:00:00+0400', |br|
+        'MinToAmount':          nToSend (list of int) Minimum No. of tokens*decimals to swap, |br|
+        'FromAssetID':          assetId (list of hex str), |br|
+        'FromStartTime':        from_st_time (list of datetime) Defaults to 'now' |br|
+        'FromEndTime':          from_en_time (list of datetime) Defaults to 'infinity' |br|
+        'MinFromAmount':        nToReceive (list of int), Minimum No. tokens to receive * decimals|br|
+        'SwapSize':             swap_size (int) swap size, |br|
+        'Targes':               target wallets (list),  # Leave as an empty list [] for a public swap.
+        
+        prepareOnly flag (bool) set to True to defer transaction signing to a later point.
+    
+    Returns:
+        TxHash transaction hash (hex str). If prepareOnly=True, the return a Tx_dict (dict)
+        
+    """
+    
    
 
 .. function::  recallSwap
@@ -1384,8 +1361,8 @@ Example code :-
     
 .. literalinclude:: ../fusion_tests/fsnTakeRawSwap.py
    :language: python
-   :lines: 40-60
-   :emphasize-lines: 20
+   :lines: 37-67
+   :emphasize-lines: 28
    
 
 
@@ -1404,7 +1381,6 @@ def getNotation(self, account, block_identifier=None):
     
     Args:
         account (hex str)   Public key, |br|
-        
         block_identifier (int),  'latest', 'earliest', or 'pending'
         
     Returns:
@@ -1413,6 +1389,23 @@ def getNotation(self, account, block_identifier=None):
     """
     
 See :ref:`genRawNotation` for an example of usage
+
+.. function::  getLatestNotation
+
+getLatestNotation
+&&&&&&&&&&&&&&&&&
+
+def getLatestNotation(self, account, block_identifier=None):
+    """Get the last notation on the blockchain
+    
+    Args:
+        account (hex str)   Public key, |br|
+        block_identifier (int),  'latest', 'earliest', or 'pending'
+        
+    Returns:
+        usan (int)
+        
+    """
 
 .. function::  getAddressByNotation
 
@@ -1424,7 +1417,6 @@ def getAddressByNotation(self, notation, block_identifier=None):
     
     Args:
         notation (int)  USAN
-    
         block_identifier (int),  'latest', 'earliest', or 'pending'
         
     Returns: 
@@ -1465,6 +1457,409 @@ Example code :-
    :language: python
    :lines: 37-74
    :emphasize-lines: 11
+
+   
+Fusion API
+^^^^^^^^^^
+
+There is a centralized service generating data about Fusion's blockchain. The output is served via an express server in JSON format. This can provide quick access to important data without having to scan the whole blockchain youself to compile it. It is possible that the format of the output will change with time (or may even cease), but below you can find some functions currently to access various parts of the data in a format useful for application development.
+
+
+.. function:: fsnprice
+
+fsnprice
+&&&&&&&&
+
+def fsnprice(self):
+    """Information about the current price, market capitation and circulating supply of the Fusion token
+    
+        Returns:
+            fsnInfo (dict)
+            
+    """
+
+.. function::  getAllSwaps
+
+getAllSwaps
+&&&&&&&&&&&
+
+def getAllSwaps(self, pageNo):
+    """Get information on all current swaps from fsnapi
+    
+    Args:
+        PageNo (int)  The data is served with 100 records per page, starting at page 0. Simply increment until the list is exhausted and the length of the output is less than 100.
+        
+    Returns:
+        swap_dict (dict) with fields :-
+        
+        'swapID'   (hex str) Can be used for taking swaps etc. |br|
+        'timeStamp' (str) date and time swap appears on chain |br|
+        'fromAddress' (hex str)  public pub_key |br|
+        'fromAsset' (hex str)  assetId |br|
+        'toAsset'   (hex str)  assetId |br|
+        'recCreated' (str)  date and time |br|
+        'height'  (int)  block height swap recCreated |br|
+        'hash'   (hex str)  transaction hash for swap creation |br|
+        'size'  (int) Total swap size |br|
+        'Description' (str) |br|
+        'FromStartTime' (str) start of swap timelock |br|
+        'ToEndTime'  (str) end of swap timelock |br|
+        'MinFromAmount'(int) minimum amount for the swap - from |br|
+        'MinToAmount' (int) minumum amount for the swap - to |br|
+        'SwapSize' (int) |br|
+        'Targes' (list) Target wallets for private swaps |br|
+        'Time' (str) date and time swap created |br|
+        'ToAssetID' (hex str) to assetId |br|
+        
+    """
+    
+    Example code
+    
+.. literalinclude:: ../fusion_tests/fsnGetAllSwaps.py
+   :language: python
+   :lines: 28-45
+   :emphasize-lines: 4
+   
+Output from this code :-
+
+.. code-block:: python 
+
+    >>>
+    No. swaps =  30 
+
+    swapID 0x5a6cb08db87f0519471dcc9fb34a0a3e2163d6e1567db0c140f13e9dbeea51eb
+    timeStamp 2019-11-20 19:29:32+00:00
+    fromAddress 0x048c6f41542e55dd22a9a37b04b8122fa1ce1006
+    fromAsset FSN
+    toAsset FSN
+    recCreated 2019-11-20T19:29:53.000Z
+    height 947735
+    hash 0x8d3ba97b26a633d0e401ebb48546be109901100644144853bbcbaafe4b6020b9
+    size 10
+    Description 
+    FromStartTime 1970-01-01 00:00:00+00:00
+    ToEndTime 2019-12-30 00:00:00+00:00
+    MinFromAmount 29100000000000000000
+    MinToAmount 2500000000000000000000
+    SwapSize 10
+    Targes []
+    Time 2019-11-20 19:29:19+00:00
+    ToAssetID 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    
+    swapID 0x9bd0e524e4eef8c9585b43a6c7f6c293428212f8f1900c68dc33780dbe584958
+    timeStamp 2019-11-19 20:40:10+00:00
+    fromAddress 0x24714cc6408cf123979e37e03ed9dbcc84666620
+    fromAsset FSN
+    toAsset FSN
+    recCreated 2019-11-19T20:40:26.000Z
+    height 941439
+    hash 0x7428e50f375dcac87f661583f5e8c97dcb9c4e4adc90dc865fc748d4839aaf08
+    size 1
+    Description 
+    FromStartTime 1970-01-01 00:00:00+00:00
+    ToEndTime 2019-11-30 00:00:00+00:00
+    MinFromAmount 25000000000000000000
+    MinToAmount 5000000000000000000000
+    SwapSize 1
+    Targes []
+    Time 2019-11-19 20:39:57+00:00
+    ToAssetID 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    
+    swapID 0x2a79788a33f87b5a78de7805f6f8c361be47d16f9808b9fbc7f7fd7bf33644e6
+    timeStamp 2019-11-19 20:35:37+00:00
+    fromAddress 0x24714cc6408cf123979e37e03ed9dbcc84666620
+    fromAsset FSN
+    toAsset FSN
+    recCreated 2019-11-19T20:35:58.000Z
+    height 941418
+    hash 0x28740d793691c805c3611d813bcd48196853fed27aebb7fb230e5d0695ec4ce1
+    size 1
+    Description 
+    FromStartTime 1970-01-01 00:00:00+00:00
+    ToEndTime 2019-12-31 00:00:00+00:00
+    MinFromAmount 50000000000000000000
+    MinToAmount 5000000000000000000000
+    SwapSize 1
+    Targes []
+    Time 2019-11-19 20:35:11+00:00
+    ToAssetID 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    
+    etc.
+
+
+.. function::  assetNameToAssetInfo
+
+.. _assetNameToAssetInfo:
+
+assetNameToAssetInfo
+&&&&&&&&&&&&&&&&&&&&
+
+def assetNameToAssetInfo(self, asset_name):
+    """ Retrieve information about a given verified asset name
+    The asset *must be* 'enabled' and 'whiteListEnabled' in the fsnapi
+    
+    Args:
+        asset_name (str)   Short string asset idenfifier
+        
+    Returns:
+        assetInfo (dict)
+        
+    """
+    
+ Here is an example of the function usage
+
+.. literalinclude:: ../fusion_tests/fsnAssetNameToAssetInfo.py
+   :language: python
+   :lines: 7-24
+   :emphasize-lines: 15
+   
+.. code-block:: python 
+
+    >>>assetInfo
+    {'assetID': '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+    'recCreated': '2019-07-09T06:40:19.000Z',
+    'recEdited': '2019-07-09T06:40:19.000Z',
+    'assetAuthority': '0xcf62374bc2b4e195ca7f2aecbe0076d9d4f89d1e',
+    'name': 'Fusion',
+    'shortName': 'FSN',
+    'image': 'EFSN_LIGHT.svg',
+    'erc20': 1, 
+    'ethereum': 1, 
+    'address': '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', 
+    'disabled': 0, 
+    'whiteListEnabled': 1, 
+    'bitcoin': 0, 
+    'decimals': 18, 
+    'lockInDisabled': 1, 
+    'reservedID': 1, 
+    'totalFusionSupply': '0', 
+    'msgSignedWithAssetAuthority': 'Signed:Fusion:0xfffffffffffffffffffffffffffffffffffffff
+    fffffffffffffffffffffffff:0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff:FSN', 
+    'msgSignature':'0xf92792db22d1bb53c5c2bd8ccbdbfc1745c15fba35c1c0fb65d066f6dd03db937f5257
+    ec5244d04ce5584eb59029d11d453b9cf92057ecc194ce2d4f12bd97'
+    }
+
+
+.. function::  assetIdToAssetInfo
+    
+assetIdToAssetInfo
+&&&&&&&&&&&&&&&&&&&&
+
+def assetIdToAssetInfo(self, assetId):
+    """ Retrieve inforamtion about a given verified asset name
+    The asset must be 'enabled' and 'whiteListEnabled' in the fsnapi
+    
+    Args:
+        assetId (hex str)   Hex string asset idenfifier
+        
+    Returns:
+        assetInfo (dict)   See :ref:`assetNameToAssetInfo` for typical output
+        
+    """
+
+.. function::  getAssetId
+
+getAssetId
+&&&&&&&&&&
+
+def getAssetId(self, asset_name):
+    """ Retrieve the hexadecimal assetId for a given verified asset name
+    The asset *must be* 'enabled' and 'whiteListEnabled' in the fsnapi
+    
+    Args:
+        asset_name (str)   Short string asset idenfifier
+        
+    Returns:
+        assetId (hex str)  
+        
+        or None if not found or not enabled/whiteListEnabled
+
+    """
+        
+Here is an example of the function usage
+
+.. literalinclude:: ../fusion_tests/fsnGetAsset.py
+   :language: python
+   :lines: 16-30
+   :emphasize-lines: 8
+   
+
+.. function::  getAssetDecimals
+   
+
+getAssetDecimals
+&&&&&&&&&&&&&&&&
+
+def getAssetId(self, asset_name):
+    """ Retrieve the decimals for a given verified asset name
+    The asset must be **enabled** and **whiteListEnabled** 
+    
+    Args:
+        asset_name (str)   Short string asset idenfifier
+        
+    Returns:
+        decimals (int)  
+        
+        or None if not found or not enabled/whiteListEnabled
+
+    """
+    
+    
+.. function:: fsnapiVerifiedAssetInfo
+
+fsnapiVerifiedAssetInfo
+&&&&&&&&&&&&&&&&&&&&&&&
+
+def fsnapiVerifiedAssetInfo(self):
+    """Get a list of the shortnames of all assets that are **whitelisted** and **verified**
+    
+    Args:
+        None
+        
+    Returns:
+        verifiedAssets (list)   e.g. ['BTC','ETH','FSN',...]
+        
+    """
+    
+.. function:: fsnapi_swaps_pubkey
+
+fsnapi_swaps_pubkey
+&&&&&&&&&&&&&&&&&&&
+
+def fsnapi_swaps_pubkey(self, account, pageNo):
+    """Output a list of all swaps have been generated by a public pub_key
+    
+    Args:
+        account (hex string)  public key, |br|
+        PageNo (int)  The data is served with 100 records per page, starting at page 0. Simply increment until the list is exhausted and the length of the output is less than 100.
+        
+    Returns:
+        swap_dict (dict) 
+        
+    """
+    
+    
+.. function:: fsnapi_swaps_target
+
+fsnapi_swaps_target
+&&&&&&&&&&&&&&&&&&&
+
+def fsnapi_swaps_target(self, account, pageNo):
+    """Output a list of all swaps have been targetted at a public pub_key
+    
+    Args:
+        account (hex string)  public key, |br|
+        PageNo (int)  The data is served with 100 records per page, starting at page 0. Simply increment until the list is exhausted and the length of the output is less than 100.
+        
+    Returns:
+        swap_dict (dict) 
+        
+    """
+    
+.. function:: transactionNoTicketsDesc
+
+transactionNoTicketsDesc
+&&&&&&&&&&&&&&&&&&&&&&&&
+
+def transactionNoTicketsDesc(self, pageNo):
+    """Output transactions from the blockchain with the most recent first and ignoring ticket purchase transactions
+    
+    Args:
+        PageNo (int)  The data is served with 100 records per page, starting at page 0. Simply increment until the list is exhausted and the length of the output is less than 100.
+        
+    Returns:
+        Txs (dict)
+        
+    """
+    
+.. function:: takeSwapsDesc
+
+takeSwapsDesc
+&&&&&&&&&&&&&
+
+def takeSwapsDesc(self, pageNo):
+    """Output a list of all takeSwap transactions, wiht the most recent first
+    
+    Args:
+        PageNo (int)  The data is served with 100 records per page, starting at page 0. Simply increment until the list is exhausted and the length of the output is less than 100.
+        
+    Returns:
+        swaps (dict)
+        
+    """
+    
+   
+   
+Miscellaneous
+^^^^^^^^^^^^^
+
+
+    
+.. function:: numToDatetime
+
+numToDatetime
+&&&&&&&&&&&&&
+    
+def numToDatetime(self, tdelta):
+    """Converts the simple integer number of seconds since 1970/01/01:0000 UTC to a timezone enabled python DateTime object
+    
+    Args:
+        tdelta (int), |br|
+        
+    Returns:
+        dateTime (DateTime object)
+        
+    """
+    
+.. function:: datetimeToHex
+
+datetimeToHex
+&&&&&&&&&&&&&
+
+def datetimeToHex(self, dateTime):
+    """Converts a python timezone enabled DateTime object to a hex string representing the number of seconds since 1970/01/01:0000 UTC
+    
+    Args:
+        dateTime (DateTime object)
+        
+    Returns:
+        dtHex (hex string)
+        
+    """
+    
+.. function:: datetimeToInt
+
+datetimeToInt
+&&&&&&&&&&&&&
+
+def datetimeToInt(self, dateTime):
+    """Converts a python timezone enabled DateTime object to an int representing the number of seconds since 1970/01/01:0000 UTC
+    
+    Args:
+        dateTime (DateTime object)
+        
+    Returns:
+        dt (int)
+        
+    """
+    
+.. function:: hex2a
+
+hex2a
+&&&&&
+
+def hex2a(self, datastr):
+    """Decodes the 'data' string in a Fusion blockchain transaction to reveal the 'to' hexadecimal address of the recipient
+    
+    Args:
+        datastr  (string)
+        
+    Returns:
+        pub_key  (20 char hex string)
+        
+    """
+    
+    
 
    
    

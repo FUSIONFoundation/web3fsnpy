@@ -38,15 +38,18 @@ To update (frequent updates available) just type :-
 
 .. code-block:: bash
 
-    #> sudo pip3 install --update web3fsnpy  (or pip3 install --update web3fsnpy --user)
+    #> sudo pip3 install --upgrade web3fsnpy  (or pip3 install --upgrade web3fsnpy --user)
     
 Now you need to update the PYTHONPATH environmental variable to your .bashrc file assuming that you are in the folder web3fsnpy :-
 
 .. code-block:: bash
 
-    #> echo "export PYTHONPATH=$PYTHONPATH:$PWD">>~/.bashrc
+    #> echo "export PYTHONPATH=$PWD:$PWD/web3fsnpy:$PYTHONPATH">>~/.bashrc
 
 Now restart your shell to activate the PYTHONPATH.
+
+Note that you may be able to substitute the command pip for pip3 and python for python3, depending on how your system is set up.
+We assume from now on that pip and python have the version 3.x
 
 
 
@@ -65,24 +68,38 @@ The dependencies are listed in the file requirements.txt
 
 
 
-
-It is best practice to operate within a virtualenv when modifying code, so as to isolate dependency issues :-
+It is best practice to operate within a virtualenv when modifying code, so as to isolate dependency issues. 
+The --no-site-packages option below prevents usage of any other python modules that may exist on your system,
+but which might cause an inconsistency with web3fsnpy :-
 
 .. code-block:: bash
 
-    #> source env/bin/activate
+    #> virtualenv --no-site-packages -p /usr/bin/python3 env   # assuming that python3 is there - check with 'which python3'
+    #> source env/bin/activate              # this changes the prompt and puts you into your virtualenv
     
+You should check that you are now using local versions of python and pip :-
+
+.. code-block:: bash
+
+    #> which python     # should output an answer within your env/bin/python folder
+    #> which pip        # same
+    #> python --version # should indicate a 3.x version
+    #> pip --version    # same
+
 To install the python dependencies in this virtual environment from the file requirements.txt :-
 
 .. code-block:: bash
 
-    #> pip3 install -r requirements.txt
+    #> pip install -r requirements.txt
+    #> pip uninstall eth-account      
+    
+We have added the uninstall eth-account as a temporary fix to force usage of the locally installed version. Version 0.4.0 of eth-account does not work with web3fsnpy, but is required by web3, so we have altered it. We will remove this when eth-account 0.5.0 arrives
     
 Check that the scope includes the correct python module versions :-
 
 .. code-block:: bash
 
-    #> pip3 list  (or pip3 show <module name> )
+    #> pip list  (or pip show <module name> )
     
 Sometimes a pre-existing install may have a higher version number of a module, which can cause unpredictable results.
 
@@ -91,7 +108,7 @@ Connection to the Blockchain
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 There are three ways to connect to the blockchain:- HTTP, WebSocket and IPC.
-If your are not running a node on your machine, then WebSocket is preferred over HTTP, since it allows asynchronous bi-directional communication.
+If you are not running a node on your machine, then WebSocket is preferred over HTTP, since it allows asynchronous bi-directional communication.
 
 There are two 'networks' :-  'mainnet' and 'testnet'.
 

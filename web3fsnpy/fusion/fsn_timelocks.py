@@ -131,6 +131,7 @@ ASSETTOTL_DEFAULTS = {
 
 ASSETTOTL_FORMATTERS = {
     'to':    to_checksum_address,
+    'toUSAN': apply_formatter_if(is_string, int),
     'from': to_checksum_address,
     'nonce': to_hex_if_integer_or_ascii,
     'gas': to_hex_if_integer_or_ascii,
@@ -144,6 +145,7 @@ ASSETTOTL_FORMATTERS = {
 
 VALID_ASSETTOTL_PARAMS = [
     'to',
+    'toUSAN',
     'from',
     'nonce',
     'gas',
@@ -156,7 +158,6 @@ VALID_ASSETTOTL_PARAMS = [
 ]
 
 REQUIRED_ASSETTOTL_PARAMS = [
-    'to',
     'from',
     'nonce',
     #'gas',
@@ -197,6 +198,8 @@ def assert_check_assettotl_params(assettotl_params):
     for param in REQUIRED_ASSETTOTL_PARAMS:
         if param not in assettotl_params:
             raise ValueError('{} is required as an asset to time lock parameter'.format(param))
+    if 'to' not in assettotl_params and 'toUSAN' not in assettotl_params:
+            raise ValueError('Either \'to\' or \'toUSAN\' is required as an asset to time lock parameter')
 
 
 ##############################################################################################################
@@ -237,6 +240,8 @@ def assert_check_tltoasset_params(tltoasset_params):
     for param in REQUIRED_TLTOASSET_PARAMS:
         if param not in tltoasset_params:
             raise ValueError('{} is required as a time lock to asset parameter'.format(param))
+    if 'to' not in tltoasset_params and 'toUSAN' not in tltoasset_params:
+            raise ValueError('Either \'to\' or \'toUSAN\' is required a time lock to asset parameter')
 
 ######################################################################################################
 #
@@ -252,6 +257,7 @@ TLTOTL_DEFAULTS = {
 
 TLTOTL_FORMATTERS = {
     'to':    to_checksum_address,
+    'toUSAN': apply_formatter_if(is_string, int),
     'from': to_checksum_address,
     'nonce': to_hex_if_integer_or_ascii,
     'gas': to_hex_if_integer_or_ascii,
@@ -265,6 +271,7 @@ TLTOTL_FORMATTERS = {
 
 VALID_TLTOTL_PARAMS = [
     'to',
+    'toUSAN',
     'from',
     'nonce',
     'gas',
@@ -277,7 +284,6 @@ VALID_TLTOTL_PARAMS = [
 ]
 
 REQUIRED_TLTOTL_PARAMS = [
-    'to',
     'from',
     'nonce',
     #'gas',
@@ -318,4 +324,6 @@ def assert_check_tltotl_params(tltotl_params):
     for param in REQUIRED_TLTOTL_PARAMS:
         if param not in tltotl_params:
             raise ValueError('{} is required as an time lock to time lock parameter'.format(param))
+    if 'to' not in tltoasset_params and 'toUSAN' not in tltoasset_params:
+            raise ValueError('Either \'to\' or \'toUSAN\' is required as an time lock to time lock parameter')
 

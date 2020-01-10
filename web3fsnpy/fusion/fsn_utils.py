@@ -1,12 +1,18 @@
 import operator
 
+from binascii import (
+    unhexlify
+)
+
+import json
+
 from cytoolz import (
     pipe,
 )
 
 import rlp
 
-from ..eth_account import (
+from eth_account import (
     Account,
 )
 
@@ -86,6 +92,11 @@ from eth_keys import (
 from eth_utils.curried import (
     apply_formatters_to_sequence,
     is_address,
+    is_bytes,
+    is_integer,
+    is_null,
+    is_string,
+    remove_0x_prefix,
     text_if_str,
     to_checksum_address,
     apply_formatter_if,
@@ -239,6 +250,23 @@ def to_boolean(value=None, intval=None, hexstr=None, text=None):
         raise TypeError("Pass in strings with keyword hexstr or text")
     else:
         return bool(value)
+    
+    
+def to_0hex(v):
+    s = f"0x{v:02x}"
+    return s
 
 
+
+def hex2a(datastr):
+    
+    datastr = remove_0x_prefix(datastr)
+    
+    str = unhexlify(datastr)
+    
+    str = str.decode('utf8')
+    
+    str_dict = dict(json.loads(str))
+    
+    return str_dict
 

@@ -61,12 +61,10 @@ transaction = {
 
 # Fill in the defaults, including gas and gasLimit
 
-tx = web3fsn.fill_tx_defaults(transaction)
-
 #print(tx)
 #
 # Send an unsigned transaction 
-TxHash = web3fsn.sendTransaction(tx)
+TxHash = web3fsn.sendTransaction(transaction)
 #
 print('TxHash = ',web3fsn.toHex(TxHash))
 #

@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('.'))
 # -- Project information -----------------------------------------------------
 
 project = u'web3fsnpy'
-copyright = u'2019, Fusion Foundation'
+copyright = u'2020, Fusion Foundation'
 author = u'Marcel Curé'
 
 DIR = os.path.dirname('__file__')

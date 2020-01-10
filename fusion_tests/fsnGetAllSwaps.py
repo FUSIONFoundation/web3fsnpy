@@ -26,8 +26,9 @@ linkToChain = {
 
 web3fsn = Fsn(linkToChain)
 
+pageNo = 0   # Only get the most recent 100 records on the first page
 
-swap_dict = web3fsn.getAllSwaps()
+swap_dict = web3fsn.getAllSwaps(pageNo)
 
 
 print('No. swaps = ',len(swap_dict),'\n')
