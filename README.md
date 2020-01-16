@@ -24,7 +24,7 @@ Get your private key from your Fusion wallet (click on 'View details') and then 
 
 To update (frequent updates available) just type :-
 
-#> sudo pip3 install --update web3fsnpy  (or pip3 install --update web3fsnpy --user)
+#> sudo pip3 install --upgrade web3fsnpy  (or pip3 install --upgarde web3fsnpy --user)
 
 
 
@@ -41,7 +41,7 @@ The dependencies are listed in the file requirements.txt
 
 Now you need to update the PYTHONPATH environmental variable to your .bashrc file assuming that you are in the folder web3fsnpy :-
 
-#> echo "export PYTHONPATH=$PYTHONPATH:$PWD">>~/.bashrc
+#> echo "export PYTHONPATH=$PWD:$PWD/web3fsnpy:$PYTHONPATH">>~/.bashrc
 
 Now restart your shell to activate the PYTHONPATH. You can now try some of the scripts in the folder fusion_tests to make sure that it is working.
 

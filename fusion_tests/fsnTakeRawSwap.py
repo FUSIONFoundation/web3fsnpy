@@ -12,7 +12,6 @@ import sys
 #import pdb ; pdb.set_trace()
 
 
-
 #web3fusion
 from  web3fsnpy import Fsn
 
@@ -33,16 +32,22 @@ linkToChain = {
 web3fsn = Fsn(linkToChain)
 
 
-pub_key = '0x3333333333333333333333333333333333333333'  # For a private swap
+pub_key = '0x7fbFa5679411a97bb2f73Dd5ad01Ca0822FaD9a6'  # For a private swap
 
-balanceInfo = web3fsn.getSwaps()
+swapInfo = web3fsn.getAllSwaps()
+
+#print(swapInfo)
+
+for swp in swapInfo:
+    print('SwapID : {} From asset : {} To asset : {} Size : {} MinFromAmount : {} MinToAmount : {} SwapSize : {}\n'
+          .format(swp['swapID'],swp['fromAsset'],swp['toAsset'],swp['size'],
+          swp['MinFromAmount'],swp['MinToAmount'],swp['SwapSize']))
+
+swapID = input('Enter a swapID from the above list  ')
 
 
-number_to_receive = 1   # The number of tokens you wish to receive
+number_to_receive = input('Enter the number you wish to receive ')   # The number of tokens you wish to receive
 
-
-
-swapHash = '0xfffffffffffffffffffffffffffffffffffffff'  # Fill in correct value
 
 nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
 
@@ -52,7 +57,7 @@ nonce = web3fsn.getTransactionCount(pub_key)  # Get the nonce for the wallet
 transaction = {
     'from':             pub_key,
     'nonce':            nonce,
-    'SwapID':           swapHash,
+    'SwapID':           swapID,
     'Size':             number_to_receive,
 }
 
@@ -70,4 +75,9 @@ res = web3fsn.getTransaction(TxHash)
 #
 print(res)
 #
+# Get some information about the swap
+#
+swap_dict = web3fsn.getSwap(TxHash)
+#
+print(swap_dict)
 

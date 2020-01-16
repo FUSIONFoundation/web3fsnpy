@@ -67,7 +67,7 @@ web3fsn.waitForTransactionReceipt(TxHash, timeout=20)
 #
 res = web3fsn.getTransaction(TxHash)
 #
-print(res)
+#print(res)
 #
 print('\nResults from the transaction :\n')
 print('Block number: ',res["blockNumber"])

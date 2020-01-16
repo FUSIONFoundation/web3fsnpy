@@ -13,9 +13,36 @@ linkToChain = {
 
 web3fsn = Fsn(linkToChain)
 
+# Get the ticket price 
+
+ticket_price = web3fsn.ticketPrice()
+ticket_price = web3fsn.fromWei(ticket_price,'ether')
+
+print('\nThe ticket price = ',ticket_price,' FSN')
+
+input('Hit a key to continue ')
+
+
+# Get the staking information
+
+stake_info = web3fsn.getStakeInfo()
+#print(stake_info)
+
+for node in range(stake_info.summary.totalMiners):
+    print(stake_info.stakeInfo[node].owner, ' has ', stake_info.stakeInfo[node].tickets, ' tickets')
+
+input('Hit a key to continue ')
+
+
+# Get the block reward
+
+block_reward = web3fsn.getBlockReward()
+
+print('\nThe block reward for the latest block was ',web3fsn.fromWei(block_reward,'ether'),' FSN\n')
+
+input('Hit a key to continue ')
 
 # Print out details of all tickets at current block height
-
 
 allTckts = web3fsn.allTickets('latest')
 
@@ -33,4 +60,7 @@ for a in allTckts:
 print('\n\nTotal number of tickets = ',len(allTckts))
 
 print('\n\nor using totalNumberOfTickets = ',web3fsn.totalNumberOfTickets())
+
+
+
 

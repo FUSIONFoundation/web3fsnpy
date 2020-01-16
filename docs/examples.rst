@@ -14,6 +14,7 @@ Buying a ticket, checking to see if autobuy ticket is on.
 
 `fsnAllTickets.py`_
 Listing all tickets and their block heights on the blockchain and showing the totalNumberOfTickets function.
+Also shows usage of the ticketPrice and getStakeInfo functions.
 
 `fsnTicketsByAddress.py`_
 Listing tickets for an account, including their start and end times.
@@ -58,7 +59,7 @@ Get information on all swaps in the Quantum Swap Marketplace.
 Create a new swap and then recall it.
 
 `fsnTakeRawSwap.py`_
-Take all or part of a swap.
+Take all or part of a swap. Example also shows getSwap.
 
 `fsnGenNotation.py`_
 Generate a new USAN for an account and then show how to get the public key for it (and vice-versa).
