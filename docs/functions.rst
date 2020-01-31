@@ -409,8 +409,95 @@ Output :-
     Gas price   :  21  gwei
     
     
-.. function:: getTransactionByBlockNumberAndIndex
+.. function::  getTransactionAndReceipt
 
+getTransactionAndReceipt
+&&&&&&&&&&&&&&&&&&&&&&&&
+
+def getTransactionAndReceipt(self, TxHash):
+    """
+    
+    Args:
+        TxHash (hex str) Transaction hash
+        
+    Returns:
+        txData (dict) The transaction data and a receipt
+    
+    
+    """
+    
+Example output:
+
+.. code-block:: python 
+
+    >>>print(web3fsn.getTransactionAndReceipt('0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d'))
+    
+    "txData": {
+    "fsnTxInput": {
+      "FuncType": "SendAssetFunc",
+      "FuncParam": {
+        "AssetID": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "To": "0x37a200388caa75edcc53a2bd329f7e9563c6acb6",
+        "Value": 1e+18
+      }
+    },
+    "tx": {
+      "blockHash": "0xd8d4b5f054cb398b1f0b5bb5d4add5e80d10a432f2c15226f620609577536b6b",
+      "blockNumber": "0xad1a5",
+      "from": "0x0122bf3930c1201a21133937ad5c83eb4ded1b08",
+      "gas": "0x15f90",
+      "gasPrice": "0x3b9aca00",
+      "hash": "0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d",
+      "input": "0xf84402b841f83fa0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9437a200388caa75edcc53a2bd329f7e9563c6acb6880de0b6b3a7640000",
+      "nonce": "0xa7cc",
+      "to": "0xffffffffffffffffffffffffffffffffffffffff",
+      "transactionIndex": "0x2",
+      "value": "0x0",
+      "v": "0x16ce3",
+      "r": "0x8244e44f720023b240faafab08bb401b1b3167087f2882fa6b8f4fc87b59bdfc",
+      "s": "0x277635df431668f4a8b8c8b0702077634dd404db9a1139539d3c276651d3d1ce"
+    },
+    "receipt": {
+      "blockHash": "0xd8d4b5f054cb398b1f0b5bb5d4add5e80d10a432f2c15226f620609577536b6b",
+      "blockNumber": "0xad1a5",
+      "contractAddress": null,
+      "cumulativeGasUsed": "0x10f60",
+      "from": "0x0122bf3930c1201a21133937ad5c83eb4ded1b08",
+      "fsnLogData": {
+        "AssetID": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "To": "0x37a200388caa75edcc53a2bd329f7e9563c6acb6",
+        "Value": 1e+18
+      },
+      "fsnLogTopic": "SendAssetFunc",
+      "gasUsed": "0x63e0",
+      "logs": [
+        {
+          "address": "0xffffffffffffffffffffffffffffffffffffffff",
+          "topics": [
+            "0x0000000000000000000000000000000000000000000000000000000000000002"
+          ],
+          "data": "0x7b2241737365744944223a22307866666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666222c22546f223a22307833376132303033383863616137356564636335336132626433323966376539353633633661636236222c2256616c7565223a313030303030303030303030303030303030307d",
+          "blockNumber": "0xad1a5",
+          "transactionHash": "0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d",
+          "transactionIndex": "0x2",
+          "blockHash": "0xd8d4b5f054cb398b1f0b5bb5d4add5e80d10a432f2c15226f620609577536b6b",
+          "logIndex": "0x2",
+          "removed": false
+        }
+      ],
+      "logsBloom": "0x04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000002000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000008000000000000000000000",
+      "status": "0x1",
+      "to": "0xffffffffffffffffffffffffffffffffffffffff",
+      "transactionHash": "0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d",
+      "transactionIndex": "0x2"
+    },
+    "receiptFound": true
+  }
+
+    
+    
+    
+.. function:: getTransactionByBlockNumberAndIndex
 
 getTransactionByBlockNumberAndIndex
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
