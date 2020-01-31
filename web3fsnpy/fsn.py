@@ -1672,7 +1672,26 @@ class Fsn(web3.eth.Eth):
             [assetId, account, block_identifier],
         )
         return timelock_dict
-        
+    
+    
+    def getAllBalances(self, account, block_identifier=None):
+        if is_integer(account):
+            account = to_hex(account)
+        if not is_address(account):
+            raise TypeError(
+                'The account does not have a valid address format'
+        )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+
+        timelock_dict =  self.web3.manager.request_blocking(
+            "fsn_getAllBalances",
+            [account, block_identifier],
+        )
+        return timelock_dict   
+    
         
     def getAllTimeLockBalances(self, account, block_identifier=None):
         if is_integer(account):

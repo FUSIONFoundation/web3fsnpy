@@ -324,6 +324,6 @@ def assert_check_tltotl_params(tltotl_params):
     for param in REQUIRED_TLTOTL_PARAMS:
         if param not in tltotl_params:
             raise ValueError('{} is required as an time lock to time lock parameter'.format(param))
-    if 'to' not in tltoasset_params and 'toUSAN' not in tltoasset_params:
+    if 'to' not in tltotl_params and 'toUSAN' not in tltotl_params:
             raise ValueError('Either \'to\' or \'toUSAN\' is required as an time lock to time lock parameter')
 
