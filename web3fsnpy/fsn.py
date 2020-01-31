@@ -225,6 +225,10 @@ class Fsn(web3.eth.Eth):
             self.__defaultChainId = 46688
         elif linkToChain['network'] == 'mainnet':
             self.__defaultChainId = 32659
+        else:
+            raise ValueError(
+                'Error: You must specify a network (\'testnet\' or \'mainnet\')'
+            )
             
             
         if linkToChain['gateway'] == 'default':
@@ -270,13 +274,12 @@ class Fsn(web3.eth.Eth):
         if gotprivatekey:
             #print('Adding account to list')
             self.addAccount()
+
   
   
         # Connect to the fusion api 
-        if self.defaultAccount == None:
-            self.api = fsnapi(None)
-        else:
-            self.api = fsnapi(self.acct.address, linkToChain['network'])
+        
+        self.api = fsnapi(self.defaultAccount, linkToChain['network'])
             
         
         

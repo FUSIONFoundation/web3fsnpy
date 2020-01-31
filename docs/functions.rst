@@ -342,6 +342,41 @@ Transactions
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
 
+.. function::  getAllBalances
+
+getAllBalances
+&&&&&&&&&&&&&&
+
+def getAllBalances(self, account, block_identifier=None):
+    """ Get the balances of all non-timelocked assets for an account
+    
+    Args:
+        account (hex str)   Public key, |br|
+        block_identifier (int),  'latest', 'earliest', or 'pending'
+        
+    Returns:
+        bal_info (dict)  key, value pairs for each asset of asset ID and balance
+        
+    """
+
+.. code-block:: python 
+
+    >>> bal_info = web3fsn.getAllBalances(pub_key)
+    >>> for key, val in bal_info.items():
+    >>>     print(key, val)
+    
+    0x0e437e96f105776f7f3f96e01ec9def69a6e66ac37d6560b23181350050238f1 95
+    0x15805e688c7516b8cf005fcb3496cf1e904c4d2579955500f5a18a7957a9d59b 1990
+    0x34ab2db7e4e5a69e5ec1441d580b9e9599e806cbecf821b87bf4a5952e27ee21 1930
+    0x3ddec7217915b0c145da683402cfbb94c1b160d23a432f75a39e33e2db091437 1880
+    0x54cbfda5d4cb46ef1f63d6642f561dcd38dec9fa27a68a0408e9b2b17cc5cfc7 1880
+    0x5fd3f254ae34bf9bf9dc46f72e4fbbc75844dbe6823f970fa3f7aaedb2925ff6 17
+    0x6fe2a4955f1424b72627a81a105d483720630e70fc4743182d874c9acc6d5647 99
+    0xcc966efc1aed2a70d602e9718d528f88cfe304cb91d89338d7f1fe1db3266590 90
+    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 62866649839999999971
+
+    
+
 .. function::  getTransaction
 
 getTransaction
