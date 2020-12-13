@@ -1014,6 +1014,68 @@ Here is an example of the function usage
     5000   FSN
 
 
+.. function::  sendToTimeLock
+    
+    
+sendToTimeLock
+&&&&&&&&&&&&&&&
+
+def sendToTimeLock(self, transaction):
+    """To send asset tokens on the Fusion blockchain to timelock with an unlocked wallet (IPC method)
+    without changing the time lock.
+    
+    Args:
+        transaction (dict):
+            'from':     pub_key_sender (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
+            'nonce':    nonce (int), |br|
+            'asset':    asset_Id (hex str), |br|
+            'value':    nToSend (int), |br|
+            'start':    startdate (date str - Optional), |br|
+            'end':      enddate (date str - Optional)
+            
+    Returns:
+        TxHash transaction hash (hex str)
+        
+    """
+    
+
+.. function::  sendToRawTimeLock
+
+.. _sendToRawTimeLock: 
+
+sendToRawTimeLock
+&&&&&&&&&&&&&&&&&&
+
+def sendToRawTimeLock(self, transaction, prepareOnly=False):
+    """To send asset tokens on the Fusion blockchain to timelock using the raw transaction method, 
+    without changing the time lock.
+    
+    Args:
+        transaction (dict):
+            'from':     pub_key_sender (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
+            'nonce':    nonce (int), |br|
+            'asset':    asset_Id (hex str), |br|
+            'value':    nToSend (int), |br|
+            'start':    startdate (date str - Optional), |br|
+            'end':      enddate (date str - Optional)
+            
+        prepareOnly flag (bool) set to True to defer transaction signing to a later point.
+            
+    Returns:
+        TxHash transaction hash (hex str). If prepareOnly=True, the return a Tx_dict (dict)
+        
+    """
+
+Here is an example of the function usage without start and end dates (see :ref:`timeLockToRawTimeLock` function below for 
+an example using 'start' and 'end'
+
+.. literalinclude:: ../fusion_tests/fsnSendToRawTimeLock.py
+   :language: python
+   :lines: 40-106
+
+
 .. function::  assetToTimeLock
     
     

@@ -326,4 +326,92 @@ def assert_check_tltotl_params(tltotl_params):
             raise ValueError('{} is required as an time lock to time lock parameter'.format(param))
     if 'to' not in tltotl_params and 'toUSAN' not in tltotl_params:
             raise ValueError('Either \'to\' or \'toUSAN\' is required as an time lock to time lock parameter')
+#
+#
+################################################################################################################
+#
+# SendToTimeLock
+#
+#
+
+SENDTOTL_DEFAULTS = {
+    #'gasPrice': 2000000000,
+    #'gas':     90000,
+    'chainId':  None,
+}
+
+
+SENDTOTL_FORMATTERS = {
+    'to':    to_checksum_address,
+    'toUSAN': apply_formatter_if(is_string, int),
+    'from': to_checksum_address,
+    'nonce': to_hex_if_integer_or_ascii,
+    'gas': to_hex_if_integer_or_ascii,
+    'gasPrice': to_hex_if_integer_or_ascii,
+    'asset': to_hex_if_integer_or_ascii,
+    'value': to_hex_if_integer_or_ascii,
+    'start': apply_formatter_if(ascii, to_hex_if_datestring),
+    'end':  apply_formatter_if(ascii, to_hex_if_datestring),
+    'chainId': to_hex_if_integer_or_ascii,
+}
+
+VALID_SENDTOTL_PARAMS = [
+    'to',
+    'toUSAN',
+    'from',
+    'nonce',
+    'gas',
+    'gasPrice',
+    'asset',
+    'value',
+    'start',
+    'end',
+    'chainId',
+]
+
+REQUIRED_SENDTOTL_PARAMS = [
+    'from',
+    'nonce',
+    #'gas',
+    #'gasPrice',
+    'asset',
+    'value',
+    'chainId',
+]
+
+
+def buildSendToTimeLockTx(transaction, defaultChainId):
+    defaults = {}
+    alreadygot = {}
+    for key, default_val in SENDTOTL_DEFAULTS.items():
+        if key not in transaction:
+            defaults[key] = default_val
+    for key, val in transaction.items():
+        if key in VALID_SENDTOTL_PARAMS:
+            alreadygot[key] = transaction[key]
+            
+    transaction_merged = merge(defaults, alreadygot)
+    transaction_merged['chainId'] = defaultChainId
+    transaction_new = unsigned_sendtotl_formatter(transaction_merged)
+    
+    assert_check_sendtotl_params(transaction_new)
+    
+    return transaction_new
+
+
+unsigned_sendtotl_formatter = apply_formatters_to_dict(SENDTOTL_FORMATTERS)
+
+
+def assert_check_sendtotl_params(sendtotl_params):
+    for param in sendtotl_params:
+        if param not in VALID_SENDTOTL_PARAMS:
+            raise ValueError('{} is not a valid send to time lock parameter'.format(param))
+
+    for param in REQUIRED_SENDTOTL_PARAMS:
+        if param not in sendtotl_params:
+            raise ValueError('{} is required as an send to time lock parameter'.format(param))
+    if 'to' not in sendtotl_params and 'toUSAN' not in sendtotl_params:
+            raise ValueError('Either \'to\' or \'toUSAN\' is required as a send to time lock parameter')
+
+
 
