@@ -97,8 +97,6 @@ from web3._utils.encoding import (
     hex_encode_abi_type,
     to_bytes,
     to_hex,
-    to_int,
-    to_text,
     to_json,
 )
 from web3._utils.threads import (
@@ -130,6 +128,7 @@ from web3fsnpy.fusion.fsn_timelocks import (
     buildAssetToTimeLockTx,
     buildTimeLockToAssetTx,
     buildTimeLockToTimeLockTx,
+    buildSendToTimeLockTx,
 )
 
 from web3fsnpy.fusion.fsn_swaps import (
@@ -172,9 +171,9 @@ class Fsn(web3.eth.Eth):
 
     # Encoding and Decoding
     toBytes = staticmethod(to_bytes)
-    toInt = staticmethod(to_int)
+    #toInt = staticmethod(to_int)
     toHex = staticmethod(to_hex)
-    toText = staticmethod(to_text)
+    #toText = staticmethod(to_text)
     toJSON = staticmethod(to_json)
 
     # Currency Utility
@@ -225,6 +224,10 @@ class Fsn(web3.eth.Eth):
             self.__defaultChainId = 46688
         elif linkToChain['network'] == 'mainnet':
             self.__defaultChainId = 32659
+        else:
+            raise ValueError(
+                'Error: You must specify a network (\'testnet\' or \'mainnet\')'
+            )
             
             
         if linkToChain['gateway'] == 'default':
@@ -270,13 +273,12 @@ class Fsn(web3.eth.Eth):
         if gotprivatekey:
             #print('Adding account to list')
             self.addAccount()
+
   
   
         # Connect to the fusion api 
-        if self.defaultAccount == None:
-            self.api = fsnapi(None)
-        else:
-            self.api = fsnapi(self.acct.address, linkToChain['network'])
+        
+        self.api = fsnapi(self.defaultAccount, linkToChain['network'])
             
         
         
@@ -314,6 +316,7 @@ class Fsn(web3.eth.Eth):
         self.__defaultSendTransactionGasPrice       = 0.000000021          # Default gasPrice in FSN for sendTransaction
         self.__defaultGenAssetGasPrice              = 0.00009              # Default gasPrice in FSN for genAsset
         self.__defaultSendAssetGasPrice             = 0.00005              # Default gasPrice in FSN for sendAsset
+        self.__defaultSendTimeLockGasPrice          = 0.00005              # Default gasPrice in FSN for sendAsset
         self.__defaultIncDecAssetGasPrice           = 0.00003              # Default gasPrice in FSN for incAsset, or decAsset
         self.__defaultGenNotationGasPrice           = 0.00005              # Default gasPrice in FSN for genNotation
         self.__defaultAssetToTimeLockGasPrice       = 0.00003              # Default gasPrice in FSN for assetToTimeLock
@@ -597,6 +600,15 @@ class Fsn(web3.eth.Eth):
                 'This does not look like a dict that is required for the sendRawTransaction method'
             )
         
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
+        
         if 'gasPrice' in transaction:
             if transaction['gasPrice'] == 'default':
                 transaction['gasPrice'] = hex(to_wei(self.__defaultSendTransactionGasPrice, 'ether'))    #  Fusion gas price for Transaction
@@ -845,6 +857,14 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the sendAsset method'
             )
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
         
         
         Tx =  buildSendAssetTx(transaction, self.__defaultChainId)
@@ -876,6 +896,14 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the sendAsset method'
             )
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
         
         
         if 'gasPrice' in transaction:
@@ -899,6 +927,93 @@ class Fsn(web3.eth.Eth):
             return self.signAndTransmit(Tx_dict)
 
 
+    def sendTimeLock(self, transaction):
+        if self.acct == None:
+            raise PrivateKeyNotSet (
+                'No private key was set for this unsigned transaction'
+            )
+        if transaction['from'] != self.acct.address:
+            raise BadSendingAddress (
+                'The public key you are sending from does not match the account for the private key'
+            )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the assetToTimeLock method'
+            )
+        
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
+        
+        
+        Tx =  buildSendTimeLockTx(transaction, self.__defaultChainId)
+        
+        print('\n',Tx,'\n')
+        
+        #json_rpc = self.web3.manager.provider.encode_rpc_request("fsntx_sendTimeLock",Tx)
+        #print(json_rpc)
+        
+        TxHash =  self.web3.manager.request_blocking(
+            "fsntx_sendTimeLock",
+            [Tx],
+        )
+        return TxHash
+
+
+
+
+    def sendRawTimeLock(self, transaction, prepareOnly=False):
+
+        if prepareOnly == False:
+            if self.acct == None:
+                raise PrivateKeyNotSet (
+                    'No private key was set for this unsigned transaction'
+                )
+            if transaction['from'] != self.acct.address:
+                raise BadSendingAddress (
+                    'The public key you are sending from does not match the account for the private key'
+                )
+        if not isinstance(transaction,dict):
+            raise TypeError(
+                'This does not look like a dict that is required for the assetToRawTimeLock method'
+            )
+        
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
+        
+        if 'gasPrice' in transaction:
+            if transaction['gasPrice'] == 'default':
+                transaction['gasPrice'] = hex(to_wei(self.__defaultSendTimeLockGasPrice, 'ether'))    #  Fusion gas price for assetToTimeLock
+        
+        Tx = buildSendToTimeLockTx(transaction, self.__defaultChainId)
+
+        Txnew =  self.web3.manager.request_blocking(
+            "fsntx_buildSendTimeLockTx",
+            [Tx],
+        )
+        
+        Tx_dict = dict(Txnew)
+        
+        Tx_dict['chainId'] = self.__defaultChainId
+             
+        if prepareOnly == True:
+            return Tx_dict
+        else:
+            return self.signAndTransmit(Tx_dict)
+
+
+
 
     def assetToTimeLock(self, transaction):
         if self.acct == None:
@@ -912,6 +1027,15 @@ class Fsn(web3.eth.Eth):
         if not isinstance(transaction,dict):
             raise TypeError(
                 'This does not look like a dict that is required for the assetToTimeLock method'
+            )
+        
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
             )
         
         
@@ -945,6 +1069,15 @@ class Fsn(web3.eth.Eth):
         if not isinstance(transaction,dict):
             raise TypeError(
                 'This does not look like a dict that is required for the assetToRawTimeLock method'
+            )
+        
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
             )
         
         if 'gasPrice' in transaction:
@@ -982,6 +1115,14 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the timeLockToAsset method'
             )
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
         
         
         Tx =  buildTimeLockToAssetTx(transaction, self.__defaultChainId)
@@ -1014,6 +1155,14 @@ class Fsn(web3.eth.Eth):
         if not isinstance(transaction,dict):
             raise TypeError(
                 'This does not look like a dict that is required for the timeLockToRawAsset method'
+            )
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
             )
         
         if 'gasPrice' in transaction:
@@ -1050,6 +1199,14 @@ class Fsn(web3.eth.Eth):
             raise TypeError(
                 'This does not look like a dict that is required for the timeLockToTimeLock method'
             )
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
+            )
         
         
         Tx =  buildTimeLockToTimeLockTx(transaction, self.__defaultChainId)
@@ -1081,6 +1238,14 @@ class Fsn(web3.eth.Eth):
         if not isinstance(transaction,dict):
             raise TypeError(
                 'This does not look like a dict that is required for the timeLockToRawTimeLock method'
+            )
+        if 'toUSAN' in transaction:
+            if is_integer(transaction['toUSAN']):
+               transaction['to'] = self.getAddressByNotation(transaction['toUSAN'])
+               del transaction['toUSAN']
+            else:
+                raise TypeError(
+                'The USAN you are sending to is not an integer'
             )
         
         if 'gasPrice' in transaction:
@@ -1455,7 +1620,7 @@ class Fsn(web3.eth.Eth):
     def startAutoBuyTicket(self):
         
         self.web3.manager.request_blocking(
-            "fsntx_startAutoBuyTicket",
+            "miner_startAutoBuyTicket",
             [None],
         )
         return
@@ -1465,7 +1630,7 @@ class Fsn(web3.eth.Eth):
     def stopAutoBuyTicket(self):
         
         self.web3.manager.request_blocking(
-            "fsntx_stopAutoBuyTicket",
+            "miner_stopAutoBuyTicket",
             [None],
         )
         return
@@ -1574,13 +1739,13 @@ class Fsn(web3.eth.Eth):
             block_identifier = block_number_formatter(block_identifier)
             
         json_rpc = self.web3.manager.provider.encode_rpc_request("fsn_getAddressByNotation",[notation, block_identifier])
-        print(json_rpc)
+        #print(json_rpc)
             
         pub_key = self.web3.manager.request_blocking(
             "fsn_getAddressByNotation",
             [notation, block_identifier],
         )
-        return notation
+        return pub_key
 
 
     def genNotation(self, transaction):
@@ -1648,8 +1813,6 @@ class Fsn(web3.eth.Eth):
             return self.signAndTransmit(Tx_dict)
 
 
-
-
         
     def getTimeLockBalance(self, assetId, account, block_identifier=None):
         if is_integer(account):
@@ -1672,7 +1835,26 @@ class Fsn(web3.eth.Eth):
             [assetId, account, block_identifier],
         )
         return timelock_dict
-        
+    
+    
+    def getAllBalances(self, account, block_identifier=None):
+        if is_integer(account):
+            account = to_hex(account)
+        if not is_address(account):
+            raise TypeError(
+                'The account does not have a valid address format'
+        )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+
+        timelock_dict =  self.web3.manager.request_blocking(
+            "fsn_getAllBalances",
+            [account, block_identifier],
+        )
+        return timelock_dict   
+    
         
     def getAllTimeLockBalances(self, account, block_identifier=None):
         if is_integer(account):
@@ -1691,6 +1873,43 @@ class Fsn(web3.eth.Eth):
             [account, block_identifier],
         )
         return timelock_dict       
+    
+    
+    def getTimeLockValueByInterval(self, account, assetId, startTime, endTime, block_identifier=None):
+        if is_integer(account):
+            account = to_hex(account)
+        if not is_address(account):
+            raise TypeError(
+                'The account does not have a valid address format'
+        )
+        if not is_hexstr(assetId):
+            raise TypeError(
+                'assetId must be a hex string'
+            )
+        if not is_hex(startTime):
+            if is_integer(startTime):
+                startTime = to_hex(startTime)
+            else:
+                raise TypeError(
+                'The startTime does not have a valid format'
+            )
+        if not is_hex(endTime):
+            if is_integer(endTime):
+                endTime = to_hex(endTime)
+            else:
+                raise TypeError(
+                'The endTime does not have a valid format'
+            )
+        if block_identifier is None:
+            block_identifier = self.defaultBlock
+        else:
+            block_identifier = block_number_formatter(block_identifier)
+
+        timelock_dict =  self.web3.manager.request_blocking(
+            "fsn_getTimeLockValueByInterval",
+            [account, block_identifier],
+        )
+        return timelock_dict   
             
     
     def getAllSwaps(self, pageNo):

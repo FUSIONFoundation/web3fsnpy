@@ -13,7 +13,6 @@ from web3.datastructures import (
 from eth_utils import (
     to_hex,
     to_bytes,
-    to_int,
     is_bytes,
     is_boolean,
     is_bytes,
@@ -107,8 +106,6 @@ from web3._utils.formatters import(
 )
 
 from web3._utils.encoding import (
-    to_int,
-    to_text,
     #bytes_to_ascii,
     trim_hex,
 )
@@ -219,12 +216,13 @@ def fill_transaction_defaults(web3,transaction, chain=None):
             defaults['gasPrice'] = estimateGas(transaction)
         if 'gas' not in defaults:
             defaults['gas'] = TRANSACTION_DEFAULTS['gas']
-        if is_address(transaction['to']):
-            transaction['to'] = to_checksum_address(transaction['to'])
-        else:
-            raise TypeError(
-                'Error: Bad \'to\' field in sendRawTransaction'
-            )
+        if 'to' in transaction:
+            if is_address(transaction['to']):
+               transaction['to'] = to_checksum_address(transaction['to'])
+            else:
+               raise TypeError(
+                  'Error: Bad \'to\' field in sendRawTransaction'
+               )
         if is_address(transaction['from']):
             transaction['from'] = to_checksum_address(transaction['from'])
         else:

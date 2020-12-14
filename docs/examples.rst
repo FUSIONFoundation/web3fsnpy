@@ -49,6 +49,9 @@ Get timelock inforamtion about one asset ID.
 `fsnToAndFromRawTimeLock.py`_
 Sending assets to and from timelock.
 
+`fsnSendToRawTimeLock.py`_
+Sending assets to another address as timelock.
+
 `fsnTimeLockToRawTimeLock.py`_
 Change the timelock on an asset.
 
@@ -87,6 +90,7 @@ Show how to separate out the preparation of transactions from actaully signing a
 ..  _fsnGetAllTimelockInfo.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnGetAllTimelockInfo.py
 ..  _fsnGetTimelockInfo.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnGetTimelockInfo.py
 ..  _fsnToAndFromRawTimeLock.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnToAndFromRawTimeLock.py
+..  _fsnSendToRawTimeLock.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnSendToRawTimeLock.py
 ..  _fsnTimeLockToRawTimeLock.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnTimeLockToRawTimeLock.py
 ..  _fsnGetAllSwaps.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnGetAllSwaps.py
 ..  _fsnMakeAndRecallRawSwap.py: https://github.com/FUSIONFoundation/web3fsnpy/blob/master/fusion_tests/fsnMakeAndRecallRawSwap.py

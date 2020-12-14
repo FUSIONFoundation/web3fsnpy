@@ -91,9 +91,6 @@ To install the python dependencies in this virtual environment from the file req
 .. code-block:: bash
 
     #> pip install -r requirements.txt
-    #> pip uninstall eth-account      
-    
-We have added the uninstall eth-account as a temporary fix to force usage of the locally installed version. Version 0.4.0 of eth-account does not work with web3fsnpy, but is required by web3, so we have altered it. We will remove this when eth-account 0.5.0 arrives
     
 Check that the scope includes the correct python module versions :-
 

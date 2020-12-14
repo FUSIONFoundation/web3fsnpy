@@ -44,7 +44,6 @@ from web3._utils.formatters import (
 
 from web3._utils.encoding import (
     to_hex,
-    to_int,
 )
 
 from web3.datastructures import (

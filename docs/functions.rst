@@ -342,6 +342,41 @@ Transactions
 For all write transactions, you may optionally specify the 'gas' and/or the 'gasLimit'. You may set 'gas': 'default' to use the hardcoded value in the class definition.
 
 
+.. function::  getAllBalances
+
+getAllBalances
+&&&&&&&&&&&&&&
+
+def getAllBalances(self, account, block_identifier=None):
+    """ Get the balances of all non-timelocked assets for an account
+    
+    Args:
+        account (hex str)   Public key, |br|
+        block_identifier (int),  'latest', 'earliest', or 'pending'
+        
+    Returns:
+        bal_info (dict)  key, value pairs for each asset of asset ID and balance
+        
+    """
+
+.. code-block:: python 
+
+    >>> bal_info = web3fsn.getAllBalances(pub_key)
+    >>> for key, val in bal_info.items():
+    >>>     print(key, val)
+    
+    0x0e437e96f105776f7f3f96e01ec9def69a6e66ac37d6560b23181350050238f1 95
+    0x15805e688c7516b8cf005fcb3496cf1e904c4d2579955500f5a18a7957a9d59b 1990
+    0x34ab2db7e4e5a69e5ec1441d580b9e9599e806cbecf821b87bf4a5952e27ee21 1930
+    0x3ddec7217915b0c145da683402cfbb94c1b160d23a432f75a39e33e2db091437 1880
+    0x54cbfda5d4cb46ef1f63d6642f561dcd38dec9fa27a68a0408e9b2b17cc5cfc7 1880
+    0x5fd3f254ae34bf9bf9dc46f72e4fbbc75844dbe6823f970fa3f7aaedb2925ff6 17
+    0x6fe2a4955f1424b72627a81a105d483720630e70fc4743182d874c9acc6d5647 99
+    0xcc966efc1aed2a70d602e9718d528f88cfe304cb91d89338d7f1fe1db3266590 90
+    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff 62866649839999999971
+
+    
+
 .. function::  getTransaction
 
 getTransaction
@@ -374,8 +409,95 @@ Output :-
     Gas price   :  21  gwei
     
     
-.. function:: getTransactionByBlockNumberAndIndex
+.. function::  getTransactionAndReceipt
 
+getTransactionAndReceipt
+&&&&&&&&&&&&&&&&&&&&&&&&
+
+def getTransactionAndReceipt(self, TxHash):
+    """
+    
+    Args:
+        TxHash (hex str) Transaction hash
+        
+    Returns:
+        txData (dict) The transaction data and a receipt
+    
+    
+    """
+    
+Example output:
+
+.. code-block:: python 
+
+    >>>print(web3fsn.getTransactionAndReceipt('0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d'))
+    
+    "txData": {
+    "fsnTxInput": {
+      "FuncType": "SendAssetFunc",
+      "FuncParam": {
+        "AssetID": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "To": "0x37a200388caa75edcc53a2bd329f7e9563c6acb6",
+        "Value": 1e+18
+      }
+    },
+    "tx": {
+      "blockHash": "0xd8d4b5f054cb398b1f0b5bb5d4add5e80d10a432f2c15226f620609577536b6b",
+      "blockNumber": "0xad1a5",
+      "from": "0x0122bf3930c1201a21133937ad5c83eb4ded1b08",
+      "gas": "0x15f90",
+      "gasPrice": "0x3b9aca00",
+      "hash": "0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d",
+      "input": "0xf84402b841f83fa0ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff9437a200388caa75edcc53a2bd329f7e9563c6acb6880de0b6b3a7640000",
+      "nonce": "0xa7cc",
+      "to": "0xffffffffffffffffffffffffffffffffffffffff",
+      "transactionIndex": "0x2",
+      "value": "0x0",
+      "v": "0x16ce3",
+      "r": "0x8244e44f720023b240faafab08bb401b1b3167087f2882fa6b8f4fc87b59bdfc",
+      "s": "0x277635df431668f4a8b8c8b0702077634dd404db9a1139539d3c276651d3d1ce"
+    },
+    "receipt": {
+      "blockHash": "0xd8d4b5f054cb398b1f0b5bb5d4add5e80d10a432f2c15226f620609577536b6b",
+      "blockNumber": "0xad1a5",
+      "contractAddress": null,
+      "cumulativeGasUsed": "0x10f60",
+      "from": "0x0122bf3930c1201a21133937ad5c83eb4ded1b08",
+      "fsnLogData": {
+        "AssetID": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "To": "0x37a200388caa75edcc53a2bd329f7e9563c6acb6",
+        "Value": 1e+18
+      },
+      "fsnLogTopic": "SendAssetFunc",
+      "gasUsed": "0x63e0",
+      "logs": [
+        {
+          "address": "0xffffffffffffffffffffffffffffffffffffffff",
+          "topics": [
+            "0x0000000000000000000000000000000000000000000000000000000000000002"
+          ],
+          "data": "0x7b2241737365744944223a22307866666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666222c22546f223a22307833376132303033383863616137356564636335336132626433323966376539353633633661636236222c2256616c7565223a313030303030303030303030303030303030307d",
+          "blockNumber": "0xad1a5",
+          "transactionHash": "0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d",
+          "transactionIndex": "0x2",
+          "blockHash": "0xd8d4b5f054cb398b1f0b5bb5d4add5e80d10a432f2c15226f620609577536b6b",
+          "logIndex": "0x2",
+          "removed": false
+        }
+      ],
+      "logsBloom": "0x04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000002000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000008000000000000000000000",
+      "status": "0x1",
+      "to": "0xffffffffffffffffffffffffffffffffffffffff",
+      "transactionHash": "0x8700056ef2896b47760e661902b21d8f294a80bff87c7e4108d7bbd5bce4ce6d",
+      "transactionIndex": "0x2"
+    },
+    "receiptFound": true
+  }
+
+    
+    
+    
+.. function:: getTransactionByBlockNumberAndIndex
 
 getTransactionByBlockNumberAndIndex
 &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
@@ -890,6 +1012,68 @@ Here is an example of the function usage
     Start Time :    Tue Dec 17 19:29:48 2019
     End Time   :    Wed Feb 12 00:00:00 2020
     5000   FSN
+
+
+.. function::  sendToTimeLock
+    
+    
+sendToTimeLock
+&&&&&&&&&&&&&&&
+
+def sendToTimeLock(self, transaction):
+    """To send asset tokens on the Fusion blockchain to timelock with an unlocked wallet (IPC method)
+    without changing the time lock.
+    
+    Args:
+        transaction (dict):
+            'from':     pub_key_sender (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
+            'nonce':    nonce (int), |br|
+            'asset':    asset_Id (hex str), |br|
+            'value':    nToSend (int), |br|
+            'start':    startdate (date str - Optional), |br|
+            'end':      enddate (date str - Optional)
+            
+    Returns:
+        TxHash transaction hash (hex str)
+        
+    """
+    
+
+.. function::  sendToRawTimeLock
+
+.. _sendToRawTimeLock: 
+
+sendToRawTimeLock
+&&&&&&&&&&&&&&&&&&
+
+def sendToRawTimeLock(self, transaction, prepareOnly=False):
+    """To send asset tokens on the Fusion blockchain to timelock using the raw transaction method, 
+    without changing the time lock.
+    
+    Args:
+        transaction (dict):
+            'from':     pub_key_sender (hex str), |br|
+            'to':         pub_key_receiver (hex str) **OR**  'toUSAN': usan (int), |br|
+            'nonce':    nonce (int), |br|
+            'asset':    asset_Id (hex str), |br|
+            'value':    nToSend (int), |br|
+            'start':    startdate (date str - Optional), |br|
+            'end':      enddate (date str - Optional)
+            
+        prepareOnly flag (bool) set to True to defer transaction signing to a later point.
+            
+    Returns:
+        TxHash transaction hash (hex str). If prepareOnly=True, the return a Tx_dict (dict)
+        
+    """
+
+Here is an example of the function usage without start and end dates (see :ref:`timeLockToRawTimeLock` function below for 
+an example using 'start' and 'end'
+
+.. literalinclude:: ../fusion_tests/fsnSendToRawTimeLock.py
+   :language: python
+   :lines: 40-106
 
 
 .. function::  assetToTimeLock

@@ -4,7 +4,7 @@
 from  web3fsnpy import Fsn
 
 linkToChain = {
-    'network'     : 'mainnet',     # One of 'testnet', or 'mainnet'
+    'network'     : 'testnet',     # One of 'testnet', or 'mainnet'
     'provider'    : 'HTTP',   # One of 'WebSocket', 'HTTP', or 'IPC'
     'gateway'     : 'default',
 }
@@ -23,9 +23,20 @@ pub_key = '0x3333333333333333333333333333333333333333'
 #
 bal = web3fsn.getBalance(pub_key, asset_Id, blockNo)
 #
-#print(ret_dict)
 #
 print('Balance for ', pub_key, ' is  ', web3fsn.fromWei(int(bal),'ether'), ' FSN')
+#
+#
+bal_info = web3fsn.getAllBalances(pub_key)
+#
+#
+print('Balances for ALL assets are \n')
+#
+for key, val in bal_info.items():
+    print(key, val)
+    
+
+
 
 
 

@@ -136,7 +136,7 @@ class fsnapi:
         return assetInfo
     
     
-    def fsnapiAssetAllInfo(self, pageNo):
+    def fsnapiAssetAllInfo(self, pageNo=0):
         
         assetAllInfoUrl = self.url_api + 'assets/all?page={}size=100&sort=desc'.format(pageNo)
         
@@ -170,12 +170,15 @@ class fsnapi:
     
     def assetIdToAssetInfo(self, asset_Id):
         
-        assetInfo = self.fsnapiAssetInfo()
+        assetInfo = self.fsnapiAssetAllInfo()
         
         #print(assetInfo)
         
-        for asset in assetInfo:
-            if asset['assetID'] == asset_Id:
+        for assetblock in assetInfo:
+            asset = json.loads(assetblock['data'])
+            
+            if asset['AssetID'] == asset_Id:
+                #print(asset)
                 return asset
         return None
 
