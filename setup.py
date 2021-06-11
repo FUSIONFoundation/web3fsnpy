@@ -47,7 +47,7 @@ with open("README.md", "r") as fh:
             "urllib3==1.25.6",
             "varint==1.0.2",
             "web3==5.5.0",
-            "websockets==8.1.0",
+            "websockets==9.1",
         ],
         setup_requires=['setuptools-markdown'],
         classifiers=[
