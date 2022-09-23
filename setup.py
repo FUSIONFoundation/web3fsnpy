@@ -36,7 +36,7 @@ with open("README.md", "r") as fh:
             "multiaddr==0.0.8",
             "netaddr==0.7.19",
             "parsimonious==0.8.1",
-            "protobuf==3.10.0",
+            "protobuf==3.18.3",
             "pycryptodome==3.9.0",
             "pyrsistent==0.15.4",
             "python-dateutil==2.8.0",
