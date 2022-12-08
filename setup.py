@@ -20,7 +20,7 @@ with open("README.md", "r") as fh:
             "attrs==19.1.0",
             "attrdict==2.0.1",
             "base58==1.0.3",
-            "certifi==2019.9.11",
+            "certifi==2022.12.7",
             "chardet==3.0.4",
             "cytoolz==0.10.1",
             "eth-abi==2.0.0",
